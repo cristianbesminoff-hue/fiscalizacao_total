@@ -6,7 +6,7 @@
     <title>Roteirizador Inteligente - OpenStreetMap</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- Leaflet CSS & JS (Alternativa gratuita sem chave) -->
+    <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -365,7 +365,7 @@
         </div>
 
         <div class="control-group" style="margin-top: 12px;">
-            <label for="nomeTecnicoLogado">Nome do Técnico:</label>
+            <label for="nomeTecnicoLogado">Nome do Técnico Fiscal (Você):</label>
             <input type="text" id="nomeTecnicoLogado" placeholder="Digite seu nome ou identificação...">
         </div>
 
@@ -718,8 +718,18 @@
 
     function enviarParaTecnico(index) {
         let item = linhasProcessadasCompletas[index];
-        let tecnico = document.getElementById('nomeTecnicoLogado').value.trim() || "Técnico Padrão";
         
+        // CORREÇÃO 1: Buscar o nome do técnico diretamente na planilha (procurando coluna com nome 'tecnico')
+        let tecnicoVal = "Técnico Padrão";
+        indicesTabelaGlobais.forEach(idx => {
+            let nomeCol = (cabecalhosGlobais[idx] || "").toString().toLowerCase();
+            if (nomeCol.includes('tecnico') || nomeCol.includes('técnico')) {
+                let valCel = item.linhaOriginal[idx];
+                if (valCel) tecnicoVal = valCel;
+            }
+        });
+
+        // Procurar protocolo
         let protocoloVal = "N/A";
         indicesTabelaGlobais.forEach(idx => {
             let nomeCol = (cabecalhosGlobais[idx] || "").toString().toLowerCase();
@@ -735,10 +745,13 @@
         salvarEstadoLocal();
         renderizarTabelaEValores();
 
+        // CORREÇÃO 2: Salvar coordenadas reais para o GPS usar
         const dadosExecucao = {
             protocolo: protocoloVal,
-            tecnico: tecnico,
+            tecnico: tecnicoVal,
             detalhesItem: item,
+            lat: item.lat,
+            lon: item.lon,
             indice: index
         };
         localStorage.setItem('protocoloEmAtendimento', JSON.stringify(dadosExecucao));
