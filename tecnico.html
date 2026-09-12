@@ -248,9 +248,7 @@
             return emailOuLogin;
         }
 
-        // Recuperação dos dados priorizando localStorage (enviado pelo extrator) e fallback para URL
-        const params = new URLSearchParams(window.location.search);
-        
+        // Recuperação dos dados do localStorage enviado pelo extrator
         let dadosSalvos = null;
         try {
             dadosSalvos = JSON.parse(localStorage.getItem('protocoloEmAtendimento'));
@@ -258,15 +256,24 @@
             console.error("Erro ao ler localStorage", e);
         }
 
-        let protocoloID = dadosSalvos?.protocolo || params.get('protocolo') || 'PRT-998822';
-        let tecnicoExecutorUrl = dadosSalvos?.tecnico || params.get('tecnico') || params.get('tecnico_fiscalizado') || 'Não informado';
-        
-        // Extrai o endereço com segurança considerando a estrutura enviada pelo extrator
+        const params = new URLSearchParams(window.location.search);
+
+        // Captura o protocolo
+        let protocoloID = dadosSalvos?.protocolo || dadosSalvos?.detalhesItem?.protocolo || params.get('protocolo') || 'PRT-998822';
+
+        // Captura o técnico executor
+        let tecnicoExecutorUrl = dadosSalvos?.tecnico || dadosSalvos?.tecnicoExecutor || dadosSalvos?.detalhesItem?.tecnico || params.get('tecnico') || 'Não informado';
+
+        // Captura o endereço correto (evitando links web e extraindo o texto real)
         let enderecoCliente = dadosSalvos?.endereco;
-        if (!enderecoCliente && dadosSalvos?.detalhesItem?.linhaOriginal) {
-            enderecoCliente = dadosSalvos.detalhesItem.linhaOriginal.filter(Boolean).join(' | ');
+        if (dadosSalvos?.detalhesItem?.endereco) {
+            enderecoCliente = dadosSalvos.detalhesItem.endereco;
+        } else if (dadosSalvos?.detalhesItem?.linhaOriginal) {
+            let colunas = dadosSalvos.detalhesItem.linhaOriginal;
+            let colunaEndereco = colunas.find(col => col && typeof col === 'string' && !col.startsWith('http') && col.length > 5 && (col.includes(',') || /\d/.test(col)));
+            if (colunaEndereco) enderecoCliente = colunaEndereco;
         }
-        enderecoCliente = enderecoCliente || params.get('endereco') || params.get('end') || 'Endereço não informado';
+        enderecoCliente = enderecoCliente || params.get('endereco') || 'Endereço não informado';
 
         let emailLoginSalvo = params.get('email') || params.get('login') || localStorage.getItem('usuarioEmail') || 'cristian.besminoff';
         const tecnicoQualidadeFormatado = formatarNomeQualidade(emailLoginSalvo);
