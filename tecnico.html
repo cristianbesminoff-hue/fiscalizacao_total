@@ -260,7 +260,13 @@
 
         let protocoloID = dadosSalvos?.protocolo || params.get('protocolo') || 'PRT-998822';
         let tecnicoExecutorUrl = dadosSalvos?.tecnico || params.get('tecnico') || params.get('tecnico_fiscalizado') || 'Não informado';
-        let enderecoCliente = dadosSalvos?.endereco || params.get('endereco') || params.get('end') || 'Endereço não informado';
+        
+        // Extrai o endereço com segurança considerando a estrutura enviada pelo extrator
+        let enderecoCliente = dadosSalvos?.endereco;
+        if (!enderecoCliente && dadosSalvos?.detalhesItem?.linhaOriginal) {
+            enderecoCliente = dadosSalvos.detalhesItem.linhaOriginal.filter(Boolean).join(' | ');
+        }
+        enderecoCliente = enderecoCliente || params.get('endereco') || params.get('end') || 'Endereço não informado';
 
         let emailLoginSalvo = params.get('email') || params.get('login') || localStorage.getItem('usuarioEmail') || 'cristian.besminoff';
         const tecnicoQualidadeFormatado = formatarNomeQualidade(emailLoginSalvo);
@@ -351,6 +357,16 @@
                 };
 
                 await addDoc(collection(db, "vistorias"), dadosVistoria);
+                
+                // Atualiza o status também no localStorage do roteirizador, caso venha de lá
+                if (dadosSalvos && dadosSalvos.indice !== undefined) {
+                    let listaCompleta = JSON.parse(localStorage.getItem('linhasProcessadasCompletasLeaflet') || '[]');
+                    if (listaCompleta[dadosSalvos.indice]) {
+                        listaCompleta[dadosSalvos.indice].status = dadosVistoria.statusFinal;
+                        localStorage.setItem('linhasProcessadasCompletasLeaflet', JSON.stringify(listaCompleta));
+                    }
+                }
+
                 alert("Fiscalização salva com sucesso! O protocolo foi processado e removido da fila.");
                 
                 localStorage.removeItem('protocoloEmAtendimento');
