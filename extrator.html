@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roteirizador Inteligente - Relatório em Texto</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Biblioteca html2pdf.js para gerar PDF direto no celular -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 10px;
+            color: #333;
+        }
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+        h2 { font-size: 18px; margin-top: 0; color: #1a365d; text-align: center; }
+        
+        .form-section {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .control-group {
+            margin-bottom: 12px;
+        }
+        
+        label { font-size: 13px; font-weight: bold; color: #2d3748; display: block; margin-bottom: 4px; }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+
+        .upload-section {
+            background: #edf2f7;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 5px;
+            border: 2px dashed #cbd5e0;
+            text-align: center;
+        }
+        input[type="file"] { display: none; }
+        .custom-file-upload {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #2b6cb0;
+            color: white;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .custom-file-upload:hover { background-color: #2c5282; }
+
+        .file-name {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #4a5568;
+            word-break: break-all;
+        }
+
+        .modo-selector {
+            display: flex;
+            gap: 15px;
+            background: #edf2f7;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+        .modo-selector label {
+            font-weight: normal;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .checkbox-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 8px;
+            background: #fff;
+            border: 1px solid #cbd5e0;
+            padding: 10px;
+            border-radius: 4px;
+            max-height: 130px;
+            overflow-y: auto;
+            margin-top: 5px;
+        }
+        .checkbox-item {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .checkbox-item input { width: auto; }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        #mapaVisual {
+            width: 100%;
+            height: 400px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border: 1px solid #cbd5e0;
+            display: none;
+        }
+
+        .numero-pin {
+            background-color: #2b6cb0;
+            color: white;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+            line-height: 24px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 15px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            max-height: 400px;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td {
+            padding: 8px 10px;
+            text-align: left;
+            font-size: 11px;
+            border-bottom: 1px solid #cbd5e0;
+            border-right: 1px solid #cbd5e0;
+        }
+        th {
+            background-color: #2b6cb0;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        tr:nth-child(even) { background-color: #f7fafc; }
+
+        .btn-action {
+            background-color: #319795;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 4px;
+            width: 100%;
+            font-size: 14px;
+        }
+        .btn-action:hover { background-color: #2c7a7b; }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-print {
+            background-color: #d97706;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 140px;
+            font-size: 14px;
+            display: none;
+        }
+        .btn-print:hover { background-color: #b45309; }
+
+        .btn-waze {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 140px;
+            font-size: 14px;
+            display: none;
+            text-align: center;
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+        .btn-waze:hover { background-color: #2b6cb0; }
+
+        .btn-txt {
+            background-color: #4a5568;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 140px;
+            font-size: 14px;
+            display: none;
+        }
+        .btn-txt:hover { background-color: #2d3748; }
+
+        .btn-back {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #4a5568;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 6px;
+            box-sizing: border-box;
+            margin-top: 15px;
+        }
+        .btn-back:hover { background-color: #2d3748; }
+
+        .instructions {
+            background: #ebf8ff;
+            border-left: 4px solid #3182ce;
+            padding: 10px;
+            font-size: 12px;
+            color: #2b6cb0;
+            margin-bottom: 12px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        #statusCarregamento {
+            font-size: 12px;
+            color: #d97706;
+            font-weight: bold;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        /* Estilos para Status e Botão Executar na Tabela */
+        .status-dot {
+            height: 12px;
+            width: 12px;
+            background-color: #cbd5e0;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-pendente { background-color: #ecc94b; } /* Amarela */
+        .status-concluido { background-color: #48bb78; } /* Verde */
+        .status-nao-concluido { background-color: #f56565; } /* Vermelho */
+
+        .btn-executar {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .btn-executar:hover { background-color: #2b6cb0; }
+
+        .select-status {
+            font-size: 11px;
+            padding: 2px;
+            border-radius: 3px;
+        }
+
+        /* Estilo específico para o PDF gerado (oculta o que não importa na exportação) */
+        .pdf-export-mode {
+            background: #fff !important;
+            padding: 15px;
+        }
+        .pdf-export-mode #mapaVisual, 
+        .pdf-export-mode .button-row, 
+        .pdf-export-mode .instructions, 
+        .pdf-export-mode .form-section, 
+        .pdf-export-mode .btn-back,
+        .pdf-export-mode h2 {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="painelPrincipal">
+    <h2>Roteirizador Inteligente (Relatório em Texto)</h2>
+    
+    <div class="form-section">
+        <div class="control-group">
+            <label>1. Carregar Planilha Excel:</label>
+            <div class="upload-section">
+                <label for="arquivoExcel" class="custom-file-upload">
+                    📊 Escolher Arquivo (.xlsx, .xls, .csv)
+                </label>
+                <input type="file" id="arquivoExcel" accept=".xlsx, .xls, .csv" onchange="carregarArquivo(event)">
+                <div id="nomeArquivo" class="file-name">Nenhum arquivo selecionado</div>
+            </div>
+        </div>
+
+        <div class="control-group" style="margin-top: 12px;">
+            <label>2. Como você deseja processar as localizações?</label>
+            <div class="modo-selector">
+                <label><input type="radio" name="modoLocalizacao" value="endereco" checked onchange="alternarModo()"> Endereço com CEP (Busca no Mapa)</label>
+                <label><input type="radio" name="modoLocalizacao" value="coordenadas" onchange="alternarModo()"> Latitude / Longitude (Direto)</label>
+            </div>
+        </div>
+
+        <!-- Seção Endereço -->
+        <div id="blocoEndereco">
+            <div class="control-group">
+                <label for="selectColunaEndereco">Selecione a coluna exata de Endereço:</label>
+                <select id="selectColunaEndereco">
+                    <option value="">Carregue a planilha primeiro...</option>
+                </select>
+            </div>
+            <div class="control-group" style="margin-top: 8px;">
+                <label for="cidadeFiltro">Cidade / Região Principal:</label>
+                <input list="cidadesRS" id="cidadeFiltro" value="Canoas" placeholder="Ex: Canoas, Porto Alegre...">
+                <datalist id="cidadesRS">
+                    <option value="Canoas">
+                    <option value="Porto Alegre">
+                    <option value="Cachoeirinha">
+                    <option value="Nova Santa Rita">
+                    <option value="Esteio">
+                    <option value="Sapucaia do Sul">
+                </datalist>
+            </div>
+        </div>
+
+        <!-- Seção Coordenadas -->
+        <div id="blocoCoordenadas" style="display: none;">
+            <div class="grid-2">
+                <div class="control-group">
+                    <label for="selectColunaLat">Coluna de Latitude:</label>
+                    <select id="selectColunaLat">
+                        <option value="">Carregue a planilha...</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="selectColunaLon">Coluna de Longitude:</label>
+                    <select id="selectColunaLon">
+                        <option value="">Carregue a planilha...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="control-group" style="margin-top: 8px;">
+                <label for="cidadeFiltroCoord">Filtrar por Cidade (Opcional):</label>
+                <input id="cidadeFiltroCoord" placeholder="Ex: Canoas, Porto Alegre...">
+            </div>
+        </div>
+
+        <!-- Seleção do Técnico Responsável (para levar ao modulo tecnico.html) -->
+        <div class="control-group" style="margin-top: 12px;">
+            <label for="nomeTecnicoLogado">Nome do Técnico:</label>
+            <input type="text" id="nomeTecnicoLogado" placeholder="Digite seu nome ou identificação...">
+        </div>
+
+        <div class="control-group" style="margin-top: 12px;">
+            <label>3. Selecione quais colunas deseja exibir na Tabela:</label>
+            <div id="seletorColunas" class="checkbox-container">
+                <span style="font-size: 12px; color: #718096; padding: 5px;">Carregue uma planilha primeiro...</span>
+            </div>
+        </div>
+
+        <button class="btn-action" onclick="executarProcessamento()" id="btnProcessar" disabled>⚙️ Gerar Rota Otimizada</button>
+        <div id="statusCarregamento"></div>
+    </div>
+
+    <div id="relatorio-conteudo">
+        <h3 style="font-size: 14px; margin-bottom: 5px; color: #2d3748;">Lista Sequencial Otimizada (<span id="contadorLinhas">0</span> registros)</h3>
+        
+        <div class="instructions" id="instrucoesRota" style="display:none;">
+            📋 <strong>Pronto:</strong> Clique em "Executar" na linha desejada para enviar o protocolo ao módulo técnico. As ordens em andamento exibirão uma bolinha amarela.
+        </div>
+
+        <div id="mapaVisual"></div>
+
+        <div class="table-responsive" id="areaTabelaExportavel">
+            <table id="tabelaDados">
+                <thead id="cabecalhoTabela">
+                    <tr><th>Aguardando processamento...</th></tr>
+                </thead>
+                <tbody id="corpoTabela">
+                    <tr><td>Sua lista aparecerá aqui.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="button-row">
+            <button class="btn-print" id="btnImprimir" onclick="baixarPDFCelular()">📥 Baixar PDF Limpo</button>
+            <button class="btn-txt" id="btnTxt" onclick="baixarArquivoTexto()">📄 Baixar TXT da Rota</button>
+            <a href="#" id="btnWaze" class="btn-waze" target="_blank">🚗 Abrir Rota no Waze</a>
+        </div>
+    </div>
+
+    <a href="index.html" class="btn-back">⬅️ Voltar para o Menu Principal</a>
+</div>
+
+<script>
+    let dadosBrutos = [];
+    let cabecalhosGlobais = [];
+    let indicesTabelaGlobais = [];
+    let linhasProcessadasCompletas = [];
+    let mapaLeaflet = null;
+    let camadaMarcadores = null;
+
+    // Carrega dados salvos localmente ao iniciar se houver
+    window.addEventListener('DOMContentLoaded', () => {
+        const salvoLocal = localStorage.getItem('linhasProcessadasCompletas');
+        const tecnicoSalvo = localStorage.getItem('tecnicoLogado');
+        if (tecnicoSalvo) {
+            document.getElementById('nomeTecnicoLogado').value = tecnicoSalvo;
+        }
+        if (salvoLocal) {
+            try {
+                linhasProcessadasCompletas = JSON.parse(salvoLocal);
+                if (linhasProcessadasCompletas.length > 0) {
+                    // Tenta restaurar cabeçalhos aproximados se já salvos
+                    cabecalhosGlobais = JSON.parse(localStorage.getItem('cabecalhosGlobais') || '[]');
+                    indicesTabelaGlobais = JSON.parse(localStorage.getItem('indicesTabelaGlobais') || '[]');
+                    if (indicesTabelaGlobais.length > 0) {
+                        renderizarTabelaEValores();
+                    }
+                }
+            } catch (e) {
+                console.error("Erro ao carregar do localStorage", e);
+            }
+        }
+    });
+
+    function alternarModo() {
+        const modo = document.querySelector('input[name="modoLocalizacao"]:checked').value;
+        if (modo === 'endereco') {
+            document.getElementById('blocoEndereco').style.display = 'block';
+            document.getElementById('blocoCoordenadas').style.display = 'none';
+        } else {
+            document.getElementById('blocoEndereco').style.display = 'none';
+            document.getElementById('blocoCoordenadas').style.display = 'block';
+        }
+    }
+
+    function carregarArquivo(e) {
+        const arquivo = e.target.files[0];
+        if (!arquivo) return;
+        document.getElementById('nomeArquivo').innerText = "Arquivo: " + arquivo.name;
+
+        const leitor = new FileReader();
+        leitor.onload = function(e) {
+            try {
+                const dadosBinarios = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(dadosBinarios, { type: 'array' });
+                const primeiraAba = workbook.SheetNames[0];
+                const aba = workbook.Sheets[primeiraAba];
+
+                const json = XLSX.utils.sheet_to_json(aba, { header: 1 });
+                if (json.length > 0) {
+                    cabecalhosGlobais = json[0];
+                    dadosBrutos = json.slice(1);
+                    preencherSeletores(cabecalhosGlobais);
+                    document.getElementById('btnProcessar').disabled = false;
+                }
+            } catch (erro) {
+                console.error(erro);
+                alert("Erro ao ler o arquivo Excel.");
+            }
+        };
+        leitor.readAsArrayBuffer(arquivo);
+    }
+
+    function preencherSeletores(cabecalhos) {
+        const selectEndereco = document.getElementById('selectColunaEndereco');
+        const selectLat = document.getElementById('selectColunaLat');
+        const selectLon = document.getElementById('selectColunaLon');
+        const containerCheckboxes = document.getElementById('seletorColunas');
+        
+        selectEndereco.innerHTML = '<option value="">-- Endereço --</option>';
+        selectLat.innerHTML = '<option value="">-- Latitude --</option>';
+        selectLon.innerHTML = '<option value="">-- Longitude --</option>';
+        containerCheckboxes.innerHTML = '';
+
+        cabecalhos.forEach((col, index) => {
+            if (col !== undefined && col !== null && col !== '') {
+                let nomeLower = col.toString().toLowerCase();
+
+                let optEnd = document.createElement('option');
+                optEnd.value = index;
+                optEnd.text = col;
+                if (nomeLower.includes('end') || nomeLower.includes('rua') || nomeLower.includes('logradouro')) optEnd.selected = true;
+                selectEndereco.appendChild(optEnd);
+
+                let optLat = document.createElement('option');
+                optLat.value = index;
+                optLat.text = col;
+                if (nomeLower.includes('lat') || nomeLower.includes('latitude')) optLat.selected = true;
+                selectLat.appendChild(optLat);
+
+                let optLon = document.createElement('option');
+                optLon.value = index;
+                optLon.text = col;
+                if (nomeLower.includes('lon') || nomeLower.includes('lng') || nomeLower.includes('longitude')) optLon.selected = true;
+                selectLon.appendChild(optLon);
+
+                let div = document.createElement('div');
+                div.className = 'checkbox-item';
+                div.innerHTML = `
+                    <input type="checkbox" id="col_${index}" value="${index}" checked>
+                    <label for="col_${index}" style="display:inline; font-weight:normal; cursor:pointer;">${col}</label>
+                `;
+                containerCheckboxes.appendChild(div);
+            }
+        });
+    }
+
+    async function executarProcessamento() {
+        if (dadosBrutos.length === 0) return;
+
+        const modo = document.querySelector('input[name="modoLocalizacao"]:checked').value;
+        const checkboxes = document.querySelectorAll('#seletorColunas input[type="checkbox"]:checked');
+        indicesTabelaGlobais = Array.from(checkboxes).map(cb => parseInt(cb.value));
+        const statusDiv = document.getElementById('statusCarregamento');
+        const btnProc = document.getElementById('btnProcessar');
+
+        btnProc.disabled = true;
+        let arrayComCoordenadas = [];
+
+        if (modo === 'endereco') {
+            const indiceEndereco = parseInt(document.getElementById('selectColunaEndereco').value);
+            if (isNaN(indiceEndereco)) {
+                alert("Por favor, selecione a coluna de Endereço.");
+                btnProc.disabled = false;
+                return;
+            }
+
+            const cidadeBusca = document.getElementById('cidadeFiltro').value.trim();
+            let dadosFiltrados = dadosBrutos.filter(linha => {
+                if (!cidadeBusca) return true;
+                return linha.some(celula => celula && celula.toString().toLowerCase().includes(cidadeBusca.toLowerCase()));
+            });
+
+            let totalRegistros = dadosFiltrados.length;
+
+            for (let i = 0; i < totalRegistros; i++) {
+                let linha = dadosFiltrados[i];
+                statusDiv.innerText = `🔍 Geocodificando endereço ${i + 1} de ${totalRegistros}...`;
+                
+                let textoEndereco = linha[indiceEndereco] !== undefined && linha[indiceEndereco] !== null ? linha[indiceEndereco].toString().trim() : "";
+                if (!textoEndereco) continue; 
+
+                let queryCompleta = textoEndereco;
+                if (cidadeBusca && !queryCompleta.toLowerCase().includes(cidadeBusca.toLowerCase())) {
+                    queryCompleta += ", " + cidadeBusca;
+                }
+                if (!queryCompleta.toLowerCase().includes("rs")) queryCompleta += " - RS";
+                if (!queryCompleta.toLowerCase().includes("brasil")) queryCompleta += ", Brasil";
+
+                try {
+                    let resposta = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryCompleta)}&limit=1`, {
+                        headers: { 'User-Agent': 'RoteirizadorCampoApp/1.0' }
+                    });
+                    let resultadoJson = await resposta.json();
+
+                    if (resultadoJson && resultadoJson.length > 0) {
+                        arrayComCoordenadas.push({
+                            linhaOriginal: linha,
+                            lat: parseFloat(resultadoJson[0].lat),
+                            lon: parseFloat(resultadoJson[0].lon),
+                            display_name: queryCompleta,
+                            status: 'pendente' // status inicial
+                        });
+                    } else {
+                        arrayComCoordenadas.push({ linhaOriginal: linha, lat: -29.9179 + (i * 0.0005), lon: -51.1837, display_name: queryCompleta, status: 'pendente' });
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                } catch (err) {
+                    console.error(err);
+                    arrayComCoordenadas.push({ linhaOriginal: linha, lat: -29.9179, lon: -51.1837, display_name: queryCompleta, status: 'pendente' });
+                }
+            }
+
+        } else {
+            const indiceLat = parseInt(document.getElementById('selectColunaLat').value);
+            const indiceLon = parseInt(document.getElementById('selectColunaLon').value);
+            
+            if (isNaN(indiceLat) || isNaN(indiceLon)) {
+                alert("Por favor, selecione as colunas de Latitude e Longitude.");
+                btnProc.disabled = false;
+                return;
+            }
+
+            statusDiv.innerText = "⚡ Lendo coordenadas diretamente da planilha...";
+            const cidadeBusca = document.getElementById('cidadeFiltroCoord').value.trim();
+
+            let dadosFiltrados = dadosBrutos.filter(linha => {
+                if (!cidadeBusca) return true;
+                return linha.some(celula => celula && celula.toString().toLowerCase().includes(cidadeBusca.toLowerCase()));
+            });
+
+            dadosFiltrados.forEach((linha) => {
+                let latVal = parseFloat(linha[indiceLat]);
+                let lonVal = parseFloat(linha[indiceLon]);
+
+                if (!isNaN(latVal) && !isNaN(lonVal)) {
+                    arrayComCoordenadas.push({
+                        linhaOriginal: linha,
+                        lat: latVal,
+                        lon: lonVal,
+                        display_name: `Lat: ${latVal}, Lon: ${lonVal}`,
+                        status: 'pendente'
+                    });
+                }
+            });
+        }
+
+        // Algoritmo de Otimização (Vizinho Mais Próximo)
+        let rotaOtimizada = [];
+        let naoVisitados = [...arrayComCoordenadas];
+        
+        if (naoVisitados.length > 0) {
+            let atual = naoVisitados.shift();
+            rotaOtimizada.push(atual);
+
+            while (naoVisitados.length > 0) {
+                let maisProximoIndex = 0;
+                let menorDistancia = Infinity;
+
+                for (let j = 0; j < naoVisitados.length; j++) {
+                    let dist = Math.hypot(naoVisitados[j].lat - atual.lat, naoVisitados[j].lon - atual.lon);
+                    if (dist < menorDistancia) {
+                        menorDistancia = dist;
+                        maisProximoIndex = j;
+                    }
+                }
+                atual = naoVisitados.splice(maisProximoIndex, 1)[0];
+                rotaOtimizada.push(atual);
+            }
+        }
+
+        linhasProcessadasCompletas = rotaOtimizada;
+        
+        // Salvar dados e metadados localmente
+        salvarEstadoLocal();
+
+        statusDiv.innerText = "";
+        btnProc.disabled = false;
+
+        renderizarTabelaEValores();
+    }
+
+    function salvarEstadoLocal() {
+        localStorage.setItem('linhasProcessadasCompletas', JSON.stringify(linhasProcessadasCompletas));
+        localStorage.setItem('cabecalhosGlobais', JSON.stringify(cabecalhosGlobais));
+        localStorage.setItem('indicesTabelaGlobais', JSON.stringify(indicesTabelaGlobais));
+        const tecnico = document.getElementById('nomeTecnicoLogado').value;
+        if (tecnico) localStorage.setItem('tecnicoLogado', tecnico);
+    }
+
+    function renderizarTabelaEValores() {
+        const thead = document.getElementById('cabecalhoTabela');
+        const tbody = document.getElementById('corpoTabela');
+        const contador = document.getElementById('contadorLinhas');
+        const btnImprimir = document.getElementById('btnImprimir');
+        const btnTxt = document.getElementById('btnTxt');
+        const btnWaze = document.getElementById('btnWaze');
+        const instrucoes = document.getElementById('instrucoesRota');
+
+        thead.innerHTML = '';
+        tbody.innerHTML = '';
+        contador.innerText = linhasProcessadasCompletas.length;
+
+        if (linhasProcessadasCompletas.length === 0) {
+            tbody.innerHTML = `<tr><td>Nenhum registro processado com sucesso.</td></tr>`;
+            return;
+        }
+
+        let trHead = '<tr><th style="width: 40px; text-align: center;">Seq</th><th style="width: 60px; text-align: center;">Status</th>';
+        indicesTabelaGlobais.forEach(idx => {
+            let nomeColuna = cabecalhosGlobais[idx] || `Coluna ${idx}`;
+            trHead += `<th>${nomeColuna}</th>`;
+        });
+        trHead += '<th style="text-align: center; width: 110px;">Ação</th></tr>';
+        thead.innerHTML = trHead;
+
+        let primeiroPonto = null;
+
+        linhasProcessadasCompletas.forEach((item, rowIndex) => {
+            let tr = document.createElement('tr');
+            
+            // Determina a cor da bolinha baseado no status armazenado ('pendente', 'concluido', 'nao-concluido', 'em-execucao')
+            let classeBolinha = 'status-pendente';
+            if (item.status === 'concluido') classeBolinha = 'status-concluido';
+            else if (item.status === 'nao-concluido') classeBolinha = 'status-nao-concluido';
+            else if (item.status === 'em-execucao') classeBolinha = 'status-pendente';
+
+            let seqHtml = `<td style="text-align: center; font-weight: bold; background: #edf2f7;">#${rowIndex + 1}</td>`;
+            let statusHtml = `<td style="text-align: center;"><span class="status-dot ${classeBolinha}" title="${item.status || 'pendente'}"></span></td>`;
+            let linhaHtml = seqHtml + statusHtml;
+
+            indicesTabelaGlobais.forEach(idx => {
+                let valor = item.linhaOriginal[idx] !== undefined ? item.linhaOriginal[idx] : '';
+                linhaHtml += `<td>${valor}</td>`;
+            });
+
+            // Adiciona a coluna de controle para o técnico executar e atualizar
+            let acaoHtml = `
+                <td style="text-align: center;">
+                    <button class="btn-executar" onclick="enviarParaTecnico(${rowIndex})">Executar</button>
+                    <select class="select-status" onchange="atualizarStatusItem(${rowIndex}, this.value)">
+                        <option value="">Status...</option>
+                        <option value="concluido" ${item.status === 'concluido' ? 'selected' : ''}>Concluído</option>
+                        <option value="nao-concluido" ${item.status === 'nao-concluido' ? 'selected' : ''}>Não Concluído</option>
+                    </select>
+                </td>
+            `;
+            linhaHtml += acaoHtml;
+
+            tr.innerHTML = linhaHtml;
+            tbody.appendChild(tr);
+
+            if (rowIndex === 0) primeiroPonto = item;
+        });
+
+        btnImprimir.style.display = 'block';
+        btnTxt.style.display = 'block';
+        btnWaze.style.display = 'block';
+        instrucoes.style.display = 'block';
+
+        if (primeiroPonto) {
+            const modo = document.querySelector('input[name="modoLocalizacao"]:checked').value;
+            if (modo === 'endereco') {
+                btnWaze.href = `https://www.waze.com/ul?q=${encodeURIComponent(primeiroPonto.display_name)}&navigate=yes`;
+            } else {
+                btnWaze.href = `https://www.waze.com/ul?ll=${primeiroPonto.lat},${primeiroPonto.lon}&navigate=yes`;
+            }
+        }
+
+        desenharMapaNaTela(linhasProcessadasCompletas);
+    }
+
+    // Função para enviar dados ao módulo técnico (tecnico.html)
+    function enviarParaTecnico(index) {
+        let item = linhasProcessadasCompletas[index];
+        let tecnico = document.getElementById('nomeTecnicoLogado').value.trim() || "Técnico Padrão";
+        
+        // Identifica o protocolo (tenta achar a coluna que contenha "protocolo" ou pega o primeiro dado disponível)
+        let protocoloVal = "N/A";
+        indicesTabelaGlobais.forEach(idx => {
+            let nomeCol = (cabecalhosGlobais[idx] || "").toString().toLowerCase();
+            if (nomeCol.includes('prot') || nomeCol.includes('os') || nomeCol.includes('ordem')) {
+                protocoloVal = item.linhaOriginal[idx];
+            }
+        });
+        if (protocoloVal === "N/A" && indicesTabelaGlobais.length > 0) {
+            protocoloVal = item.linhaOriginal[indicesTabelaGlobais[0]];
+        }
+
+        // Altera o status para pendente com bolinha amarela (em execução)
+        item.status = 'em-execucao';
+        salvarEstadoLocal();
+        renderizarTabelaEValores();
+
+        // Salva os dados específicos para o tecnico.html consumir
+        const dadosExecucao = {
+            protocolo: protocoloVal,
+            tecnico: tecnico,
+            detalhesItem: item,
+            indice: index
+        };
+        localStorage.setItem('protocoloEmAtendimento', JSON.stringify(dadosExecucao));
+
+        // Redireciona para o módulo técnico
+        window.location.href = 'tecnico.html';
+    }
+
+    // Permite atualizar o status diretamente pela lista (Concluído / Não Concluído)
+    function atualizarStatusItem(index, novoStatus) {
+        if (!novoStatus) return;
+        linhasProcessadasCompletas[index].status = novoStatus;
+        salvarEstadoLocal();
+        renderizarTabelaEValores();
+    }
+
+    function desenharMapaNaTela(pontos) {
+        const divMapa = document.getElementById('mapaVisual');
+        divMapa.style.display = 'block';
+
+        let centroLat = pontos[0] ? pontos[0].lat : -29.9179;
+        let centroLon = pontos[0] ? pontos[0].lon : -51.1837;
+
+        if (!mapaLeaflet) {
+            mapaLeaflet = L.map('mapaVisual').setView([centroLat, centroLon], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(mapaLeaflet);
+            camadaMarcadores = L.layerGroup().addTo(mapaLeaflet);
+        } else {
+            mapaLeaflet.setView([centroLat, centroLon], 13);
+            camadaMarcadores.clearLayers();
+        }
+
+        pontos.forEach((pt, index) => {
+            let iconeNumerado = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="numero-pin">${index + 1}</div>`,
+                iconSize: [26, 26],
+                iconAnchor: [13, 13]
+            });
+
+            L.marker([pt.lat, pt.lon], { icon: iconeNumerado }).addTo(camadaMarcadores)
+                .bindPopup(`<b>Parada #${index + 1}</b><br>${pt.display_name}`);
+        });
+
+        setTimeout(() => { mapaLeaflet.invalidateSize(); }, 200);
+    }
+
+    function baixarPDFCelular() {
+        if (linhasProcessadasCompletas.length === 0) return;
+
+        const elemento = document.getElementById('painelPrincipal');
+        elemento.classList.add('pdf-export-mode');
+
+        const opcoes = {
+            margin:       10,
+            filename:     'rota_otimizada.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+
+        html2pdf().from(elemento).set(opcoes).save().then(() => {
+            elemento.classList.remove('pdf-export-mode');
+        }).catch(err => {
+            console.error(err);
+            elemento.classList.remove('pdf-export-mode');
+            alert("Erro ao gerar o PDF no celular.");
+        });
+    }
+
+    function baixarArquivoTexto() {
+        if (linhasProcessadasCompletas.length === 0) return;
+
+        let conteudoTexto = "ROTEIRO SEQUENCIAL OTIMIZADO\n";
+        conteudoTexto += "========================================\n\n";
+
+        linhasProcessadasCompletas.forEach((item, index) => {
+            conteudoTexto += `Parada #${index + 1} [Status: ${item.status || 'pendente'}]\n`;
+            indicesTabelaGlobais.forEach(idx => {
+                let nomeColuna = cabecalhosGlobais[idx] || `Coluna ${idx}`;
+                let valor = item.linhaOriginal[idx] !== undefined ? item.linhaOriginal[idx] : '';
+                conteudoTexto += `- ${nomeColuna}: ${valor}\n`;
+            });
+            conteudoTexto += "----------------------------------------\n";
+        });
+
+        let blob = new Blob([conteudoTexto], { type: 'text/plain;charset=utf-8' });
+        let link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'rota_otimizada.txt';
+        link.click();
+    }
+</script>
+
+</body>
+</html>

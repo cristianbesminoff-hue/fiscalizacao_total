@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiscalização Total - Unifique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- Container Principal de Login -->
+    <div class="w-full max-w-md glass rounded-2xl shadow-2xl p-8 border border-slate-700">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-cyan-400 tracking-wider">FISCALIZAÇÃO TOTAL</h1>
+            <p class="text-xs text-slate-400 mt-1">Plataforma Operacional de Qualidade - Unifique</p>
+        </div>
+
+        <form onsubmit="realizarLogin(event)" class="space-y-5">
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">E-mail Corporativo:</label>
+                <input type="email" id="email" required placeholder="seu.email@redeunifique.com.br" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-cyan-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">Senha:</label>
+                <input type="password" id="senha" required placeholder="••••••••" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-cyan-500">
+            </div>
+
+            <button type="submit" class="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg transition transform active:scale-95 text-sm uppercase tracking-wider">
+                Acessar Sistema
+            </button>
+        </form>
+
+        <div id="msg-erro" class="mt-4 text-center text-xs text-rose-400 font-semibold hidden"></div>
+    </div>
+
+    <!-- Rodapé com Direitos Autorais -->
+    <footer class="mt-8 text-center text-xs text-slate-500 space-y-1">
+        <p>Criado e Desenvolvido por <span class="text-cyan-400 font-semibold">Cristian Azevedo Besminoff</span></p>
+        <p class="text-[11px] text-slate-400 font-medium">© 2026 • Todos os direitos reservados</p>
+        <p class="text-[10px] text-slate-600">Unifique Telecomunicações</p>
+    </footer>
+
+    <script>
+        function realizarLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const senha = document.getElementById('senha').value.trim();
+            const msgErro = document.getElementById('msg-erro');
+
+            // Credenciais e Senhas Específicas
+            const tecnicosAutorizados = [
+                "cristian.besminoff@redeunifique.com.br"
+            ];
+            const senhaTecnico = "102030";
+
+            const emailGestor = "gestor@redeunifique.com.br";
+            const senhaGestor = "unifique123";
+
+            // Verificação de Perfil e Senha Correspondente
+            if (email === emailGestor) {
+                if (senha !== senhaGestor) {
+                    msgErro.innerText = "Senha incorreta para o Gestor.";
+                    msgErro.classList.remove('hidden');
+                    return;
+                }
+                alert("Acesso autorizado: Painel do Gestor.");
+                window.location.href = "gestor.html";
+            } else if (tecnicosAutorizados.includes(email)) {
+                if (senha !== senhaTecnico) {
+                    msgErro.innerText = "Senha incorreta para o Técnico.";
+                    msgErro.classList.remove('hidden');
+                    return;
+                }
+                alert("Acesso autorizado: Módulo Extrator.");
+                window.location.href = "extrator.html";
+            } else {
+                msgErro.innerText = "E-mail não autorizado no sistema.";
+                msgErro.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
