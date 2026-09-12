@@ -26,7 +26,7 @@
             </div>
         </div>
 
-        <!-- Informações Automáticas da URL / Validação -->
+        <!-- Informações Automáticas da URL / LocalStorage -->
         <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 mb-6 space-y-4 text-sm">
             
             <!-- Validação de Protocolo -->
@@ -248,24 +248,19 @@
             return emailOuLogin;
         }
 
-        // Recuperação dos dados da URL / LocalStorage (com suporte direto ao extrator de rotas/protocolos)
+        // Recuperação dos dados priorizando localStorage (enviado pelo extrator) e fallback para URL
         const params = new URLSearchParams(window.location.search);
-        let protocoloID = params.get('protocolo') || 'PRT-998822';
-        let tecnicoExecutorUrl = params.get('tecnico') || params.get('tecnico_fiscalizado') || 'Não informado';
-        let enderecoCliente = params.get('endereco') || params.get('end') || 'Rua Exemplo, 123 - Canoas/RS';
-        const latLongCliente = params.get('coords') || '-29.9189,-51.1784';
-
-        const dadosSalvos = localStorage.getItem('protocoloEmAtendimento');
-        if (dadosSalvos) {
-            try {
-                let parsed = JSON.parse(dadosSalvos);
-                if (parsed.protocolo) protocoloID = parsed.protocolo;
-                if (parsed.tecnico || parsed.tecnico_fiscalizado) tecnicoExecutorUrl = parsed.tecnico || parsed.tecnico_fiscalizado;
-                if (parsed.endereco || parsed.end) enderecoCliente = parsed.endereco || parsed.end;
-            } catch (e) {
-                console.error("Erro ao ler localStorage", e);
-            }
+        
+        let dadosSalvos = null;
+        try {
+            dadosSalvos = JSON.parse(localStorage.getItem('protocoloEmAtendimento'));
+        } catch (e) {
+            console.error("Erro ao ler localStorage", e);
         }
+
+        let protocoloID = dadosSalvos?.protocolo || params.get('protocolo') || 'PRT-998822';
+        let tecnicoExecutorUrl = dadosSalvos?.tecnico || params.get('tecnico') || params.get('tecnico_fiscalizado') || 'Não informado';
+        let enderecoCliente = dadosSalvos?.endereco || params.get('endereco') || params.get('end') || 'Endereço não informado';
 
         let emailLoginSalvo = params.get('email') || params.get('login') || localStorage.getItem('usuarioEmail') || 'cristian.besminoff';
         const tecnicoQualidadeFormatado = formatarNomeQualidade(emailLoginSalvo);
@@ -319,7 +314,6 @@
             btn.disabled = true;
 
             try {
-                // Pega os valores finais considerando se o usuário alterou manualmente ou manteve o padrão
                 const protocoloFinal = document.getElementById('valida-protocolo').value === 'nao' 
                     ? (document.getElementById('input-protocolo-custom').value || protocoloID) 
                     : protocoloID;
