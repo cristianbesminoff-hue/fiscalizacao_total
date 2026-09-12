@@ -264,15 +264,23 @@
         // Captura o técnico executor
         let tecnicoExecutorUrl = dadosSalvos?.tecnico || dadosSalvos?.tecnicoExecutor || dadosSalvos?.detalhesItem?.tecnico || params.get('tecnico') || 'Não informado';
 
-        // Captura o endereço correto (evitando links web e extraindo o texto real)
-        let enderecoCliente = dadosSalvos?.endereco;
-        if (dadosSalvos?.detalhesItem?.endereco) {
+        // Captura e valida o endereço de forma inteligente (evitando IDs numéricos puros e links)
+        let enderecoCliente = '';
+        
+        function ehEnderecoValido(texto) {
+            return texto && typeof texto === 'string' && /[a-zA-Zá-úÁ-Ú]/.test(texto) && !texto.startsWith('http');
+        }
+
+        if (ehEnderecoValido(dadosSalvos?.endereco)) {
+            enderecoCliente = dadosSalvos.endereco;
+        } else if (ehEnderecoValido(dadosSalvos?.detalhesItem?.endereco)) {
             enderecoCliente = dadosSalvos.detalhesItem.endereco;
         } else if (dadosSalvos?.detalhesItem?.linhaOriginal) {
             let colunas = dadosSalvos.detalhesItem.linhaOriginal;
-            let colunaEndereco = colunas.find(col => col && typeof col === 'string' && !col.startsWith('http') && col.length > 5 && (col.includes(',') || /\d/.test(col)));
-            if (colunaEndereco) enderecoCliente = colunaEndereco;
+            let colunaEncontrada = colunas.find(col => ehEnderecoValido(col) && (col.includes(',') || col.length > 10));
+            if (colunaEncontrada) enderecoCliente = colunaEncontrada;
         }
+
         enderecoCliente = enderecoCliente || params.get('endereco') || 'Endereço não informado';
 
         let emailLoginSalvo = params.get('email') || params.get('login') || localStorage.getItem('usuarioEmail') || 'cristian.besminoff';
@@ -365,7 +373,6 @@
 
                 await addDoc(collection(db, "vistorias"), dadosVistoria);
                 
-                // Atualiza o status também no localStorage do roteirizador, caso venha de lá
                 if (dadosSalvos && dadosSalvos.indice !== undefined) {
                     let listaCompleta = JSON.parse(localStorage.getItem('linhasProcessadasCompletasLeaflet') || '[]');
                     if (listaCompleta[dadosSalvos.indice]) {
