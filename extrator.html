@@ -6,7 +6,7 @@
     <title>Roteirizador Inteligente - Google Maps</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- Google Maps API (Insira a sua chave API na URL abaixo onde diz YOUR_API_KEY) -->
+    <!-- Google Maps API (Insira a sua chave API na URL abaixo) -->
     <script src="https://maps.googleapis.com/maps/api/js?key=SUA_CHAVE_API_DO_GOOGLE&libraries=geometry"></script>
     <style>
         body {
@@ -224,6 +224,21 @@
         }
         .btn-txt:hover { background-color: #2d3748; }
 
+        .btn-limpar-pendentes {
+            background-color: #e53e3e;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 140px;
+            font-size: 14px;
+            display: none;
+        }
+        .btn-limpar-pendentes:hover { background-color: #c53030; }
+
         .btn-back {
             display: block;
             width: 100%;
@@ -386,6 +401,7 @@
         <div class="button-row">
             <button class="btn-print" id="btnImprimir" onclick="baixarPDFCelular()">📥 Baixar PDF Limpo</button>
             <button class="btn-txt" id="btnTxt" onclick="baixarArquivoTexto()">📄 Baixar TXT da Rota</button>
+            <button class="btn-limpar-pendentes" id="btnLimparPendentes" onclick="limparNaoExecutados()" style="display: none;">🗑️ Limpar Não Executados</button>
             <a href="#" id="btnWaze" class="btn-waze" target="_blank">🚗 Abrir Rota no Waze</a>
         </div>
     </div>
@@ -578,6 +594,7 @@
         const btnImprimir = document.getElementById('btnImprimir');
         const btnTxt = document.getElementById('btnTxt');
         const btnWaze = document.getElementById('btnWaze');
+        const btnLimparPendentes = document.getElementById('btnLimparPendentes');
         const instrucoes = document.getElementById('instrucoesRota');
 
         thead.innerHTML = '';
@@ -585,7 +602,17 @@
         contador.innerText = linhasProcessadasCompletas.length;
 
         if (linhasProcessadasCompletas.length === 0) {
-            tbody.innerHTML = `<tr><td>Nenhum registro processado com sucesso.</td></tr>`;
+            tbody.innerHTML = `<tr><td>Nenhum registro ativo restante.</td></tr>`;
+            btnImprimir.style.display = 'none';
+            btnTxt.style.display = 'none';
+            btnWaze.style.display = 'none';
+            btnLimparPendentes.style.display = 'none';
+            instrucoes.style.display = 'none';
+            if (mapaGoogle) {
+                marcadoresGoogle.forEach(m => m.setMap(null));
+                marcadoresGoogle = [];
+                document.getElementById('mapaVisual').style.display = 'none';
+            }
             return;
         }
 
@@ -637,6 +664,7 @@
         btnImprimir.style.display = 'block';
         btnTxt.style.display = 'block';
         btnWaze.style.display = 'block';
+        btnLimparPendentes.style.display = 'block';
         instrucoes.style.display = 'block';
 
         if (primeiroPonto) {
@@ -646,11 +674,20 @@
         desenharGoogleMaps(linhasProcessadasCompletas);
     }
 
+    function limparNaoExecutados() {
+        if (!confirm("Deseja apagar todos os pontos que não foram concluídos e manter apenas os concluídos?")) return;
+
+        // Mantém apenas os que estão explicitamente marcados como 'concluido'
+        linhasProcessadasCompletas = linhasProcessadasCompletas.filter(item => item.status === 'concluido');
+        
+        salvarEstadoLocal();
+        renderizarTabelaEValores();
+    }
+
     function desenharGoogleMaps(pontos) {
         const divMapa = document.getElementById('mapaVisual');
         divMapa.style.display = 'block';
 
-        // Limpa marcadores antigos
         marcadoresGoogle.forEach(m => m.setMap(null));
         marcadoresGoogle = [];
 
@@ -666,6 +703,9 @@
         pontos.forEach((pt, index) => {
             const posicao = { lat: pt.lat, lng: pt.lon };
             
+            // Se estiver concluído, podemos diferenciar a cor do marcador (verde por exemplo)
+            const corLabel = pt.status === 'concluido' ? "#48bb78" : "white";
+
             const marcador = new google.maps.Marker({
                 position: posicao,
                 map: mapaGoogle,
@@ -674,11 +714,11 @@
                     color: "white",
                     fontWeight: "bold"
                 },
-                title: `Parada #${index + 1}`
+                title: `Parada #${index + 1} (${pt.status || 'pendente'})`
             });
 
             const infowindow = new google.maps.InfoWindow({
-                content: `<b>Parada #${index + 1}</b><br>Lat: ${pt.lat}, Lon: ${pt.lon}`
+                content: `<b>Parada #${index + 1}</b><br>Status: ${pt.status || 'pendente'}<br>Lat: ${pt.lat}, Lon: ${pt.lon}`
             });
 
             marcador.addListener("click", () => {
@@ -689,7 +729,6 @@
             bounds.extend(posicao);
         });
 
-        // Ajusta o zoom automaticamente para abranger todos os pontos
         mapaGoogle.fitBounds(bounds);
     }
 
