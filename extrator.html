@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roteirizador Inteligente - Relatório em Texto</title>
+    <title>Roteirizador Inteligente - Google Maps</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Biblioteca html2pdf.js para gerar PDF direto no celular -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- Leaflet CSS & JS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Google Maps API (Insira a sua chave API na URL abaixo onde diz YOUR_API_KEY) -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=SUA_CHAVE_API_DO_GOOGLE&libraries=geometry"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -130,18 +128,6 @@
             margin-top: 15px;
             border: 1px solid #cbd5e0;
             display: none;
-        }
-
-        .numero-pin {
-            background-color: #2b6cb0;
-            color: white;
-            border: 2px solid #fff;
-            border-radius: 50%;
-            text-align: center;
-            font-weight: bold;
-            font-size: 11px;
-            line-height: 24px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
         .table-responsive {
@@ -272,7 +258,6 @@
             text-align: center;
         }
 
-        /* Estilos para Status e Botão Executar na Tabela */
         .status-dot {
             height: 12px;
             width: 12px;
@@ -280,9 +265,9 @@
             border-radius: 50%;
             display: inline-block;
         }
-        .status-pendente { background-color: #ecc94b; } /* Amarela */
-        .status-concluido { background-color: #48bb78; } /* Verde */
-        .status-nao-concluido { background-color: #f56565; } /* Vermelho */
+        .status-pendente { background-color: #ecc94b; }
+        .status-concluido { background-color: #48bb78; }
+        .status-nao-concluido { background-color: #f56565; }
 
         .btn-executar {
             background-color: #3182ce;
@@ -302,7 +287,6 @@
             border-radius: 3px;
         }
 
-        /* Estilo específico para o PDF gerado (oculta o que não importa na exportação) */
         .pdf-export-mode {
             background: #fff !important;
             padding: 15px;
@@ -320,7 +304,7 @@
 <body>
 
 <div class="container" id="painelPrincipal">
-    <h2>Roteirizador Inteligente (Relatório em Texto)</h2>
+    <h2>Roteirizador Inteligente (Google Maps)</h2>
     
     <div class="form-section">
         <div class="control-group">
@@ -335,37 +319,14 @@
         </div>
 
         <div class="control-group" style="margin-top: 12px;">
-            <label>2. Como você deseja processar as localizações?</label>
+            <label>2. Modo de Localização:</label>
             <div class="modo-selector">
-                <label><input type="radio" name="modoLocalizacao" value="endereco" checked onchange="alternarModo()"> Endereço com CEP (Busca no Mapa)</label>
-                <label><input type="radio" name="modoLocalizacao" value="coordenadas" onchange="alternarModo()"> Latitude / Longitude (Direto)</label>
-            </div>
-        </div>
-
-        <!-- Seção Endereço -->
-        <div id="blocoEndereco">
-            <div class="control-group">
-                <label for="selectColunaEndereco">Selecione a coluna exata de Endereço:</label>
-                <select id="selectColunaEndereco">
-                    <option value="">Carregue a planilha primeiro...</option>
-                </select>
-            </div>
-            <div class="control-group" style="margin-top: 8px;">
-                <label for="cidadeFiltro">Cidade / Região Principal:</label>
-                <input list="cidadesRS" id="cidadeFiltro" value="Canoas" placeholder="Ex: Canoas, Porto Alegre...">
-                <datalist id="cidadesRS">
-                    <option value="Canoas">
-                    <option value="Porto Alegre">
-                    <option value="Cachoeirinha">
-                    <option value="Nova Santa Rita">
-                    <option value="Esteio">
-                    <option value="Sapucaia do Sul">
-                </datalist>
+                <label><input type="radio" name="modoLocalizacao" value="coordenadas" checked onchange="alternarModo()"> Latitude / Coordenadas Diretas</label>
             </div>
         </div>
 
         <!-- Seção Coordenadas -->
-        <div id="blocoCoordenadas" style="display: none;">
+        <div id="blocoCoordenadas">
             <div class="grid-2">
                 <div class="control-group">
                     <label for="selectColunaLat">Coluna de Latitude:</label>
@@ -386,7 +347,6 @@
             </div>
         </div>
 
-        <!-- Seleção do Técnico Responsável (para levar ao modulo tecnico.html) -->
         <div class="control-group" style="margin-top: 12px;">
             <label for="nomeTecnicoLogado">Nome do Técnico:</label>
             <input type="text" id="nomeTecnicoLogado" placeholder="Digite seu nome ou identificação...">
@@ -399,7 +359,7 @@
             </div>
         </div>
 
-        <button class="btn-action" onclick="executarProcessamento()" id="btnProcessar" disabled>⚙️ Gerar Rota Otimizada</button>
+        <button class="btn-action" onclick="executarProcessamento()" id="btnProcessar" disabled>⚙️ Gerar Rota Otimizada (Google Maps)</button>
         <div id="statusCarregamento"></div>
     </div>
 
@@ -407,7 +367,7 @@
         <h3 style="font-size: 14px; margin-bottom: 5px; color: #2d3748;">Lista Sequencial Otimizada (<span id="contadorLinhas">0</span> registros)</h3>
         
         <div class="instructions" id="instrucoesRota" style="display:none;">
-            📋 <strong>Pronto:</strong> Clique em "Executar" na linha desejada para enviar o protocolo ao módulo técnico. As ordens em andamento exibirão uma bolinha amarela.
+            📋 <strong>Pronto:</strong> Pinos numéricos carregados diretamente via Google Maps com zoom automático de rota.
         </div>
 
         <div id="mapaVisual"></div>
@@ -438,12 +398,11 @@
     let cabecalhosGlobais = [];
     let indicesTabelaGlobais = [];
     let linhasProcessadasCompletas = [];
-    let mapaLeaflet = null;
-    let camadaMarcadores = null;
+    let mapaGoogle = null;
+    let marcadoresGoogle = [];
 
-    // Carrega dados salvos localmente ao iniciar se houver
     window.addEventListener('DOMContentLoaded', () => {
-        const salvoLocal = localStorage.getItem('linhasProcessadasCompletas');
+        const salvoLocal = localStorage.getItem('linhasProcessadasCompletasGoogle');
         const tecnicoSalvo = localStorage.getItem('tecnicoLogado');
         if (tecnicoSalvo) {
             document.getElementById('nomeTecnicoLogado').value = tecnicoSalvo;
@@ -452,8 +411,8 @@
             try {
                 linhasProcessadasCompletas = JSON.parse(salvoLocal);
                 if (linhasProcessadasCompletas.length > 0) {
-                    cabecalhosGlobais = JSON.parse(localStorage.getItem('cabecalhosGlobais') || '[]');
-                    indicesTabelaGlobais = JSON.parse(localStorage.getItem('indicesTabelaGlobais') || '[]');
+                    cabecalhosGlobais = JSON.parse(localStorage.getItem('cabecalhosGlobaisGoogle') || '[]');
+                    indicesTabelaGlobais = JSON.parse(localStorage.getItem('indicesTabelaGlobaisGoogle') || '[]');
                     if (indicesTabelaGlobais.length > 0) {
                         renderizarTabelaEValores();
                     }
@@ -463,17 +422,6 @@
             }
         }
     });
-
-    function alternarModo() {
-        const modo = document.querySelector('input[name="modoLocalizacao"]:checked').value;
-        if (modo === 'endereco') {
-            document.getElementById('blocoEndereco').style.display = 'block';
-            document.getElementById('blocoCoordenadas').style.display = 'none';
-        } else {
-            document.getElementById('blocoEndereco').style.display = 'none';
-            document.getElementById('blocoCoordenadas').style.display = 'block';
-        }
-    }
 
     function carregarArquivo(e) {
         const arquivo = e.target.files[0];
@@ -504,12 +452,10 @@
     }
 
     function preencherSeletores(cabecalhos) {
-        const selectEndereco = document.getElementById('selectColunaEndereco');
         const selectLat = document.getElementById('selectColunaLat');
         const selectLon = document.getElementById('selectColunaLon');
         const containerCheckboxes = document.getElementById('seletorColunas');
         
-        selectEndereco.innerHTML = '<option value="">-- Endereço --</option>';
         selectLat.innerHTML = '<option value="">-- Latitude --</option>';
         selectLon.innerHTML = '<option value="">-- Longitude --</option>';
         containerCheckboxes.innerHTML = '';
@@ -517,12 +463,6 @@
         cabecalhos.forEach((col, index) => {
             if (col !== undefined && col !== null && col !== '') {
                 let nomeLower = col.toString().toLowerCase();
-
-                let optEnd = document.createElement('option');
-                optEnd.value = index;
-                optEnd.text = col;
-                if (nomeLower.includes('end') || nomeLower.includes('rua') || nomeLower.includes('logradouro')) optEnd.selected = true;
-                selectEndereco.appendChild(optEnd);
 
                 let optLat = document.createElement('option');
                 optLat.value = index;
@@ -547,10 +487,9 @@
         });
     }
 
-    async function executarProcessamento() {
+    function executarProcessamento() {
         if (dadosBrutos.length === 0) return;
 
-        const modo = document.querySelector('input[name="modoLocalizacao"]:checked').value;
         const checkboxes = document.querySelectorAll('#seletorColunas input[type="checkbox"]:checked');
         indicesTabelaGlobais = Array.from(checkboxes).map(cb => parseInt(cb.value));
         const statusDiv = document.getElementById('statusCarregamento');
@@ -559,95 +498,39 @@
         btnProc.disabled = true;
         let arrayComCoordenadas = [];
 
-        if (modo === 'endereco') {
-            const indiceEndereco = parseInt(document.getElementById('selectColunaEndereco').value);
-            if (isNaN(indiceEndereco)) {
-                alert("Por favor, selecione a coluna de Endereço.");
-                btnProc.disabled = false;
-                return;
-            }
-
-            const cidadeBusca = document.getElementById('cidadeFiltro').value.trim();
-            let dadosFiltrados = dadosBrutos.filter(linha => {
-                if (!cidadeBusca) return true;
-                return linha.some(celula => celula && celula.toString().toLowerCase().includes(cidadeBusca.toLowerCase()));
-            });
-
-            let totalRegistros = dadosFiltrados.length;
-
-            for (let i = 0; i < totalRegistros; i++) {
-                let linha = dadosFiltrados[i];
-                statusDiv.innerText = `🔍 Geocodificando endereço ${i + 1} de ${totalRegistros}...`;
-                
-                let textoEndereco = linha[indiceEndereco] !== undefined && linha[indiceEndereco] !== null ? linha[indiceEndereco].toString().trim() : "";
-                if (!textoEndereco) continue; 
-
-                let queryCompleta = textoEndereco;
-                if (cidadeBusca && !queryCompleta.toLowerCase().includes(cidadeBusca.toLowerCase())) {
-                    queryCompleta += ", " + cidadeBusca;
-                }
-                if (!queryCompleta.toLowerCase().includes("rs")) queryCompleta += " - RS";
-                if (!queryCompleta.toLowerCase().includes("brasil")) queryCompleta += ", Brasil";
-
-                try {
-                    let resposta = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryCompleta)}&limit=1`, {
-                        headers: { 'User-Agent': 'RoteirizadorCampoApp/1.0' }
-                    });
-                    let resultadoJson = await resposta.json();
-
-                    if (resultadoJson && resultadoJson.length > 0) {
-                        arrayComCoordenadas.push({
-                            linhaOriginal: linha,
-                            lat: parseFloat(resultadoJson[0].lat),
-                            lon: parseFloat(resultadoJson[0].lon),
-                            display_name: queryCompleta,
-                            status: 'pendente'
-                        });
-                    } else {
-                        arrayComCoordenadas.push({ linhaOriginal: linha, lat: -29.9179 + (i * 0.0005), lon: -51.1837, display_name: queryCompleta, status: 'pendente' });
-                    }
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                } catch (err) {
-                    console.error(err);
-                    arrayComCoordenadas.push({ linhaOriginal: linha, lat: -29.9179, lon: -51.1837, display_name: queryCompleta, status: 'pendente' });
-                }
-            }
-
-        } else {
-            const indiceLat = parseInt(document.getElementById('selectColunaLat').value);
-            const indiceLon = parseInt(document.getElementById('selectColunaLon').value);
-            
-            if (isNaN(indiceLat) || isNaN(indiceLon)) {
-                alert("Por favor, selecione as colunas de Latitude e Longitude.");
-                btnProc.disabled = false;
-                return;
-            }
-
-            statusDiv.innerText = "⚡ Lendo coordenadas diretamente da planilha...";
-            const cidadeBusca = document.getElementById('cidadeFiltroCoord').value.trim();
-
-            let dadosFiltrados = dadosBrutos.filter(linha => {
-                if (!cidadeBusca) return true;
-                return linha.some(celula => celula && celula.toString().toLowerCase().includes(cidadeBusca.toLowerCase()));
-            });
-
-            dadosFiltrados.forEach((linha) => {
-                let latVal = parseFloat(linha[indiceLat]);
-                let lonVal = parseFloat(linha[indiceLon]);
-
-                if (!isNaN(latVal) && !isNaN(lonVal)) {
-                    arrayComCoordenadas.push({
-                        linhaOriginal: linha,
-                        lat: latVal,
-                        lon: lonVal,
-                        display_name: `Lat: ${latVal}, Lon: ${lonVal}`,
-                        status: 'pendente'
-                    });
-                }
-            });
+        const indiceLat = parseInt(document.getElementById('selectColunaLat').value);
+        const indiceLon = parseInt(document.getElementById('selectColunaLon').value);
+        
+        if (isNaN(indiceLat) || isNaN(indiceLon)) {
+            alert("Por favor, selecione as colunas de Latitude e Longitude.");
+            btnProc.disabled = false;
+            return;
         }
 
-        // Algoritmo de Otimização (Vizinho Mais Próximo)
+        statusDiv.innerText = "⚡ Lendo coordenadas diretamente da planilha...";
+        const cidadeBusca = document.getElementById('cidadeFiltroCoord').value.trim();
+
+        let dadosFiltrados = dadosBrutos.filter(linha => {
+            if (!cidadeBusca) return true;
+            return linha.some(celula => celula && celula.toString().toLowerCase().includes(cidadeBusca.toLowerCase()));
+        });
+
+        dadosFiltrados.forEach((linha) => {
+            let latVal = parseFloat(linha[indiceLat]);
+            let lonVal = parseFloat(linha[indiceLon]);
+
+            if (!isNaN(latVal) && !isNaN(lonVal)) {
+                arrayComCoordenadas.push({
+                    linhaOriginal: linha,
+                    lat: latVal,
+                    lon: lonVal,
+                    display_name: `Lat: ${latVal}, Lon: ${lonVal}`,
+                    status: 'pendente'
+                });
+            }
+        });
+
+        // Algoritmo de Vizinho Mais Próximo
         let rotaOtimizada = [];
         let naoVisitados = [...arrayComCoordenadas];
         
@@ -672,7 +555,6 @@
         }
 
         linhasProcessadasCompletas = rotaOtimizada;
-        
         salvarEstadoLocal();
 
         statusDiv.innerText = "";
@@ -682,9 +564,9 @@
     }
 
     function salvarEstadoLocal() {
-        localStorage.setItem('linhasProcessadasCompletas', JSON.stringify(linhasProcessadasCompletas));
-        localStorage.setItem('cabecalhosGlobais', JSON.stringify(cabecalhosGlobais));
-        localStorage.setItem('indicesTabelaGlobais', JSON.stringify(indicesTabelaGlobais));
+        localStorage.setItem('linhasProcessadasCompletasGoogle', JSON.stringify(linhasProcessadasCompletas));
+        localStorage.setItem('cabecalhosGlobaisGoogle', JSON.stringify(cabecalhosGlobais));
+        localStorage.setItem('indicesTabelaGlobaisGoogle', JSON.stringify(indicesTabelaGlobais));
         const tecnico = document.getElementById('nomeTecnicoLogado').value;
         if (tecnico) localStorage.setItem('tecnicoLogado', tecnico);
     }
@@ -758,15 +640,57 @@
         instrucoes.style.display = 'block';
 
         if (primeiroPonto) {
-            const modo = document.querySelector('input[name="modoLocalizacao"]:checked').value;
-            if (modo === 'endereco') {
-                btnWaze.href = `https://www.waze.com/ul?q=${encodeURIComponent(primeiroPonto.display_name)}&navigate=yes`;
-            } else {
-                btnWaze.href = `https://www.waze.com/ul?ll=${primeiroPonto.lat},${primeiroPonto.lon}&navigate=yes`;
-            }
+            btnWaze.href = `https://www.waze.com/ul?ll=${primeiroPonto.lat},${primeiroPonto.lon}&navigate=yes`;
         }
 
-        desenharMapaNaTela(linhasProcessadasCompletas);
+        desenharGoogleMaps(linhasProcessadasCompletas);
+    }
+
+    function desenharGoogleMaps(pontos) {
+        const divMapa = document.getElementById('mapaVisual');
+        divMapa.style.display = 'block';
+
+        // Limpa marcadores antigos
+        marcadoresGoogle.forEach(m => m.setMap(null));
+        marcadoresGoogle = [];
+
+        if (!mapaGoogle) {
+            mapaGoogle = new google.maps.Map(divMapa, {
+                zoom: 12,
+                center: { lat: pontos[0].lat, lng: pontos[0].lon }
+            });
+        }
+
+        const bounds = new google.maps.LatLngBounds();
+
+        pontos.forEach((pt, index) => {
+            const posicao = { lat: pt.lat, lng: pt.lon };
+            
+            const marcador = new google.maps.Marker({
+                position: posicao,
+                map: mapaGoogle,
+                label: {
+                    text: String(index + 1),
+                    color: "white",
+                    fontWeight: "bold"
+                },
+                title: `Parada #${index + 1}`
+            });
+
+            const infowindow = new google.maps.InfoWindow({
+                content: `<b>Parada #${index + 1}</b><br>Lat: ${pt.lat}, Lon: ${pt.lon}`
+            });
+
+            marcador.addListener("click", () => {
+                infowindow.open(mapaGoogle, marcador);
+            });
+
+            marcadoresGoogle.push(marcador);
+            bounds.extend(posicao);
+        });
+
+        // Ajusta o zoom automaticamente para abranger todos os pontos
+        mapaGoogle.fitBounds(bounds);
     }
 
     function enviarParaTecnico(index) {
@@ -806,44 +730,6 @@
         renderizarTabelaEValores();
     }
 
-    function desenharMapaNaTela(pontos) {
-        const divMapa = document.getElementById('mapaVisual');
-        divMapa.style.display = 'block';
-
-        if (!mapaLeaflet) {
-            mapaLeaflet = L.map('mapaVisual');
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(mapaLeaflet);
-            camadaMarcadores = L.layerGroup().addTo(mapaLeaflet);
-        } else {
-            camadaMarcadores.clearLayers();
-        }
-
-        let bounds = [];
-
-        pontos.forEach((pt, index) => {
-            let iconeNumerado = L.divIcon({
-                className: 'custom-div-icon',
-                html: `<div class="numero-pin">${index + 1}</div>`,
-                iconSize: [26, 26],
-                iconAnchor: [13, 13]
-            });
-
-            L.marker([pt.lat, pt.lon], { icon: iconeNumerado }).addTo(camadaMarcadores)
-                .bindPopup(`<b>Parada #${index + 1}</b><br>${pt.display_name}`);
-            
-            bounds.push([pt.lat, pt.lon]);
-        });
-
-        if (bounds.length > 0) {
-            mapaLeaflet.fitBounds(bounds, { padding: [50, 50] });
-        }
-
-        setTimeout(() => { mapaLeaflet.invalidateSize(); }, 200);
-    }
-
     function baixarPDFCelular() {
         if (linhasProcessadasCompletas.length === 0) return;
 
@@ -852,7 +738,7 @@
 
         const opcoes = {
             margin:       10,
-            filename:     'rota_otimizada.pdf',
+            filename:     'rota_google_maps.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2, useCORS: true },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
@@ -863,14 +749,14 @@
         }).catch(err => {
             console.error(err);
             elemento.classList.remove('pdf-export-mode');
-            alert("Erro ao gerar o PDF no celular.");
+            alert("Erro ao gerar o PDF.");
         });
     }
 
     function baixarArquivoTexto() {
         if (linhasProcessadasCompletas.length === 0) return;
 
-        let conteudoTexto = "ROTEIRO SEQUENCIAL OTIMIZADO\n";
+        let conteudoTexto = "ROTEIRO SEQUENCIAL OTIMIZADO (GOOGLE MAPS)\n";
         conteudoTexto += "========================================\n\n";
 
         linhasProcessadasCompletas.forEach((item, index) => {
