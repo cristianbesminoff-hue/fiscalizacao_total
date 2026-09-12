@@ -3,217 +3,371 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Técnico - Execução de Ordem</title>
+    <title>Fiscalização Total - Vistoria de Campo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 15px;
-            color: #333;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-        }
-        h2 { font-size: 20px; margin-top: 0; color: #1a365d; text-align: center; }
-        
-        .info-card {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-        }
-        .info-label {
-            font-size: 12px;
-            color: #718096;
-            text-transform: uppercase;
-            font-weight: bold;
-            margin-bottom: 3px;
-        }
-        .info-value {
-            font-size: 16px;
-            color: #2d3748;
-            font-weight: bold;
-            margin-bottom: 12px;
-            word-break: break-word;
-        }
-        .endereco-destaque {
-            background: #ebf8ff;
-            border-left: 4px solid #3182ce;
-            padding: 10px;
-            margin-top: 5px;
-            margin-bottom: 15px;
-            border-radius: 0 4px 4px 0;
-        }
-        .endereco-destaque .info-value {
-            color: #2b6cb0;
-            margin-bottom: 0;
-            font-size: 15px;
-        }
-
-        .btn-navegar {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            background-color: #3182ce;
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 16px;
-            border-radius: 6px;
-            box-sizing: border-box;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 4px rgba(49, 130, 206, 0.3);
-        }
-        .btn-navegar:hover { background-color: #2b6cb0; }
-
-        .btn-concluir {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            background-color: #48bb78;
-            color: white;
-            border: none;
-            text-align: center;
-            font-weight: bold;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            box-sizing: border-box;
-            margin-bottom: 12px;
-        }
-        .btn-concluir:hover { background-color: #38a169; }
-
-        .btn-nao-concluido {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            background-color: #e53e3e;
-            color: white;
-            border: none;
-            text-align: center;
-            font-weight: bold;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            box-sizing: border-box;
-            margin-bottom: 12px;
-        }
-        .btn-nao-concluido:hover { background-color: #c53030; }
-
-        .btn-voltar {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: #4a5568;
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 14px;
-            border-radius: 6px;
-            box-sizing: border-box;
-        }
-        .btn-voltar:hover { background-color: #2d3748; }
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .secao-condicional, .campo-customizado { display: none; }
     </style>
 </head>
-<body>
+<body class="min-h-screen p-3 md:p-8 flex items-center justify-center">
 
-<div class="container">
-    <h2>Painel de Atendimento</h2>
-
-    <div class="info-card">
-        <div class="info-label">Técnico Fiscal / Responsável</div>
-        <div class="info-value" id="valTecnico">Carregando...</div>
-
-        <!-- Endereço posicionado logo abaixo do nome do técnico fiscal -->
-        <div class="endereco-destaque">
-            <div class="info-label">Endereço de Destino</div>
-            <div class="info-value" id="campoEndereco">Carregando endereço...</div>
+    <div class="w-full max-w-3xl glass rounded-2xl shadow-2xl p-5 md:p-8">
+        
+        <!-- Cabeçalho -->
+        <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-6">
+            <div>
+                <h1 class="text-xl md:text-2xl font-extrabold text-cyan-400 tracking-wider">FISCALIZAÇÃO TOTAL</h1>
+                <p class="text-xs text-slate-400">Unifique - Padrão de Vistoria Operacional</p>
+            </div>
+            <div id="status-conexao" class="px-3 py-1 bg-emerald-500/20 border border-emerald-500 text-emerald-400 text-xs rounded-full font-semibold">
+                Online
+            </div>
         </div>
 
-        <div class="info-label">Cliente / Assinante</div>
-        <div class="info-value" id="valCliente">Carregando...</div>
+        <!-- Informações Automáticas da URL / Validação -->
+        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 mb-6 space-y-4 text-sm">
+            
+            <!-- Validação de Protocolo -->
+            <div class="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                <div class="flex justify-between items-center mb-2">
+                    <div>
+                        <span class="text-xs text-slate-400 block">Protocolo Identificado:</span>
+                        <span id="txt-protocolo" class="font-bold text-white text-base">Carregando...</span>
+                    </div>
+                    <div class="w-48">
+                        <label class="block text-[10px] text-slate-400 mb-1">Está correto?</label>
+                        <select id="valida-protocolo" onchange="controlarEdicao('protocolo')" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-white">
+                            <option value="sim">Sim, está correto</option>
+                            <option value="nao">Não, alterar</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="box-edicao-protocolo" class="campo-customizado pt-2 border-t border-slate-700">
+                    <input type="text" id="input-protocolo-custom" placeholder="Digite o número correto do protocolo" class="w-full bg-slate-900 border border-cyan-500 rounded-lg p-2 text-white text-xs focus:outline-none">
+                </div>
+            </div>
 
-        <div class="info-label">Protocolo / Ordem de Serviço</div>
-        <div class="info-value" id="valProtocolo">Carregando...</div>
+            <!-- Validação de Técnico Executor -->
+            <div class="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                <div class="flex justify-between items-center mb-2">
+                    <div>
+                        <span class="text-xs text-slate-400 block">Técnico Executor Identificado:</span>
+                        <span id="txt-tecnico-executor" class="font-bold text-cyan-300 text-sm">Carregando...</span>
+                    </div>
+                    <div class="w-48">
+                        <label class="block text-[10px] text-slate-400 mb-1">Está correto?</label>
+                        <select id="valida-executor" onchange="controlarEdicao('executor')" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-white">
+                            <option value="sim">Sim, está correto</option>
+                            <option value="nao">Não, alterar</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="box-edicao-executor" class="campo-customizado pt-2 border-t border-slate-700">
+                    <input type="text" id="input-executor-custom" placeholder="Digite o nome correto do técnico executor" class="w-full bg-slate-900 border border-cyan-500 rounded-lg p-2 text-white text-xs focus:outline-none">
+                </div>
+            </div>
+
+            <!-- Informações Fixas (Técnico Qualidade e Endereço) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-slate-800 text-xs">
+                <div>
+                    <span class="text-slate-400 block">Técnico Fiscal (Você):</span>
+                    <span id="txt-tecnico-qualidade" class="font-semibold text-cyan-300 text-sm">Identificando...</span>
+                </div>
+                <div class="flex flex-col justify-end">
+                    <button type="button" onclick="abrirGPS()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition shadow-lg flex items-center justify-center gap-1">
+                        📍 Abrir Navegação GPS
+                    </button>
+                </div>
+                <div class="md:col-span-2">
+                    <span id="txt-endereco" class="text-slate-300 truncate block">Endereço: Carregando...</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Formulário Oficial Unificado -->
+        <form id="form-vistoria" onsubmit="enviarVistoria(event)" class="space-y-6 text-sm">
+            
+            <!-- Estado e Cidade -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-2">2. Estado:</label>
+                    <select id="estado" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500">
+                        <option value="">Selecione...</option>
+                        <option value="SC">SC</option>
+                        <option value="RS">RS</option>
+                        <option value="PR">PR</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-2">3. Cidade Fiscalizada:</label>
+                    <input type="text" id="cidade" placeholder="Ex: Canoas, Blumenau..." required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500">
+                </div>
+            </div>
+
+            <!-- Empresa & Tipo de Vistoria -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-2">5. Empresa Fiscalizada (Terceirizada):</label>
+                    <input type="text" id="empresa" placeholder="Nome da empresa parceira" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-2">7. Tipo de Vistoria:</label>
+                    <select id="tipo-vistoria" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500">
+                        <option value="FTTH">FTTH</option>
+                        <option value="FTTB">FTTB</option>
+                        <option value="FTTA">FTTA</option>
+                        <option value="FTTX">FTTX</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- APR -->
+            <div>
+                <label class="block font-semibold text-slate-300 mb-2">8. APR - Análise Preliminar de Risco:</label>
+                <select id="apr" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500">
+                    <option value="Trabalho em altura">Trabalho em altura</option>
+                    <option value="Não ha atividade de risco">Não há atividade de risco</option>
+                </select>
+            </div>
+
+            <!-- 9. Organização da C.A / Caixa (Com Se Aplica) -->
+            <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-800 space-y-4">
+                <label class="block font-semibold text-cyan-300">9. Organização da C.A / Caixa:</label>
+                <select id="aplica-caixa" onchange="controlarSecao('caixa')" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500">
+                    <option value="">Se aplica?</option>
+                    <option value="Sim">Sim, se aplica</option>
+                    <option value="NA">Não se aplica (N/A)</option>
+                </select>
+
+                <div id="conteudo-caixa" class="secao-condicional space-y-3 pt-2 border-t border-slate-800">
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">Status da Caixa:</label>
+                        <select id="org-ca" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                            <option value="APROVADO">APROVADO</option>
+                            <option value="REPROVADO">REPROVADO</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">10. Foto da Caixa Externa:</label>
+                            <input type="file" id="foto-caixa-ext" accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">11. Foto da Caixa Interna:</label>
+                            <input type="file" id="foto-caixa-int" accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 12. Lançamento do Drop (Com Se Aplica) -->
+            <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-800 space-y-4">
+                <label class="block font-semibold text-cyan-300">12. Lançamento do Drop:</label>
+                <select id="aplica-drop" onchange="controlarSecao('drop')" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500">
+                    <option value="">Se aplica?</option>
+                    <option value="Sim">Sim, se aplica</option>
+                    <option value="NA">Não se aplica (N/A)</option>
+                </select>
+
+                <div id="conteudo-drop" class="secao-condicional space-y-3 pt-2 border-t border-slate-800">
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">Status do Lançamento:</label>
+                        <select id="lanc-drop" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                            <option value="APROVADO">APROVADO</option>
+                            <option value="REPROVADO">REPROVADO</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">13. Foto do Lançamento do Drop:</label>
+                        <input type="file" id="foto-lanc-drop" accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Situação Final -->
+            <div>
+                <label class="block font-semibold text-slate-300 mb-2">22. Situação Final da Vistoria:</label>
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="cursor-pointer border border-emerald-500/50 bg-emerald-500/10 hover:bg-emerald-500/20 p-3 rounded-xl flex items-center justify-center gap-2 transition">
+                        <input type="radio" name="status" value="APROVADO" required class="accent-emerald-500">
+                        <span class="font-bold text-emerald-400">🟢 APROVADO</span>
+                    </label>
+                    <label class="cursor-pointer border border-rose-500/50 bg-rose-500/10 hover:bg-rose-500/20 p-3 rounded-xl flex items-center justify-center gap-2 transition">
+                        <input type="radio" name="status" value="PENDENCIA-REFAZER" required class="accent-rose-500">
+                        <span class="font-bold text-rose-400">🔴 PENDÊNCIA / REFAZER</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Observações Finais -->
+            <div>
+                <label class="block font-semibold text-slate-300 mb-2">23. Observações finais (Obrigatório em caso de pendência):</label>
+                <textarea id="observacoes" rows="3" placeholder="Descreva detalhadamente os motivos identificados em caso de reprovação..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500 text-sm"></textarea>
+            </div>
+
+            <!-- Botão Enviar -->
+            <button type="submit" id="btn-enviar" class="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg transition transform active:scale-95">
+                Salvar Fiscalização e Limpar Fila
+            </button>
+        </form>
+
     </div>
 
-    <!-- Botão de Navegação Waze usando o Endereço -->
-    <a href="#" id="btnAbrirGps" class="btn-navegar" target="_blank">🚗 Abrir Navegação no Waze</a>
+    <!-- Script de Controle, Base64 e Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    <button class="btn-concluir" onclick="marcarStatus('concluido')">✅ Marcar como Concluído</button>
-    <button class="btn-nao-concluido" onclick="marcarStatus('nao-concluido')">❌ Marcar como Não Concluído</button>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIY1qa9sWjI3n58TJ31s0EvF8L-5uui4",
+            authDomain: "fiscalizacao-total.firebaseapp.com",
+            projectId: "fiscalizacao-total",
+            storageBucket: "fiscalizacao-total.firebasestorage.app",
+            messagingSenderId: "916695238680",
+            appId: "1:916695238680:web:3dceb58db475ace3b9b6d"
+        };
 
-    <a href="index.html" class="btn-voltar">⬅️ Voltar para a Rota</a>
-</div>
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-<script>
-    let dadosAtuais = null;
+        function formatarNomeQualidade(emailOuLogin) {
+            if (!emailOuLogin) return "Cristian Besminoff";
+            let base = emailOuLogin.split('@')[0];
+            let partes = base.split(/[\.\-_]/).filter(Boolean);
+            
+            if (partes.length >= 2) {
+                let p1 = partes[0].charAt(0).toUpperCase() + partes[0].slice(1).toLowerCase();
+                let p2 = partes[1].charAt(0).toUpperCase() + partes[1].slice(1).toLowerCase();
+                return `${p1} ${p2}`;
+            } else if (partes.length === 1) {
+                return partes[0].charAt(0).toUpperCase() + partes[0].slice(1).toLowerCase();
+            }
+            return emailOuLogin;
+        }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const dadosStr = localStorage.getItem('protocoloEmAtendimento');
-        
-        if (dadosStr) {
+        // Recuperação dos dados da URL / LocalStorage (com suporte direto ao extrator de rotas/protocolos)
+        const params = new URLSearchParams(window.location.search);
+        let protocoloID = params.get('protocolo') || 'PRT-998822';
+        let tecnicoExecutorUrl = params.get('tecnico') || params.get('tecnico_fiscalizado') || 'Não informado';
+        let enderecoCliente = params.get('endereco') || params.get('end') || 'Rua Exemplo, 123 - Canoas/RS';
+        const latLongCliente = params.get('coords') || '-29.9189,-51.1784';
+
+        const dadosSalvos = localStorage.getItem('protocoloEmAtendimento');
+        if (dadosSalvos) {
             try {
-                dadosAtuais = JSON.parse(dadosStr);
+                let parsed = JSON.parse(dadosSalvos);
+                if (parsed.protocolo) protocoloID = parsed.protocolo;
+                if (parsed.tecnico || parsed.tecnico_fiscalizado) tecnicoExecutorUrl = parsed.tecnico || parsed.tecnico_fiscalizado;
+                if (parsed.endereco || parsed.end) enderecoCliente = parsed.endereco || parsed.end;
+            } catch (e) {
+                console.error("Erro ao ler localStorage", e);
+            }
+        }
+
+        let emailLoginSalvo = params.get('email') || params.get('login') || localStorage.getItem('usuarioEmail') || 'cristian.besminoff';
+        const tecnicoQualidadeFormatado = formatarNomeQualidade(emailLoginSalvo);
+
+        // Inserção na tela
+        document.getElementById('txt-protocolo').innerText = protocoloID;
+        document.getElementById('txt-tecnico-executor').innerText = tecnicoExecutorUrl;
+        document.getElementById('txt-tecnico-qualidade').innerText = tecnicoQualidadeFormatado;
+        document.getElementById('txt-endereco').innerText = "Endereço: " + enderecoCliente;
+
+        // Função para alternar caixas de edição condicional (Protocolo e Executor)
+        window.controlarEdicao = function(tipo) {
+            const selectVal = document.getElementById(`valida-${tipo}`).value;
+            const boxEdicao = document.getElementById(`box-edicao-${tipo}`);
+            if (selectVal === 'nao') {
+                boxEdicao.style.display = 'block';
+            } else {
+                boxEdicao.style.display = 'none';
+                document.getElementById(`input-${tipo}-custom`).value = '';
+            }
+        }
+
+        // Função para seções condicionais do formulário principal
+        window.controlarSecao = function(nome) {
+            const selectAplica = document.getElementById(`aplica-${nome}`);
+            const blocoConteudo = document.getElementById(`conteudo-${nome}`);
+            if (selectAplica.value === 'Sim') {
+                blocoConteudo.style.display = 'block';
+            } else {
+                blocoConteudo.style.display = 'none';
+            }
+        }
+
+        async function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        window.abrirGPS = function() {
+            window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoCliente)}`, '_blank');
+        }
+
+        window.enviarVistoria = async function(event) {
+            event.preventDefault();
+            const btn = document.getElementById('btn-enviar');
+            btn.innerText = "Compactando Fotos e Salvando...";
+            btn.disabled = true;
+
+            try {
+                // Pega os valores finais considerando se o usuário alterou manualmente ou manteve o padrão
+                const protocoloFinal = document.getElementById('valida-protocolo').value === 'nao' 
+                    ? (document.getElementById('input-protocolo-custom').value || protocoloID) 
+                    : protocoloID;
+
+                const executorFinal = document.getElementById('valida-executor').value === 'nao' 
+                    ? (document.getElementById('input-executor-custom').value || tecnicoExecutorUrl) 
+                    : tecnicoExecutorUrl;
+
+                const fExt = document.getElementById('foto-caixa-ext')?.files[0];
+                const fDrop = document.getElementById('foto-lanc-drop')?.files[0];
                 
-                // Preenche os campos na tela
-                document.getElementById('valTecnico').innerText = dadosAtuais.tecnico || "Não informado";
-                document.getElementById('campoEndereco').innerText = dadosAtuais.endereco || "Endereço não informado";
-                document.getElementById('valCliente').innerText = dadosAtuais.cliente || "Não especificado";
-                document.getElementById('valProtocolo').innerText = dadosAtuais.protocolo || "N/A";
+                const dadosVistoria = {
+                    protocolo: protocoloFinal,
+                    tecnicoQualidade: tecnicoQualidadeFormatado,
+                    tecnicoExecutor: executorFinal,
+                    enderecoCliente: enderecoCliente,
+                    estado: document.getElementById('estado').value,
+                    cidade: document.getElementById('cidade').value,
+                    empresaFiscalizada: document.getElementById('empresa').value,
+                    tipoVistoria: document.getElementById('tipo-vistoria').value,
+                    apr: document.getElementById('apr').value,
+                    
+                    aplicaCaixa: document.getElementById('aplica-caixa').value,
+                    orgCaixa: document.getElementById('aplica-caixa').value === 'Sim' ? document.getElementById('org-ca').value : 'N/A',
+                    
+                    aplicaDrop: document.getElementById('aplica-drop').value,
+                    lancDrop: document.getElementById('aplica-drop').value === 'Sim' ? document.getElementById('lanc-drop').value : 'N/A',
 
-                // Configura o link do Waze usando prioridade para o Endereço de texto (ou coordenadas como fallback)
-                const btnGps = document.getElementById('btnAbrirGps');
-                if (dadosAtuais.endereco && dadosAtuais.endereco !== "Endereço não informado") {
-                    let enderecoCodificado = encodeURIComponent(dadosAtuais.endereco);
-                    btnGps.href = `https://www.waze.com/ul?q=${enderecoCodificado}&navigate=yes`;
-                } else if (dadosAtuais.lat && dadosAtuais.lon) {
-                    btnGps.href = `https://www.waze.com/ul?ll=${dadosAtuais.lat},${dadosAtuais.lon}&navigate=yes`;
-                } else {
-                    btnGps.style.display = 'none';
-                }
+                    statusFinal: document.querySelector('input[name="status"]:checked').value,
+                    observacoes: document.getElementById('observacoes').value,
+                    dataHora: new Date().toISOString(),
 
+                    fotoCaixaExt: fExt ? await fileToBase64(fExt) : null,
+                    fotoLancDrop: fDrop ? await fileToBase64(fDrop) : null
+                };
+
+                await addDoc(collection(db, "vistorias"), dadosVistoria);
+                alert("Fiscalização salva com sucesso! O protocolo foi processado e removido da fila.");
+                
+                localStorage.removeItem('protocoloEmAtendimento');
+                window.location.href = "index.html"; 
             } catch (e) {
-                console.error("Erro ao ler os dados do atendimento:", e);
-                alert("Erro ao carregar dados do atendimento.");
-            }
-        } else {
-            alert("Nenhum atendimento selecionado.");
-            window.location.href = 'index.html';
-        }
-    });
-
-    function marcarStatus(novoStatus) {
-        if (!dadosAtuais) return;
-
-        // Atualiza na lista principal salva no localStorage
-        const salvoLocal = localStorage.getItem('linhasProcessadasCompletasLeaflet');
-        if (salvoLocal) {
-            try {
-                let lista = JSON.parse(salvoLocal);
-                if (lista[dadosAtuais.indice]) {
-                    lista[dadosAtuais.indice].status = novoStatus;
-                    localStorage.setItem('linhasProcessadasCompletasLeaflet', JSON.stringify(lista));
-                }
-            } catch (e) {
-                console.error("Erro ao atualizar status global", e);
+                console.error("Erro ao salvar: ", e);
+                alert("Erro ao salvar os dados. Tente novamente.");
+                btn.innerText = "Salvar Fiscalização e Limpar Fila";
+                btn.disabled = false;
             }
         }
-
-        alert(`Atendimento marcado como: ${novoStatus === 'concluido' ? 'Concluído' : 'Não Concluído'}`);
-        window.location.href = 'index.html';
-    }
-</script>
-
+    </script>
 </body>
 </html>
