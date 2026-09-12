@@ -718,17 +718,45 @@
 
     function enviarParaTecnico(index) {
         let item = linhasProcessadasCompletas[index];
-        let tecnico = document.getElementById('nomeTecnicoLogado').value.trim() || "Técnico Padrão";
+        let tecnicoLogadoInput = document.getElementById('nomeTecnicoLogado').value.trim() || "Técnico Padrão";
         
         let protocoloVal = "N/A";
-        indicesTabelaGlobais.forEach(idx => {
+        let tecnicoExecutorVal = tecnicoLogadoInput;
+        let enderecoVal = "Endereço não informado";
+
+        // Varre os cabeçalhos para extrair perfeitamente o Protocolo, Técnico Executor e Endereço
+        indicesTabelaGlobais.forEach((idx) => {
             let nomeCol = (cabecalhosGlobais[idx] || "").toString().toLowerCase();
+            let valorCel = (item.linhaOriginal[idx] !== undefined && item.linhaOriginal[idx] !== null) ? item.linhaOriginal[idx].toString() : "";
+
             if (nomeCol.includes('prot') || nomeCol.includes('os') || nomeCol.includes('ordem')) {
-                protocoloVal = item.linhaOriginal[idx];
+                if (valorCel) protocoloVal = valorCel;
+            }
+            
+            if (nomeCol.includes('tecnico') || nomeCol.includes('técnico') || nomeCol.includes('responsavel') || nomeCol.includes('executor')) {
+                if (valorCel && valorCel.toLowerCase() !== 'não informado') {
+                    tecnicoExecutorVal = valorCel;
+                }
+            }
+
+            if (nomeCol.includes('end') || nomeCol.includes('rua') || nomeCol.includes('logradouro') || nomeCol.includes('endereco')) {
+                if (valorCel && /[a-zA-Zá-úÁ-Ú]/.test(valorCel)) {
+                    enderecoVal = valorCel;
+                }
             }
         });
+
+        // Fallbacks inteligentes caso as colunas tenham nomes genéricos
         if (protocoloVal === "N/A" && indicesTabelaGlobais.length > 0) {
             protocoloVal = item.linhaOriginal[indicesTabelaGlobais[0]];
+        }
+        if (enderecoVal === "Endereço não informado") {
+            indicesTabelaGlobais.forEach(idx => {
+                let val = (item.linhaOriginal[idx] || "").toString();
+                if (/[a-zA-Zá-úÁ-Ú]/.test(val) && (val.includes(',') || val.length > 8)) {
+                    enderecoVal = val;
+                }
+            });
         }
 
         item.status = 'em-execucao';
@@ -737,10 +765,12 @@
 
         const dadosExecucao = {
             protocolo: protocoloVal,
-            tecnico: tecnico,
+            tecnico: tecnicoExecutorVal,
+            endereco: enderecoVal,
             detalhesItem: item,
             indice: index
         };
+        
         localStorage.setItem('protocoloEmAtendimento', JSON.stringify(dadosExecucao));
 
         window.location.href = 'tecnico.html';
