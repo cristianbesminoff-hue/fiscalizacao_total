@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roteirizador Inteligente - Google Maps</title>
+    <title>Roteirizador Inteligente - OpenStreetMap</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- Google Maps API (Substitua SUA_CHAVE_API_DO_GOOGLE pela sua chave válida) -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=SUA_CHAVE_API_DO_GOOGLE&libraries=geometry"></script>
+    <!-- Leaflet CSS & JS (Alternativa gratuita sem chave) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -128,6 +129,7 @@
             margin-top: 15px;
             border: 1px solid #cbd5e0;
             display: none;
+            z-index: 1;
         }
 
         .table-responsive {
@@ -319,7 +321,7 @@
 <body>
 
 <div class="container" id="painelPrincipal">
-    <h2>Roteirizador Inteligente (Google Maps)</h2>
+    <h2>Roteirizador Inteligente (OpenStreetMap)</h2>
     
     <div class="form-section">
         <div class="control-group">
@@ -374,7 +376,7 @@
             </div>
         </div>
 
-        <button class="btn-action" onclick="executarProcessamento()" id="btnProcessar" disabled>⚙️ Gerar Rota Otimizada (Google Maps)</button>
+        <button class="btn-action" onclick="executarProcessamento()" id="btnProcessar" disabled>⚙️ Gerar Rota Otimizada (Leaflet)</button>
         <div id="statusCarregamento"></div>
     </div>
 
@@ -382,7 +384,7 @@
         <h3 style="font-size: 14px; margin-bottom: 5px; color: #2d3748;">Lista Sequencial Otimizada (<span id="contadorLinhas">0</span> registros)</h3>
         
         <div class="instructions" id="instrucoesRota" style="display:none;">
-            📋 <strong>Pronto:</strong> Pinos numéricos carregados diretamente via Google Maps com zoom automático de rota.
+            📋 <strong>Pronto:</strong> Pinos carregados no mapa interativo sem restrições de chave.
         </div>
 
         <div id="mapaVisual"></div>
@@ -414,11 +416,11 @@
     let cabecalhosGlobais = [];
     let indicesTabelaGlobais = [];
     let linhasProcessadasCompletas = [];
-    let mapaGoogle = null;
-    let marcadoresGoogle = [];
+    let mapaLeaflet = null;
+    let camadaMarcadores = null;
 
     window.addEventListener('DOMContentLoaded', () => {
-        const salvoLocal = localStorage.getItem('linhasProcessadasCompletasGoogle');
+        const salvoLocal = localStorage.getItem('linhasProcessadasCompletasLeaflet');
         const tecnicoSalvo = localStorage.getItem('tecnicoLogado');
         if (tecnicoSalvo) {
             document.getElementById('nomeTecnicoLogado').value = tecnicoSalvo;
@@ -427,8 +429,8 @@
             try {
                 linhasProcessadasCompletas = JSON.parse(salvoLocal);
                 if (linhasProcessadasCompletas.length > 0) {
-                    cabecalhosGlobais = JSON.parse(localStorage.getItem('cabecalhosGlobaisGoogle') || '[]');
-                    indicesTabelaGlobais = JSON.parse(localStorage.getItem('indicesTabelaGlobaisGoogle') || '[]');
+                    cabecalhosGlobais = JSON.parse(localStorage.getItem('cabecalhosGlobaisLeaflet') || '[]');
+                    indicesTabelaGlobais = JSON.parse(localStorage.getItem('indicesTabelaGlobaisLeaflet') || '[]');
                     if (indicesTabelaGlobais.length > 0) {
                         renderizarTabelaEValores();
                     }
@@ -580,9 +582,9 @@
     }
 
     function salvarEstadoLocal() {
-        localStorage.setItem('linhasProcessadasCompletasGoogle', JSON.stringify(linhasProcessadasCompletas));
-        localStorage.setItem('cabecalhosGlobaisGoogle', JSON.stringify(cabecalhosGlobais));
-        localStorage.setItem('indicesTabelaGlobaisGoogle', JSON.stringify(indicesTabelaGlobais));
+        localStorage.setItem('linhasProcessadasCompletasLeaflet', JSON.stringify(linhasProcessadasCompletas));
+        localStorage.setItem('cabecalhosGlobaisLeaflet', JSON.stringify(cabecalhosGlobais));
+        localStorage.setItem('indicesTabelaGlobaisLeaflet', JSON.stringify(indicesTabelaGlobais));
         const tecnico = document.getElementById('nomeTecnicoLogado').value;
         if (tecnico) localStorage.setItem('tecnicoLogado', tecnico);
     }
@@ -608,9 +610,7 @@
             btnWaze.style.display = 'none';
             btnLimparPendentes.style.display = 'none';
             instrucoes.style.display = 'none';
-            if (mapaGoogle) {
-                marcadoresGoogle.forEach(m => m.setMap(null));
-                marcadoresGoogle = [];
+            if (mapaLeaflet) {
                 document.getElementById('mapaVisual').style.display = 'none';
             }
             return;
@@ -671,7 +671,7 @@
             btnWaze.href = `https://www.waze.com/ul?ll=${primeiroPonto.lat},${primeiroPonto.lon}&navigate=yes`;
         }
 
-        desenharGoogleMaps(linhasProcessadasCompletas);
+        desenharMapaLeaflet(linhasProcessadasCompletas);
     }
 
     function limparNaoExecutados() {
@@ -683,49 +683,37 @@
         renderizarTabelaEValores();
     }
 
-    function desenharGoogleMaps(pontos) {
+    function desenharMapaLeaflet(pontos) {
         const divMapa = document.getElementById('mapaVisual');
         divMapa.style.display = 'block';
 
-        marcadoresGoogle.forEach(m => m.setMap(null));
-        marcadoresGoogle = [];
-
-        if (!mapaGoogle) {
-            mapaGoogle = new google.maps.Map(divMapa, {
-                zoom: 12,
-                center: { lat: pontos[0].lat, lng: pontos[0].lon }
-            });
+        if (!mapaLeaflet) {
+            mapaLeaflet = L.map('mapaVisual').setView([pontos[0].lat, pontos[0].lon], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(mapaLeaflet);
+        } else {
+            mapaLeaflet.setView([pontos[0].lat, pontos[0].lon], 12);
         }
 
-        const bounds = new google.maps.LatLngBounds();
+        if (camadaMarcadores) {
+            mapaLeaflet.removeLayer(camadaMarcadores);
+        }
+
+        camadaMarcadores = L.layerGroup();
+        let bounds = [];
 
         pontos.forEach((pt, index) => {
-            const posicao = { lat: pt.lat, lng: pt.lon };
-            
-            const marcador = new google.maps.Marker({
-                position: posicao,
-                map: mapaGoogle,
-                label: {
-                    text: String(index + 1),
-                    color: "white",
-                    fontWeight: "bold"
-                },
-                title: `Parada #${index + 1} (${pt.status || 'pendente'})`
-            });
-
-            const infowindow = new google.maps.InfoWindow({
-                content: `<b>Parada #${index + 1}</b><br>Status: ${pt.status || 'pendente'}<br>Lat: ${pt.lat}, Lon: ${pt.lon}`
-            });
-
-            marcador.addListener("click", () => {
-                infowindow.open(mapaGoogle, marcador);
-            });
-
-            marcadoresGoogle.push(marcador);
-            bounds.extend(posicao);
+            let marker = L.marker([pt.lat, pt.lon]).bindPopup(`<b>Parada #${index + 1}</b><br>Status: ${pt.status || 'pendente'}<br>Lat: ${pt.lat}, Lon: ${pt.lon}`);
+            camadaMarcadores.addLayer(marker);
+            bounds.push([pt.lat, pt.lon]);
         });
 
-        mapaGoogle.fitBounds(bounds);
+        camadaMarcadores.addTo(mapaLeaflet);
+        if (bounds.length > 0) {
+            mapaLeaflet.fitBounds(bounds);
+        }
     }
 
     function enviarParaTecnico(index) {
@@ -773,7 +761,7 @@
 
         const opcoes = {
             margin:       10,
-            filename:     'rota_google_maps.pdf',
+            filename:     'rota_openstreetmap.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2, useCORS: true },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
@@ -791,8 +779,8 @@
     function baixarArquivoTexto() {
         if (linhasProcessadasCompletas.length === 0) return;
 
-        let conteudoTexto = "ROTEIRO SEQUENCIAL OTIMIZADO (GOOGLE MAPS)\n";
-        conteudoTexto += "========================================\n\n";
+        let conteudoTexto = "ROTEIRO SEQUENCIAL OTIMIZADO (OPENSTREETMAP)\n";
+        conteudoTexto += "=========================================\n\n";
 
         linhasProcessadasCompletas.forEach((item, index) => {
             conteudoTexto += `Parada #${index + 1} [Status: ${item.status || 'pendente'}]\n`;
