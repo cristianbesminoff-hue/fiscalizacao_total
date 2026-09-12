@@ -452,7 +452,6 @@
             try {
                 linhasProcessadasCompletas = JSON.parse(salvoLocal);
                 if (linhasProcessadasCompletas.length > 0) {
-                    // Tenta restaurar cabeçalhos aproximados se já salvos
                     cabecalhosGlobais = JSON.parse(localStorage.getItem('cabecalhosGlobais') || '[]');
                     indicesTabelaGlobais = JSON.parse(localStorage.getItem('indicesTabelaGlobais') || '[]');
                     if (indicesTabelaGlobais.length > 0) {
@@ -602,7 +601,7 @@
                             lat: parseFloat(resultadoJson[0].lat),
                             lon: parseFloat(resultadoJson[0].lon),
                             display_name: queryCompleta,
-                            status: 'pendente' // status inicial
+                            status: 'pendente'
                         });
                     } else {
                         arrayComCoordenadas.push({ linhaOriginal: linha, lat: -29.9179 + (i * 0.0005), lon: -51.1837, display_name: queryCompleta, status: 'pendente' });
@@ -674,7 +673,6 @@
 
         linhasProcessadasCompletas = rotaOtimizada;
         
-        // Salvar dados e metadados localmente
         salvarEstadoLocal();
 
         statusDiv.innerText = "";
@@ -722,7 +720,6 @@
         linhasProcessadasCompletas.forEach((item, rowIndex) => {
             let tr = document.createElement('tr');
             
-            // Determina a cor da bolinha baseado no status armazenado ('pendente', 'concluido', 'nao-concluido', 'em-execucao')
             let classeBolinha = 'status-pendente';
             if (item.status === 'concluido') classeBolinha = 'status-concluido';
             else if (item.status === 'nao-concluido') classeBolinha = 'status-nao-concluido';
@@ -737,7 +734,6 @@
                 linhaHtml += `<td>${valor}</td>`;
             });
 
-            // Adiciona a coluna de controle para o técnico executar e atualizar
             let acaoHtml = `
                 <td style="text-align: center;">
                     <button class="btn-executar" onclick="enviarParaTecnico(${rowIndex})">Executar</button>
@@ -773,12 +769,10 @@
         desenharMapaNaTela(linhasProcessadasCompletas);
     }
 
-    // Função para enviar dados ao módulo técnico (tecnico.html)
     function enviarParaTecnico(index) {
         let item = linhasProcessadasCompletas[index];
         let tecnico = document.getElementById('nomeTecnicoLogado').value.trim() || "Técnico Padrão";
         
-        // Identifica o protocolo (tenta achar a coluna que contenha "protocolo" ou pega o primeiro dado disponível)
         let protocoloVal = "N/A";
         indicesTabelaGlobais.forEach(idx => {
             let nomeCol = (cabecalhosGlobais[idx] || "").toString().toLowerCase();
@@ -790,12 +784,10 @@
             protocoloVal = item.linhaOriginal[indicesTabelaGlobais[0]];
         }
 
-        // Altera o status para pendente com bolinha amarela (em execução)
         item.status = 'em-execucao';
         salvarEstadoLocal();
         renderizarTabelaEValores();
 
-        // Salva os dados específicos para o tecnico.html consumir
         const dadosExecucao = {
             protocolo: protocoloVal,
             tecnico: tecnico,
@@ -804,11 +796,9 @@
         };
         localStorage.setItem('protocoloEmAtendimento', JSON.stringify(dadosExecucao));
 
-        // Redireciona para o módulo técnico
         window.location.href = 'tecnico.html';
     }
 
-    // Permite atualizar o status diretamente pela lista (Concluído / Não Concluído)
     function atualizarStatusItem(index, novoStatus) {
         if (!novoStatus) return;
         linhasProcessadasCompletas[index].status = novoStatus;
@@ -820,20 +810,18 @@
         const divMapa = document.getElementById('mapaVisual');
         divMapa.style.display = 'block';
 
-        let centroLat = pontos[0] ? pontos[0].lat : -29.9179;
-        let centroLon = pontos[0] ? pontos[0].lon : -51.1837;
-
         if (!mapaLeaflet) {
-            mapaLeaflet = L.map('mapaVisual').setView([centroLat, centroLon], 13);
+            mapaLeaflet = L.map('mapaVisual');
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '© OpenStreetMap'
             }).addTo(mapaLeaflet);
             camadaMarcadores = L.layerGroup().addTo(mapaLeaflet);
         } else {
-            mapaLeaflet.setView([centroLat, centroLon], 13);
             camadaMarcadores.clearLayers();
         }
+
+        let bounds = [];
 
         pontos.forEach((pt, index) => {
             let iconeNumerado = L.divIcon({
@@ -845,7 +833,13 @@
 
             L.marker([pt.lat, pt.lon], { icon: iconeNumerado }).addTo(camadaMarcadores)
                 .bindPopup(`<b>Parada #${index + 1}</b><br>${pt.display_name}`);
+            
+            bounds.push([pt.lat, pt.lon]);
         });
+
+        if (bounds.length > 0) {
+            mapaLeaflet.fitBounds(bounds, { padding: [50, 50] });
+        }
 
         setTimeout(() => { mapaLeaflet.invalidateSize(); }, 200);
     }
