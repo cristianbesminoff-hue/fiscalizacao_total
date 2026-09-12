@@ -6,7 +6,7 @@
     <title>Roteirizador Inteligente - Google Maps</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- Google Maps API (Insira a sua chave API na URL abaixo) -->
+    <!-- Google Maps API (Substitua SUA_CHAVE_API_DO_GOOGLE pela sua chave válida) -->
     <script src="https://maps.googleapis.com/maps/api/js?key=SUA_CHAVE_API_DO_GOOGLE&libraries=geometry"></script>
     <style>
         body {
@@ -677,7 +677,6 @@
     function limparNaoExecutados() {
         if (!confirm("Deseja apagar todos os pontos que não foram concluídos e manter apenas os concluídos?")) return;
 
-        // Mantém apenas os que estão explicitamente marcados como 'concluido'
         linhasProcessadasCompletas = linhasProcessadasCompletas.filter(item => item.status === 'concluido');
         
         salvarEstadoLocal();
@@ -703,9 +702,6 @@
         pontos.forEach((pt, index) => {
             const posicao = { lat: pt.lat, lng: pt.lon };
             
-            // Se estiver concluído, podemos diferenciar a cor do marcador (verde por exemplo)
-            const corLabel = pt.status === 'concluido' ? "#48bb78" : "white";
-
             const marcador = new google.maps.Marker({
                 position: posicao,
                 map: mapaGoogle,
