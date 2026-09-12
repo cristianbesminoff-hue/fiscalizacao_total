@@ -719,17 +719,16 @@
     function enviarParaTecnico(index) {
         let item = linhasProcessadasCompletas[index];
         
-        // CORREÇÃO 1: Buscar o nome do técnico diretamente na planilha (procurando coluna com nome 'tecnico')
+        // 1. Buscar o nome do técnico na planilha
         let tecnicoVal = "Técnico Padrão";
         indicesTabelaGlobais.forEach(idx => {
             let nomeCol = (cabecalhosGlobais[idx] || "").toString().toLowerCase();
             if (nomeCol.includes('tecnico') || nomeCol.includes('técnico')) {
-                let valCel = item.linhaOriginal[idx];
-                if (valCel) tecnicoVal = valCel;
+                if (item.linhaOriginal[idx]) tecnicoVal = item.linhaOriginal[idx];
             }
         });
 
-        // Procurar protocolo
+        // 2. Buscar o Protocolo na planilha
         let protocoloVal = "N/A";
         indicesTabelaGlobais.forEach(idx => {
             let nomeCol = (cabecalhosGlobais[idx] || "").toString().toLowerCase();
@@ -741,21 +740,40 @@
             protocoloVal = item.linhaOriginal[indicesTabelaGlobais[0]];
         }
 
+        // 3. Buscar o Nome do Cliente na planilha
+        let clienteVal = "Não especificado";
+        indicesTabelaGlobais.forEach(idx => {
+            let nomeCol = (cabecalhosGlobais[idx] || "").toString().toLowerCase();
+            if (nomeCol.includes('cliente') || nomeCol.includes('nome') || nomeCol.includes('assinante')) {
+                if (item.linhaOriginal[idx]) clienteVal = item.linhaOriginal[idx];
+            }
+        });
+
+        // 4. Buscar o Endereço na planilha
+        let enderecoVal = "Endereço não informado";
+        indicesTabelaGlobais.forEach(idx => {
+            let nomeCol = (cabecalhosGlobais[idx] || "").toString().toLowerCase();
+            if (nomeCol.includes('end') || nomeCol.includes('rua') || nomeCol.includes('logradouro')) {
+                if (item.linhaOriginal[idx]) enderecoVal = item.linhaOriginal[idx];
+            }
+        });
+
         item.status = 'em-execucao';
         salvarEstadoLocal();
         renderizarTabelaEValores();
 
-        // CORREÇÃO 2: Salvar coordenadas reais para o GPS usar
+        // Empacotar todos os dados limpos para a tela do técnico
         const dadosExecucao = {
             protocolo: protocoloVal,
             tecnico: tecnicoVal,
-            detalhesItem: item,
+            cliente: clienteVal,
+            endereco: enderecoVal,
             lat: item.lat,
             lon: item.lon,
             indice: index
         };
+        
         localStorage.setItem('protocoloEmAtendimento', JSON.stringify(dadosExecucao));
-
         window.location.href = 'tecnico.html';
     }
 
