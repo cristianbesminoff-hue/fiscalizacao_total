@@ -156,11 +156,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs text-slate-300 mb-1">10. Foto da Caixa Externa (Máx: 1 arquivo):</label>
-                            <input type="file" id="foto-caixa-ext" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                            <input type="file" id="foto-caixa-ext" accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
                         </div>
                         <div>
                             <label class="block text-xs text-slate-300 mb-1">11. Foto da Caixa Interna (Máx: 1 arquivo):</label>
-                            <input type="file" id="foto-caixa-int" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                            <input type="file" id="foto-caixa-int" accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
                         </div>
                     </div>
                 </div>
@@ -190,7 +190,7 @@
                     </div>
                     <div>
                         <label class="block text-xs text-slate-300 mb-1">13. Foto Lançamento do Drop (Máx: 1 arquivo):</label>
-                        <input type="file" id="foto-lanc-drop" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                        <input type="file" id="foto-lanc-drop" accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
                     </div>
                 </div>
             </div>
@@ -220,7 +220,7 @@
                     </div>
                     <div>
                         <label class="block text-xs text-slate-300 mb-1">15. Foto da ancoragem na roldana (Até 5 arquivos):</label>
-                        <input type="file" id="foto-ancoragem-roldana" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                        <input type="file" id="foto-ancoragem-roldana" multiple accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
                     </div>
                 </div>
             </div>
@@ -250,7 +250,7 @@
                     </div>
                     <div>
                         <label class="block text-xs text-slate-300 mb-1">17. Foto da ancoragem no pimentão (Máx: 1 arquivo):</label>
-                        <input type="file" id="foto-ancoragem-pimentao" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                        <input type="file" id="foto-ancoragem-pimentao" accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
                     </div>
                 </div>
             </div>
@@ -279,7 +279,7 @@
                     </div>
                     <div>
                         <label class="block text-xs text-slate-300 mb-1">19. Foto do acabamento do Drop (Até 5 arquivos):</label>
-                        <input type="file" id="foto-acabamento-drop" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                        <input type="file" id="foto-acabamento-drop" multiple accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
                     </div>
                 </div>
             </div>
@@ -309,7 +309,7 @@
                     </div>
                     <div>
                         <label class="block text-xs text-slate-300 mb-1">21. Foto da organização do DG (Máx: 1 arquivo):</label>
-                        <input type="file" id="foto-organizacao-dg" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                        <input type="file" id="foto-organizacao-dg" accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
                     </div>
                 </div>
             </div>
@@ -343,12 +343,11 @@
 
     </div>
 
-    <!-- Script de Controle, Base64, GPS e Firebase -->
+    <!-- Script de Compressão de Imagens, GPS e Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Configuração exata extraída do seu console do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDIY1qa9sWjI3n58TJ31s0EvF8L-5uui4",
             authDomain: "fiscalizacao-total.firebaseapp.com",
@@ -376,7 +375,6 @@
             return emailOuLogin;
         }
 
-        // Recuperação dos dados da URL / LocalStorage
         const params = new URLSearchParams(window.location.search);
         let protocoloID = params.get('protocolo') || 'PRT-998822';
         let tecnicoExecutorUrl = params.get('tecnico') || 'Não informado';
@@ -397,13 +395,11 @@
         let emailLoginSalvo = params.get('email') || params.get('login') || localStorage.getItem('usuarioEmail') || 'cristian.besminoff';
         const tecnicoQualidadeFormatado = formatarNomeQualidade(emailLoginSalvo);
 
-        // Inserção na tela
         document.getElementById('txt-tecnico-qualidade').innerText = tecnicoQualidadeFormatado;
         document.getElementById('txt-protocolo').innerText = protocoloID;
         document.getElementById('txt-tecnico-executor').innerText = tecnicoExecutorUrl;
         document.getElementById('txt-endereco-cliente').innerText = enderecoCliente;
 
-        // Função do Botão GPS para abrir o Google Maps
         window.abrirGPS = function() {
             if (enderecoCliente && enderecoCliente !== 'Endereço não informado') {
                 window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoCliente)}`, '_blank');
@@ -412,7 +408,6 @@
             }
         }
 
-        // Função para alternar caixas de edição condicional (Protocolo e Executor)
         window.controlarEdicao = function(tipo) {
             const selectVal = document.getElementById(`valida-${tipo}`).value;
             const boxEdicao = document.getElementById(`box-edicao-${tipo}`);
@@ -424,7 +419,6 @@
             }
         }
 
-        // Função para seções condicionais baseadas em "Se aplica? (Sim / Não)"
         window.controlarSecao = function(nome) {
             const selectAplica = document.getElementById(`aplica-${nome}`);
             const blocoConteudo = document.getElementById(`conteudo-${nome}`);
@@ -435,11 +429,42 @@
             }
         }
 
-        async function fileToBase64(file) {
+        // Função para Comprimir e Redimensionar Imagens Automaticamente antes de converter em Base64
+        async function comprimirImagemParaBase64(file, maxWidth = 1024, maxHeight = 1024, qualidade = 0.7) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
+                reader.onload = event => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height = Math.round((height * maxWidth) / width);
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width = Math.round((width * maxHeight) / height);
+                                height = maxHeight;
+                            }
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Converte para JPEG compactado gerando uma string leve (< 150KB)
+                        const dataUrl = canvas.toDataURL('image/jpeg', qualidade);
+                        resolve(dataUrl);
+                    };
+                    img.onerror = error => reject(error);
+                };
                 reader.onerror = error => reject(error);
             });
         }
@@ -448,7 +473,7 @@
             if (!fileList || fileList.length === 0) return null;
             let arr = [];
             for (let i = 0; i < fileList.length; i++) {
-                let b64 = await fileToBase64(fileList[i]);
+                let b64 = await comprimirImagemParaBase64(fileList[i]);
                 arr.push(b64);
             }
             return arr;
@@ -457,7 +482,7 @@
         window.enviarVistoria = async function(event) {
             event.preventDefault();
             const btn = document.getElementById('btn-enviar');
-            btn.innerText = "Salva no Firebase e Limpar Fila...";
+            btn.innerText = "Compactando fotos e salvando...";
             btn.disabled = true;
 
             try {
@@ -518,28 +543,28 @@
                     dataHora: new Date().toISOString(),
                     criadoEm: serverTimestamp(),
 
-                    fotoCaixaExt: fExt ? await fileToBase64(fExt) : null,
-                    fotoCaixaInt: fInt ? await fileToBase64(fInt) : null,
-                    fotoLancDrop: fDrop ? await fileToBase64(fDrop) : null,
+                    fotoCaixaExt: fExt ? await comprimirImagemParaBase64(fExt) : null,
+                    fotoCaixaInt: fInt ? await comprimirImagemParaBase64(fInt) : null,
+                    fotoLancDrop: fDrop ? await comprimirImagemParaBase64(fDrop) : null,
                     fotoAncoragemRoldana: await filesArrayToBase64(fRoldana),
-                    fotoAncoragemPimentao: fPimentao ? await fileToBase64(fPimentao) : null,
+                    fotoAncoragemPimentao: fPimentao ? await comprimirImagemParaBase64(fPimentao) : null,
                     fotoAcabamentoDrop: await filesArrayToBase64(fAcabamento),
-                    fotoOrganizacaoDg: fDg ? await fileToBase64(fDg) : null
+                    fotoOrganizacaoDg: fDg ? await comprimirImagemParaBase64(fDg) : null
                 };
 
-                // Salva no banco Firestore na coleção 'vistorias'
+                // Salva no Firestore
                 await addDoc(collection(db, "vistorias"), dadosVistoria);
 
-                alert("Fiscalização salva com sucesso no Firebase! O protocolo foi processado.");
+                alert("Fiscalização salva com sucesso no Firebase!");
                 
                 localStorage.removeItem('protocoloEmAtendimento');
                 
-                // Redireciona de volta para o extrator mantendo o e-mail/sessão
+                // Redireciona de volta para o extrator mantendo o e-mail ativo
                 const emailAtual = encodeURIComponent(params.get('email') || params.get('login') || localStorage.getItem('usuarioEmail') || '');
                 window.location.href = `extrator.html?email=${emailAtual}`; 
             } catch (e) {
                 console.error("Erro ao salvar no Firebase: ", e);
-                alert("Erro ao salvar os dados no Firebase. Verifique a conexão e tente novamente.");
+                alert("Erro ao salvar os dados no Firebase. Verifique a conexão.");
                 btn.innerText = "Salvar Fiscalização e Limpar Fila";
                 btn.disabled = false;
             }
