@@ -82,9 +82,11 @@
             btnEntrar.textContent = "Verificando...";
 
             try {
-                // Consulta no Firebase para encontrar o e-mail
+                console.log("Tentando buscar o e-mail:", email);
                 const q = query(collection(db, "usuarios_sistema"), where("email", "==", email));
                 const querySnapshot = await getDocs(q);
+
+                console.log("Total de documentos encontrados:", querySnapshot.size);
 
                 if (querySnapshot.empty) {
                     msgErro.innerText = "E-mail não cadastrado ou sem acesso.";
@@ -97,9 +99,9 @@
                 let usuarioData = null;
                 querySnapshot.forEach((doc) => {
                     usuarioData = doc.data();
+                    console.log("Dados do usuário encontrados:", usuarioData);
                 });
 
-                // Validação de Status (Férias ou Inativo)
                 if (usuarioData.status === "pausado") {
                     msgErro.innerText = "Acesso temporariamente pausado (Férias/Afastamento). Contate o gestor.";
                     msgErro.classList.remove('hidden');
@@ -108,7 +110,6 @@
                     return;
                 }
 
-                // Validação de Senha
                 if (usuarioData.senha !== senha) {
                     msgErro.innerText = "Senha incorreta.";
                     msgErro.classList.remove('hidden');
@@ -117,7 +118,6 @@
                     return;
                 }
 
-                // Direcionamento com base no perfil cadastrado
                 if (usuarioData.perfil === "gestor") {
                     alert("Acesso autorizado: Painel do Gestor.");
                     window.location.href = "gestor.html";
@@ -127,8 +127,8 @@
                 }
 
             } catch (e) {
-                console.error("Erro no login:", e);
-                msgErro.innerText = "Erro ao conectar com o banco de dados.";
+                console.error("Erro detalhado no login:", e);
+                msgErro.innerText = "Erro ao conectar: " + e.message;
                 msgErro.classList.remove('hidden');
                 btnEntrar.disabled = false;
                 btnEntrar.textContent = "Acessar Sistema";
