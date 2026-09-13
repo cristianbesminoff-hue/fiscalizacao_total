@@ -12,11 +12,52 @@
         body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         
-        /* Estilos exclusivos para impressão em PDF */
+        /* Estilos robustos para impressão completa do PDF sem cortes */
         @media print {
-            body { background: white !important; color: black !important; }
+            body, html {
+                background: white !important;
+                color: black !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
             .no-print { display: none !important; }
-            .print-container { background: white !important; color: black !important; border: none !important; box-shadow: none !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; }
+            
+            /* Oculta o fundo escuro do modal e expõe o conteúdo em tela cheia para o PDF */
+            #modal-detalhes {
+                position: absolute !important;
+                inset: 0 !important;
+                background: white !important;
+                backdrop-filter: none !important;
+                display: block !important;
+                z-index: 9999 !important;
+                padding: 0 !important;
+                overflow: visible !important;
+            }
+            
+            .print-container {
+                background: white !important;
+                color: black !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                max-height: none !important;
+                overflow: visible !important;
+            }
+
+            /* Evita que blocos de informações ou fotos sejam cortados ao meio na quebra de página */
+            .print-container div, .print-container section {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            img {
+                max-width: 100% !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
             .print-text-dark { color: black !important; }
         }
     </style>
@@ -279,7 +320,6 @@
             btn.textContent = "Salvando...";
 
             try {
-                // Verificar se email já existe
                 const existente = listaUsuarios.find(u => u.email === email);
                 if (existente) {
                     alert("Este e-mail já está cadastrado no sistema.");
@@ -293,7 +333,7 @@
                     email,
                     senha,
                     perfil,
-                    status: "ativo" // status podem ser: ativo, pausado
+                    status: "ativo"
                 });
 
                 alert("Usuário cadastrado com sucesso!");
@@ -706,7 +746,6 @@
             return 'bin';
         }
 
-        // Inicialização
         carregarUsuarios();
         carregarDadosGestor();
     </script>
