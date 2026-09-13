@@ -241,6 +241,21 @@
         }
         .btn-limpar-pendentes:hover { background-color: #c53030; }
 
+        .btn-finalizar-rota {
+            background-color: #2b6cb0;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 140px;
+            font-size: 14px;
+            display: none;
+        }
+        .btn-finalizar-rota:hover { background-color: #2c5282; }
+
         .btn-back {
             display: block;
             width: 100%;
@@ -508,6 +523,7 @@
             <button class="btn-print" id="btnImprimir" onclick="baixarPDFCelular()">📥 Baixar PDF Limpo</button>
             <button class="btn-txt" id="btnTxt" onclick="baixarArquivoTexto()">📄 Baixar TXT da Rota</button>
             <button class="btn-limpar-pendentes" id="btnLimparPendentes" onclick="limparNaoExecutados()" style="display: none;">🗑️ Limpar Não Executados</button>
+            <button class="btn-finalizar-rota" id="btnFinalizarRota" onclick="finalizarRotaAtual()" style="display: none;">🏁 Finalizar Rota</button>
             <a href="#" id="btnWaze" class="btn-waze" target="_blank">🚗 Abrir Rota no Waze</a>
         </div>
     </div>
@@ -702,6 +718,7 @@
         const btnTxt = document.getElementById('btnTxt');
         const btnWaze = document.getElementById('btnWaze');
         const btnLimparPendentes = document.getElementById('btnLimparPendentes');
+        const btnFinalizarRota = document.getElementById('btnFinalizarRota');
         const instrucoes = document.getElementById('instrucoesRota');
         
         const secaoInferior = document.getElementById('secaoInferiorHistorico');
@@ -720,6 +737,7 @@
             btnTxt.style.display = 'none';
             btnWaze.style.display = 'none';
             btnLimparPendentes.style.display = 'none';
+            btnFinalizarRota.style.display = 'none';
             instrucoes.style.display = 'none';
             secaoInferior.style.display = 'none';
             if (mapaLeaflet) {
@@ -832,6 +850,7 @@
         btnTxt.style.display = 'block';
         btnWaze.style.display = 'block';
         btnLimparPendentes.style.display = 'block';
+        btnFinalizarRota.style.display = 'block';
         instrucoes.style.display = 'block';
 
         if (primeiroPonto) {
@@ -848,6 +867,28 @@
         
         salvarEstadoLocal();
         renderizarTabelaEValores();
+    }
+
+    function finalizarRotaAtual() {
+        if (!confirm("Deseja finalizar a rota atual? Os pontos ativos e o mapa serão limpos. Os itens concluídos ficarão salvos e os não concluídos voltarão a ficar disponíveis para nova vistoria.")) {
+            return;
+        }
+
+        // Converte os não concluídos de volta para 'pendente' ou limpa a rota ativa atual
+        linhasProcessadasCompletas.forEach(item => {
+            if (item.status === 'nao-concluido') {
+                item.status = 'pendente';
+                item.timestamp = null;
+            }
+        });
+
+        // Limpa a listagem de rota ativa e o mapa atual
+        linhasProcessadasCompletas = [];
+        
+        salvarEstadoLocal();
+        renderizarTabelaEValores();
+        
+        alert("Rota finalizada com sucesso! Os pontos ativos e o mapa foram zerados.");
     }
 
     function desenharMapaLeaflet(pontos) {
@@ -872,7 +913,6 @@
         let bounds = [];
 
         pontos.forEach((pt, index) => {
-            // Criação do ícone numerado correspondente à sequência da lista
             let numeroIcone = L.divIcon({
                 className: 'custom-div-icon',
                 html: `<div class="numero-marcador">${index + 1}</div>`,
