@@ -178,56 +178,9 @@
             margin-top: 10px;
             flex-wrap: wrap;
         }
-        .btn-print {
-            background-color: #d97706;
-            color: white;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 4px;
-            flex: 1;
-            min-width: 140px;
-            font-size: 14px;
-            display: none;
-        }
-        .btn-print:hover { background-color: #b45309; }
-
-        .btn-waze {
-            background-color: #3182ce;
-            color: white;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 4px;
-            flex: 1;
-            min-width: 140px;
-            font-size: 14px;
-            display: none;
-            text-align: center;
-            text-decoration: none;
-            box-sizing: border-box;
-        }
-        .btn-waze:hover { background-color: #2b6cb0; }
-
-        .btn-txt {
-            background-color: #4a5568;
-            color: white;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 4px;
-            flex: 1;
-            min-width: 140px;
-            font-size: 14px;
-            display: none;
-        }
-        .btn-txt:hover { background-color: #2d3748; }
 
         .btn-limpar-pendentes {
-            background-color: #e53e3e;
+            background-color: #742a2a;
             color: white;
             border: none;
             font-weight: bold;
@@ -239,22 +192,7 @@
             font-size: 14px;
             display: none;
         }
-        .btn-limpar-pendentes:hover { background-color: #c53030; }
-
-        .btn-finalizar-rota {
-            background-color: #2b6cb0;
-            color: white;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 4px;
-            flex: 1;
-            min-width: 140px;
-            font-size: 14px;
-            display: none;
-        }
-        .btn-finalizar-rota:hover { background-color: #2c5282; }
+        .btn-limpar-pendentes:hover { background-color: #551a1a; }
 
         .btn-back {
             display: block;
@@ -403,9 +341,15 @@
         }
         .btn-revistar:hover { background-color: #2c7a7b; }
 
+        /* Modo de exportação PDF: remove limites de altura e oculta controles desnecessários */
         .pdf-export-mode {
             background: #fff !important;
             padding: 15px;
+        }
+        .pdf-export-mode .table-responsive {
+            max-height: none !important;
+            overflow: visible !important;
+            border: none !important;
         }
         .pdf-export-mode #mapaVisual, 
         .pdf-export-mode .button-row, 
@@ -520,12 +464,7 @@
         </div>
 
         <div class="button-row">
-            <button class="btn-print" id="btnImprimir" onclick="baixarPDFCelular()">📥 Baixar PDF Limpo</button>
-            <button class="btn-txt" id="btnTxt" onclick="baixarArquivoTexto()">📄 Baixar TXT da Rota</button>
-            <button class="btn-limpar-pendentes" id="btnLimparPendentes" onclick="limparNaoExecutados()" style="display: none;">🗑️ Limpar Não Executados</button>
-            <button class="btn-limpar-pendentes" id="btnZerarDados" onclick="zerarTodosDadosSistema()" style="background-color: #742a2a; display: none;">⚠️ Zerar Dados (ATENÇÃO)</button>
-            <button class="btn-finalizar-rota" id="btnFinalizarRota" onclick="finalizarRotaAtual()" style="display: none;">🏁 Finalizar Rota</button>
-            <a href="#" id="btnWaze" class="btn-waze" target="_blank">🚗 Abrir Rota no Waze</a>
+            <button class="btn-limpar-pendentes" id="btnZerarDados" onclick="zerarTodosDadosSistema()" style="display: none;">⚠️ Zerar Dados e Baixar Backup PDF</button>
         </div>
     </div>
 
@@ -715,12 +654,7 @@
         const thead = document.getElementById('cabecalhoTabela');
         const tbody = document.getElementById('corpoTabela');
         const contador = document.getElementById('contadorLinhas');
-        const btnImprimir = document.getElementById('btnImprimir');
-        const btnTxt = document.getElementById('btnTxt');
-        const btnWaze = document.getElementById('btnWaze');
-        const btnLimparPendentes = document.getElementById('btnLimparPendentes');
         const btnZerarDados = document.getElementById('btnZerarDados');
-        const btnFinalizarRota = document.getElementById('btnFinalizarRota');
         const instrucoes = document.getElementById('instrucoesRota');
         
         const secaoInferior = document.getElementById('secaoInferiorHistorico');
@@ -735,12 +669,7 @@
 
         if (linhasProcessadasCompletas.length === 0) {
             tbody.innerHTML = `<tr><td>Nenhum registro ativo restante. Utilize a importação ou limpe para reiniciar.</td></tr>`;
-            btnImprimir.style.display = 'none';
-            btnTxt.style.display = 'none';
-            btnWaze.style.display = 'none';
-            btnLimparPendentes.style.display = 'none';
             btnZerarDados.style.display = 'none';
-            btnFinalizarRota.style.display = 'none';
             instrucoes.style.display = 'none';
             secaoInferior.style.display = 'none';
             if (mapaLeaflet) {
@@ -760,7 +689,6 @@
         trHead += '<th style="text-align: center; width: 110px;">Ação</th></tr>';
         thead.innerHTML = trHead;
 
-        let primeiroPonto = null;
         let emExecucaoGlobal = linhasProcessadasCompletas.some(item => item.status === 'em-execucao');
 
         let htmlConcluidos = '';
@@ -808,8 +736,6 @@
             tr.innerHTML = linhaHtml;
             tbody.appendChild(tr);
 
-            if (rowIndex === 0 && item.status !== 'concluido' && item.status !== 'nao-concluido') primeiroPonto = item;
-
             let resumoItem = '';
             indicesTabelaGlobais.slice(0, 3).forEach(idx => {
                 let val = item.linhaOriginal[idx] !== undefined ? item.linhaOriginal[idx] : '';
@@ -850,49 +776,45 @@
         listaNaoConcluidosInferior.innerHTML = htmlNaoConcluidos || '<li>Nenhum item pendente de nova vistoria.</li>';
         secaoInferior.style.display = 'grid';
 
-        btnImprimir.style.display = 'block';
-        btnTxt.style.display = 'block';
-        btnWaze.style.display = 'block';
-        btnLimparPendentes.style.display = 'block';
         btnZerarDados.style.display = 'block';
-        btnFinalizarRota.style.display = 'block';
         instrucoes.style.display = 'block';
-
-        if (!primeiroPonto) {
-            primeiroPonto = linhasProcessadasCompletas.find(i => i.status !== 'concluido' && i.status !== 'nao-concluido') || linhasProcessadasCompletas[0];
-        }
-
-        if (primeiroPonto) {
-            btnWaze.href = `https://www.waze.com/ul?ll=${primeiroPonto.lat},${primeiroPonto.lon}&navigate=yes`;
-        }
 
         desenharMapaLeaflet(linhasProcessadasCompletas);
     }
 
-    function limparNaoExecutados() {
-        if (!confirm("Deseja remover da lista todos os itens que ficaram como 'Não Concluídos' e limpá-los do mapa?")) return;
-
-        linhasProcessadasCompletas = linhasProcessadasCompletas.filter(item => item.status !== 'nao-concluido');
-        
-        salvarEstadoLocal();
-        renderizarTabelaEValores();
-    }
-
     function zerarTodosDadosSistema() {
-        let confirmacao = confirm("⚠️ ATENÇÃO: TODOS OS DADOS SERÃO APAGADOS!\n\nDeseja realmente zerar tudo e limpar todas as listas, histórico e mapa?");
+        let confirmacao = confirm("⚠️ ATENÇÃO: Deseja baixar um backup em PDF da lista atual com todos os itens concluídos, manter apenas eles e limpar o mapa e os demais registros?");
         if (!confirmacao) {
             return;
         }
 
-        linhasProcessadasCompletas = [];
-        dadosBrutos = [];
-        cabecalhosGlobais = [];
-        indicesTabelaGlobais = [];
+        const elemento = document.getElementById('painelPrincipal');
+        elemento.classList.add('pdf-export-mode');
+
+        const opcoes = {
+            margin:       10,
+            filename:     'backup_rota_openstreetmap.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, windowWidth: document.documentElement.scrollWidth },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+
+        html2pdf().from(elemento).set(opcoes).save().then(() => {
+            elemento.classList.remove('pdf-export-mode');
+            executarLimpezaParcial();
+        }).catch(err => {
+            console.error(err);
+            elemento.classList.remove('pdf-export-mode');
+            alert("Erro ao gerar o PDF de backup. O sistema não foi alterado.");
+        });
+    }
+
+    function executarLimpezaParcial() {
+        // Mantém apenas os itens que foram concluídos (executados)
+        linhasProcessadasCompletas = linhasProcessadasCompletas.filter(item => item.status === 'concluido');
         
-        localStorage.removeItem('linhasProcessadasCompletasLeaflet');
-        localStorage.removeItem('cabecalhosGlobaisLeaflet');
-        localStorage.removeItem('indicesTabelaGlobaisLeaflet');
-        localStorage.removeItem('protocoloEmAtendimento');
+        // Salva a nova lista reduzida apenas com os executados
+        salvarEstadoLocal();
 
         if (mapaLeaflet) {
             mapaLeaflet.remove();
@@ -900,35 +822,8 @@
             camadaMarcadores = null;
         }
 
-        document.getElementById('nomeArquivo').innerText = "Nenhum arquivo selecionado";
-        document.getElementById('arquivoExcel').value = "";
-        document.getElementById('selectColunaLat').innerHTML = '<option value="">Carregue a planilha...</option>';
-        document.getElementById('selectColunaLon').innerHTML = '<option value="">Carregue a planilha...</option>';
-        document.getElementById('seletorColunas').innerHTML = '<span style="font-size: 12px; color: #718096; padding: 5px;">Carregue uma planilha primeiro...</span>';
-        document.getElementById('btnProcessar').disabled = true;
-
         renderizarTabelaEValores();
-        alert("Todos os dados do sistema foram apagados com sucesso.");
-    }
-
-    function finalizarRotaAtual() {
-        if (!confirm("Deseja finalizar a rota atual? Os itens não concluídos voltarão para a lista principal para nova otimização, e os concluídos ficarão salvos apenas no histórico.")) {
-            return;
-        }
-
-        linhasProcessadasCompletas.forEach(item => {
-            if (item.status === 'nao-concluido') {
-                item.status = 'pendente';
-                item.timestamp = null;
-            }
-        });
-
-        linhasProcessadasCompletas = linhasProcessadasCompletas.filter(item => item.status !== 'concluido');
-        
-        salvarEstadoLocal();
-        renderizarTabelaEValores();
-        
-        alert("Rota finalizada! Os itens não concluídos retornaram para a lista principal prontos para uma nova otimização.");
+        alert("Backup em PDF gerado com sucesso. Os itens concluídos foram mantidos e o mapa/demais registros foram limpos.");
     }
 
     function desenharMapaLeaflet(pontos) {
@@ -1065,53 +960,6 @@
         linhasProcessadasCompletas[index].timestamp = null;
         salvarEstadoLocal();
         renderizarTabelaEValores();
-    }
-
-    function baixarPDFCelular() {
-        if (linhasProcessadasCompletas.length === 0) return;
-
-        const elemento = document.getElementById('painelPrincipal');
-        elemento.classList.add('pdf-export-mode');
-
-        const opcoes = {
-            margin:       10,
-            filename:     'rota_openstreetmap.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
-
-        html2pdf().from(elemento).set(opcoes).save().then(() => {
-            elemento.classList.remove('pdf-export-mode');
-        }).catch(err => {
-            console.error(err);
-            elemento.classList.remove('pdf-export-mode');
-            alert("Erro ao gerar o PDF.");
-        });
-    }
-
-    function baixarArquivoTexto() {
-        if (linhasProcessadasCompletas.length === 0) return;
-
-        let conteudoTexto = "ROTEIRO SEQUENCIAL OTIMIZADO (OPENSTREETMAP)\n";
-        conteudoTexto += "=========================================\n\n";
-
-        linhasProcessadasCompletas.forEach((item, index) => {
-            if (item.status === 'concluido' || item.status === 'nao-concluido') return;
-            conteudoTexto += `Parada #${index + 1} [Status: ${item.status || 'pendente'}]\n`;
-            indicesTabelaGlobais.forEach(idx => {
-                let nomeColuna = cabecalhosGlobais[idx] || `Coluna ${idx}`;
-                let valor = item.linhaOriginal[idx] !== undefined ? item.linhaOriginal[idx] : '';
-                conteudoTexto += `- ${nomeColuna}: ${valor}\n`;
-            });
-            conteudoTexto += "----------------------------------------\n";
-        });
-
-        let blob = new Blob([conteudoTexto], { type: 'text/plain;charset=utf-8' });
-        let link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'rota_otimizada.txt';
-        link.click();
     }
 </script>
 
