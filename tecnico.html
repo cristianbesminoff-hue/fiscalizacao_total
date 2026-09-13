@@ -346,15 +346,16 @@
     <!-- Script de Controle, Base64, GPS e Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // Configuração exata extraída do seu console do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDIY1qa9sWjI3n58TJ31s0EvF8L-5uui4",
             authDomain: "fiscalizacao-total.firebaseapp.com",
             projectId: "fiscalizacao-total",
             storageBucket: "fiscalizacao-total.firebasestorage.app",
             messagingSenderId: "916695238680",
-            appId: "1:916695238680:web:3dceb58db475ace3b9b6d"
+            appId: "1:916695238680:web:3dc3eb58d475ace3b9b6d"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -456,7 +457,7 @@
         window.enviarVistoria = async function(event) {
             event.preventDefault();
             const btn = document.getElementById('btn-enviar');
-            btn.innerText = "Compactando Fotos e Salvando...";
+            btn.innerText = "Salva no Firebase e Limpar Fila...";
             btn.disabled = true;
 
             try {
@@ -515,6 +516,7 @@
                     statusFinal: document.querySelector('input[name="status"]:checked').value,
                     observacoes: document.getElementById('observacoes').value,
                     dataHora: new Date().toISOString(),
+                    criadoEm: serverTimestamp(),
 
                     fotoCaixaExt: fExt ? await fileToBase64(fExt) : null,
                     fotoCaixaInt: fInt ? await fileToBase64(fInt) : null,
@@ -525,14 +527,16 @@
                     fotoOrganizacaoDg: fDg ? await fileToBase64(fDg) : null
                 };
 
+                // Salva no banco Firestore na coleção 'vistorias'
                 await addDoc(collection(db, "vistorias"), dadosVistoria);
-                alert("Fiscalização salva com sucesso! O protocolo foi processado e removido da fila.");
+
+                alert("Fiscalização salva com sucesso no Firebase! O protocolo foi processado.");
                 
                 localStorage.removeItem('protocoloEmAtendimento');
                 window.location.href = "index.html"; 
             } catch (e) {
-                console.error("Erro ao salvar: ", e);
-                alert("Erro ao salvar os dados. Tente novamente.");
+                console.error("Erro ao salvar no Firebase: ", e);
+                alert("Erro ao salvar os dados no Firebase. Verifique a conexão e tente novamente.");
                 btn.innerText = "Salvar Fiscalização e Limpar Fila";
                 btn.disabled = false;
             }
