@@ -435,8 +435,8 @@
             }
         }
 
-        // Função de compactação para evitar estouro de memória no celular ao enviar imagens pesadas
-        async function comprimirImagem(file, maxWidth = 900, quality = 0.75) {
+        // Função de compactação otimizada para evitar estouro de 1MB do Firestore
+        async function comprimirImagem(file, maxWidth = 720, quality = 0.6) {
             return new Promise((resolve) => {
                 if (!file) {
                     resolve(null);
@@ -472,8 +472,10 @@
         async function filesArrayToBase64(fileList) {
             if (!fileList || fileList.length === 0) return null;
             let arr = [];
-            for (let i = 0; i < fileList.length; i++) {
-                let b64 = await comprimirImagem(fileList[i]);
+            // Limita no máximo a 3 arquivos por campo múltiplo para garantir que não estoure o documento
+            let limiteArquivos = Math.min(fileList.length, 3);
+            for (let i = 0; i < limiteArquivos; i++) {
+                let b64 = await comprimirImagem(fileList[i], 640, 0.5);
                 if (b64) arr.push(b64);
             }
             return arr.length > 0 ? arr : null;
