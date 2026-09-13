@@ -732,7 +732,7 @@
         contador.innerText = linhasProcessadasCompletas.length;
 
         if (linhasProcessadasCompletas.length === 0) {
-            tbody.innerHTML = `<tr><td>Nenhum registro ativo restante.</td></tr>`;
+            tbody.innerHTML = `<tr><td>Nenhum registro ativo restante. Utilize a importação ou limpe para reiniciar.</td></tr>`;
             btnImprimir.style.display = 'none';
             btnTxt.style.display = 'none';
             btnWaze.style.display = 'none';
@@ -804,7 +804,6 @@
 
             if (rowIndex === 0) primeiroPonto = item;
 
-            // Coletar dados para os painéis inferiores de histórico
             let resumoItem = '';
             indicesTabelaGlobais.slice(0, 3).forEach(idx => {
                 let val = item.linhaOriginal[idx] !== undefined ? item.linhaOriginal[idx] : '';
@@ -831,14 +830,13 @@
                         <div class="item-historico-conteudo">
                             <strong>${resumoItem}</strong>
                             <div class="item-historico-meta">Registrado em: ${item.timestamp || 'Data não registrada'}</div>
-                            <button class="btn-revistar" onclick="revistarItem(${rowIndex})">🔄 Nova Vistoria</button>
+                            <button class="btn-revistar" onclick="revistarItem(${rowIndex})">🔄 Reencaixar na Rota</button>
                         </div>
                     </li>
                 `;
             }
         });
 
-        // Atualizar painéis inferiores na tela
         contadorConcluidos.innerText = countConcluidos;
         contadorNaoConcluidos.innerText = countNaoConcluidos;
 
@@ -870,11 +868,11 @@
     }
 
     function finalizarRotaAtual() {
-        if (!confirm("Deseja finalizar a rota atual? Os pontos ativos e o mapa serão limpos. Os itens concluídos ficarão salvos e os não concluídos voltarão a ficar disponíveis para nova vistoria.")) {
+        if (!confirm("Deseja finalizar a rota atual? Os itens não concluídos voltarão para a lista principal para nova otimização, e os concluídos ficarão salvos apenas no histórico.")) {
             return;
         }
 
-        // Converte os não concluídos de volta para 'pendente' ou limpa a rota ativa atual
+        // Separa os concluídos e redefine os não concluídos/pendentes para retornarem ao fluxo principal
         linhasProcessadasCompletas.forEach(item => {
             if (item.status === 'nao-concluido') {
                 item.status = 'pendente';
@@ -882,13 +880,13 @@
             }
         });
 
-        // Limpa a listagem de rota ativa e o mapa atual
-        linhasProcessadasCompletas = [];
+        // Mantém na lista principal apenas os que precisam ser reencaixados (removendo os concluídos da tabela ativa)
+        linhasProcessadasCompletas = linhasProcessadasCompletas.filter(item => item.status !== 'concluido');
         
         salvarEstadoLocal();
         renderizarTabelaEValores();
         
-        alert("Rota finalizada com sucesso! Os pontos ativos e o mapa foram zerados.");
+        alert("Rota finalizada! Os itens não concluídos retornaram para a lista principal prontos para uma nova otimização.");
     }
 
     function desenharMapaLeaflet(pontos) {
