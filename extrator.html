@@ -743,8 +743,9 @@
             btnFinalizarRota.style.display = 'none';
             instrucoes.style.display = 'none';
             secaoInferior.style.display = 'none';
-            if (mapaLeaflet && camadaMarcadores) {
-                mapaLeaflet.removeLayer(camadaMarcadores);
+            if (mapaLeaflet) {
+                mapaLeaflet.remove();
+                mapaLeaflet = null;
                 camadaMarcadores = null;
             }
             document.getElementById('mapaVisual').style.display = 'none';
@@ -871,7 +872,6 @@
     function limparNaoExecutados() {
         if (!confirm("Deseja remover da lista todos os itens que ficaram como 'Não Concluídos' e limpá-los do mapa?")) return;
 
-        // Remove os itens 'nao-concluido' da lista geral
         linhasProcessadasCompletas = linhasProcessadasCompletas.filter(item => item.status !== 'nao-concluido');
         
         salvarEstadoLocal();
@@ -879,12 +879,11 @@
     }
 
     function zerarTodosDadosSistema() {
-        let confirmacao = confirm("⚠️ ATENÇÃO: TODOS OS DADOS SERÃO APAGADOS!\n\nDeseja realmente zerar tudo e limpar todas as listas e histórico?");
+        let confirmacao = confirm("⚠️ ATENÇÃO: TODOS OS DADOS SERÃO APAGADOS!\n\nDeseja realmente zerar tudo e limpar todas as listas, histórico e mapa?");
         if (!confirmacao) {
-            return; // Cancela e não faz nada
+            return;
         }
 
-        // Limpa variáveis e localStorage
         linhasProcessadasCompletas = [];
         dadosBrutos = [];
         cabecalhosGlobais = [];
@@ -895,7 +894,12 @@
         localStorage.removeItem('indicesTabelaGlobaisLeaflet');
         localStorage.removeItem('protocoloEmAtendimento');
 
-        // Reseta a interface visual
+        if (mapaLeaflet) {
+            mapaLeaflet.remove();
+            mapaLeaflet = null;
+            camadaMarcadores = null;
+        }
+
         document.getElementById('nomeArquivo').innerText = "Nenhum arquivo selecionado";
         document.getElementById('arquivoExcel').value = "";
         document.getElementById('selectColunaLat').innerHTML = '<option value="">Carregue a planilha...</option>';
@@ -930,13 +934,13 @@
     function desenharMapaLeaflet(pontos) {
         const divMapa = document.getElementById('mapaVisual');
         
-        // Filtra para exibir no mapa apenas os pontos que NÃO estão concluídos nem foram removidos por completo
         let pontosAtivosNoMapa = pontos.filter(pt => pt.status !== 'nao-concluido' && pt.status !== 'concluido');
 
         if (pontosAtivosNoMapa.length === 0) {
             divMapa.style.display = 'none';
-            if (mapaLeaflet && camadaMarcadores) {
-                mapaLeaflet.removeLayer(camadaMarcadores);
+            if (mapaLeaflet) {
+                mapaLeaflet.remove();
+                mapaLeaflet = null;
                 camadaMarcadores = null;
             }
             return;
@@ -962,7 +966,6 @@
         let bounds = [];
 
         pontos.forEach((pt, index) => {
-            // Ignora pinos no mapa se o item foi concluído ou limpo da lista de não concluídos
             if (pt.status === 'concluido' || pt.status === 'nao-concluido') return;
 
             let numeroIcone = L.divIcon({
