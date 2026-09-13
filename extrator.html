@@ -523,6 +523,7 @@
             <button class="btn-print" id="btnImprimir" onclick="baixarPDFCelular()">📥 Baixar PDF Limpo</button>
             <button class="btn-txt" id="btnTxt" onclick="baixarArquivoTexto()">📄 Baixar TXT da Rota</button>
             <button class="btn-limpar-pendentes" id="btnLimparPendentes" onclick="limparNaoExecutados()" style="display: none;">🗑️ Limpar Não Executados</button>
+            <button class="btn-limpar-pendentes" id="btnZerarDados" onclick="zerarTodosDadosSistema()" style="background-color: #742a2a; display: none;">⚠️ Zerar Dados (ATENÇÃO)</button>
             <button class="btn-finalizar-rota" id="btnFinalizarRota" onclick="finalizarRotaAtual()" style="display: none;">🏁 Finalizar Rota</button>
             <a href="#" id="btnWaze" class="btn-waze" target="_blank">🚗 Abrir Rota no Waze</a>
         </div>
@@ -718,6 +719,7 @@
         const btnTxt = document.getElementById('btnTxt');
         const btnWaze = document.getElementById('btnWaze');
         const btnLimparPendentes = document.getElementById('btnLimparPendentes');
+        const btnZerarDados = document.getElementById('btnZerarDados');
         const btnFinalizarRota = document.getElementById('btnFinalizarRota');
         const instrucoes = document.getElementById('instrucoesRota');
         
@@ -737,12 +739,15 @@
             btnTxt.style.display = 'none';
             btnWaze.style.display = 'none';
             btnLimparPendentes.style.display = 'none';
+            btnZerarDados.style.display = 'none';
             btnFinalizarRota.style.display = 'none';
             instrucoes.style.display = 'none';
             secaoInferior.style.display = 'none';
-            if (mapaLeaflet) {
-                document.getElementById('mapaVisual').style.display = 'none';
+            if (mapaLeaflet && camadaMarcadores) {
+                mapaLeaflet.removeLayer(camadaMarcadores);
+                camadaMarcadores = null;
             }
+            document.getElementById('mapaVisual').style.display = 'none';
             return;
         }
 
@@ -802,7 +807,7 @@
             tr.innerHTML = linhaHtml;
             tbody.appendChild(tr);
 
-            if (rowIndex === 0) primeiroPonto = item;
+            if (rowIndex === 0 && item.status !== 'concluido' && item.status !== 'nao-concluido') primeiroPonto = item;
 
             let resumoItem = '';
             indicesTabelaGlobais.slice(0, 3).forEach(idx => {
@@ -848,8 +853,13 @@
         btnTxt.style.display = 'block';
         btnWaze.style.display = 'block';
         btnLimparPendentes.style.display = 'block';
+        btnZerarDados.style.display = 'block';
         btnFinalizarRota.style.display = 'block';
         instrucoes.style.display = 'block';
+
+        if (!primeiroPonto) {
+            primeiroPonto = linhasProcessadasCompletas.find(i => i.status !== 'concluido' && i.status !== 'nao-concluido') || linhasProcessadasCompletas[0];
+        }
 
         if (primeiroPonto) {
             btnWaze.href = `https://www.waze.com/ul?ll=${primeiroPonto.lat},${primeiroPonto.lon}&navigate=yes`;
@@ -859,12 +869,42 @@
     }
 
     function limparNaoExecutados() {
-        if (!confirm("Deseja apagar todos os pontos que não foram concluídos e manter apenas os concluídos?")) return;
+        if (!confirm("Deseja remover da lista todos os itens que ficaram como 'Não Concluídos' e limpá-los do mapa?")) return;
 
-        linhasProcessadasCompletas = linhasProcessadasCompletas.filter(item => item.status === 'concluido');
+        // Remove os itens 'nao-concluido' da lista geral
+        linhasProcessadasCompletas = linhasProcessadasCompletas.filter(item => item.status !== 'nao-concluido');
         
         salvarEstadoLocal();
         renderizarTabelaEValores();
+    }
+
+    function zerarTodosDadosSistema() {
+        let confirmacao = confirm("⚠️ ATENÇÃO: TODOS OS DADOS SERÃO APAGADOS!\n\nDeseja realmente zerar tudo e limpar todas as listas e histórico?");
+        if (!confirmacao) {
+            return; // Cancela e não faz nada
+        }
+
+        // Limpa variáveis e localStorage
+        linhasProcessadasCompletas = [];
+        dadosBrutos = [];
+        cabecalhosGlobais = [];
+        indicesTabelaGlobais = [];
+        
+        localStorage.removeItem('linhasProcessadasCompletasLeaflet');
+        localStorage.removeItem('cabecalhosGlobaisLeaflet');
+        localStorage.removeItem('indicesTabelaGlobaisLeaflet');
+        localStorage.removeItem('protocoloEmAtendimento');
+
+        // Reseta a interface visual
+        document.getElementById('nomeArquivo').innerText = "Nenhum arquivo selecionado";
+        document.getElementById('arquivoExcel').value = "";
+        document.getElementById('selectColunaLat').innerHTML = '<option value="">Carregue a planilha...</option>';
+        document.getElementById('selectColunaLon').innerHTML = '<option value="">Carregue a planilha...</option>';
+        document.getElementById('seletorColunas').innerHTML = '<span style="font-size: 12px; color: #718096; padding: 5px;">Carregue uma planilha primeiro...</span>';
+        document.getElementById('btnProcessar').disabled = true;
+
+        renderizarTabelaEValores();
+        alert("Todos os dados do sistema foram apagados com sucesso.");
     }
 
     function finalizarRotaAtual() {
@@ -872,7 +912,6 @@
             return;
         }
 
-        // Separa os concluídos e redefine os não concluídos/pendentes para retornarem ao fluxo principal
         linhasProcessadasCompletas.forEach(item => {
             if (item.status === 'nao-concluido') {
                 item.status = 'pendente';
@@ -880,7 +919,6 @@
             }
         });
 
-        // Mantém na lista principal apenas os que precisam ser reencaixados (removendo os concluídos da tabela ativa)
         linhasProcessadasCompletas = linhasProcessadasCompletas.filter(item => item.status !== 'concluido');
         
         salvarEstadoLocal();
@@ -891,16 +929,29 @@
 
     function desenharMapaLeaflet(pontos) {
         const divMapa = document.getElementById('mapaVisual');
+        
+        // Filtra para exibir no mapa apenas os pontos que NÃO estão concluídos nem foram removidos por completo
+        let pontosAtivosNoMapa = pontos.filter(pt => pt.status !== 'nao-concluido' && pt.status !== 'concluido');
+
+        if (pontosAtivosNoMapa.length === 0) {
+            divMapa.style.display = 'none';
+            if (mapaLeaflet && camadaMarcadores) {
+                mapaLeaflet.removeLayer(camadaMarcadores);
+                camadaMarcadores = null;
+            }
+            return;
+        }
+
         divMapa.style.display = 'block';
 
         if (!mapaLeaflet) {
-            mapaLeaflet = L.map('mapaVisual').setView([pontos[0].lat, pontos[0].lon], 12);
+            mapaLeaflet = L.map('mapaVisual').setView([pontosAtivosNoMapa[0].lat, pontosAtivosNoMapa[0].lon], 12);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(mapaLeaflet);
         } else {
-            mapaLeaflet.setView([pontos[0].lat, pontos[0].lon], 12);
+            mapaLeaflet.setView([pontosAtivosNoMapa[0].lat, pontosAtivosNoMapa[0].lon], 12);
         }
 
         if (camadaMarcadores) {
@@ -911,6 +962,9 @@
         let bounds = [];
 
         pontos.forEach((pt, index) => {
+            // Ignora pinos no mapa se o item foi concluído ou limpo da lista de não concluídos
+            if (pt.status === 'concluido' || pt.status === 'nao-concluido') return;
+
             let numeroIcone = L.divIcon({
                 className: 'custom-div-icon',
                 html: `<div class="numero-marcador">${index + 1}</div>`,
@@ -1040,6 +1094,7 @@
         conteudoTexto += "=========================================\n\n";
 
         linhasProcessadasCompletas.forEach((item, index) => {
+            if (item.status === 'concluido' || item.status === 'nao-concluido') return;
             conteudoTexto += `Parada #${index + 1} [Status: ${item.status || 'pendente'}]\n`;
             indicesTabelaGlobais.forEach(idx => {
                 let nomeColuna = cabecalhosGlobais[idx] || `Coluna ${idx}`;
