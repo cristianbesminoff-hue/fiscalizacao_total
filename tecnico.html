@@ -560,7 +560,7 @@
                 alert("Fiscalização salva com sucesso no Firebase! O protocolo foi processado.");
                 
                 localStorage.removeItem('protocoloEmAtendimento');
-                window.location.href = "index.html"; 
+                window.location.href = "extrator.html"; 
             } catch (e) {
                 console.error("Erro ao salvar no Firebase: ", e);
                 alert("Erro ao salvar os dados no Firebase. Verifique a conexão e tente novamente: " + (e.message || e));
