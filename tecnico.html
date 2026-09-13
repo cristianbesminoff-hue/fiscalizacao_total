@@ -18,7 +18,7 @@
         <!-- Cabeçalho -->
         <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-6">
             <div>
-                <h1 class="text-xl md:text-2xl font-extrabold text-cyan-400 tracking-wider">FISCALIZAÇÃO TOTAL</h1>
+                <h1 class="text-xl md:text-2xl font-extrabold text-cyan-400 tracking-wider">FISCALIZAÇÃO DE PROTOCOLOS</h1>
                 <p class="text-xs text-slate-400">Unifique - Padrão de Vistoria Operacional</p>
             </div>
             <div id="status-conexao" class="px-3 py-1 bg-emerald-500/20 border border-emerald-500 text-emerald-400 text-xs rounded-full font-semibold">
@@ -26,70 +26,15 @@
             </div>
         </div>
 
-        <!-- Informações Automáticas da URL / LocalStorage -->
-        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 mb-6 space-y-4 text-sm">
-            
-            <!-- Validação de Protocolo -->
-            <div class="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                <div class="flex justify-between items-center mb-2">
-                    <div>
-                        <span class="text-xs text-slate-400 block">Protocolo Identificado:</span>
-                        <span id="txt-protocolo" class="font-bold text-white text-base">Carregando...</span>
-                    </div>
-                    <div class="w-48">
-                        <label class="block text-[10px] text-slate-400 mb-1">Está correto?</label>
-                        <select id="valida-protocolo" onchange="controlarEdicao('protocolo')" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-white">
-                            <option value="sim">Sim, está correto</option>
-                            <option value="nao">Não, alterar</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="box-edicao-protocolo" class="campo-customizado pt-2 border-t border-slate-700">
-                    <input type="text" id="input-protocolo-custom" placeholder="Digite o número correto do protocolo" class="w-full bg-slate-900 border border-cyan-500 rounded-lg p-2 text-white text-xs focus:outline-none">
-                </div>
-            </div>
-
-            <!-- Validação de Técnico Executor -->
-            <div class="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                <div class="flex justify-between items-center mb-2">
-                    <div>
-                        <span class="text-xs text-slate-400 block">Técnico Executor Identificado:</span>
-                        <span id="txt-tecnico-executor" class="font-bold text-cyan-300 text-sm">Carregando...</span>
-                    </div>
-                    <div class="w-48">
-                        <label class="block text-[10px] text-slate-400 mb-1">Está correto?</label>
-                        <select id="valida-executor" onchange="controlarEdicao('executor')" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-white">
-                            <option value="sim">Sim, está correto</option>
-                            <option value="nao">Não, alterar</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="box-edicao-executor" class="campo-customizado pt-2 border-t border-slate-700">
-                    <input type="text" id="input-executor-custom" placeholder="Digite o nome correto do técnico executor" class="w-full bg-slate-900 border border-cyan-500 rounded-lg p-2 text-white text-xs focus:outline-none">
-                </div>
-            </div>
-
-            <!-- Informações Fixas (Técnico Qualidade e Endereço) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-slate-800 text-xs">
-                <div>
-                    <span class="text-slate-400 block">Técnico Fiscal (Você):</span>
-                    <span id="txt-tecnico-qualidade" class="font-semibold text-cyan-300 text-sm">Identificando...</span>
-                </div>
-                <div class="flex flex-col justify-end">
-                    <button type="button" onclick="abrirGPS()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition shadow-lg flex items-center justify-center gap-1">
-                        📍 Abrir Navegação GPS
-                    </button>
-                </div>
-                <div class="md:col-span-2">
-                    <span id="txt-endereco" class="text-slate-300 truncate block">Endereço: Carregando...</span>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Formulário Oficial Unificado -->
+        <!-- Formulário Oficial Moderno e Dinâmico -->
         <form id="form-vistoria" onsubmit="enviarVistoria(event)" class="space-y-6 text-sm">
             
+            <!-- 1. Nome do tecnico de qualidade -->
+            <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800">
+                <label class="block font-semibold text-slate-300 mb-2">1. Nome do técnico de qualidade:</label>
+                <span id="txt-tecnico-qualidade" class="font-semibold text-cyan-300 text-base block">Identificando...</span>
+            </div>
+
             <!-- Estado e Cidade -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -107,15 +52,36 @@
                 </div>
             </div>
 
-            <!-- Empresa & Tipo de Vistoria -->
+            <!-- 4. Número do Protocolo (Com Validação/Edição) -->
+            <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800 space-y-3">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <label class="block font-semibold text-slate-300">4. Número do Protocolo:</label>
+                        <span id="txt-protocolo" class="font-bold text-white text-base">Carregando...</span>
+                    </div>
+                    <div class="w-48">
+                        <label class="block text-[10px] text-slate-400 mb-1">Está correto?</label>
+                        <select id="valida-protocolo" onchange="controlarEdicao('protocolo')" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-white">
+                            <option value="sim">Sim, está correto</option>
+                            <option value="nao">Não, alterar</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="box-edicao-protocolo" class="campo-customizado pt-2 border-t border-slate-700">
+                    <input type="text" id="input-protocolo-custom" placeholder="Digite o número correto do protocolo" class="w-full bg-slate-900 border border-cyan-500 rounded-lg p-2 text-white text-xs focus:outline-none">
+                </div>
+            </div>
+
+            <!-- Empresa & Técnico Executor -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-2">5. Empresa Fiscalizada (Terceirizada):</label>
+                    <label class="block font-semibold text-slate-300 mb-2">5. Empresa Fiscalizada:</label>
                     <input type="text" id="empresa" placeholder="Nome da empresa parceira" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-2">7. Tipo de Vistoria:</label>
+                    <label class="block font-semibold text-slate-300 mb-2">7. Vistoria:</label>
                     <select id="tipo-vistoria" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500">
+                        <option value="">Selecione...</option>
                         <option value="FTTH">FTTH</option>
                         <option value="FTTB">FTTB</option>
                         <option value="FTTA">FTTA</option>
@@ -124,27 +90,53 @@
                 </div>
             </div>
 
-            <!-- APR -->
+            <!-- 6. Nome do técnico que executou o serviço (Com Validação/Edição) -->
+            <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800 space-y-3">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <label class="block font-semibold text-slate-300">6. Nome do técnico que executou o serviço:</label>
+                        <span id="txt-tecnico-executor" class="font-bold text-cyan-300 text-base">Carregando...</span>
+                    </div>
+                    <div class="w-48">
+                        <label class="block text-[10px] text-slate-400 mb-1">Está correto?</label>
+                        <select id="valida-executor" onchange="controlarEdicao('executor')" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-white">
+                            <option value="sim">Sim, está correto</option>
+                            <option value="nao">Não, alterar</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="box-edicao-executor" class="campo-customizado pt-2 border-t border-slate-700">
+                    <input type="text" id="input-executor-custom" placeholder="Digite o nome correto do técnico executor" class="w-full bg-slate-900 border border-cyan-500 rounded-lg p-2 text-white text-xs focus:outline-none">
+                </div>
+            </div>
+
+            <!-- 8. APR - Análise Preliminar de Risco -->
             <div>
                 <label class="block font-semibold text-slate-300 mb-2">8. APR - Análise Preliminar de Risco:</label>
                 <select id="apr" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500">
+                    <option value="">Selecione...</option>
                     <option value="Trabalho em altura">Trabalho em altura</option>
                     <option value="Não ha atividade de risco">Não há atividade de risco</option>
                 </select>
             </div>
 
-            <!-- 9. Organização da C.A / Caixa (Com Se Aplica) -->
+            <!-- 9 & 10 & 11. Organização da C.A e Fotos (Externa / Interna) com Se Aplica -->
             <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-800 space-y-4">
-                <label class="block font-semibold text-cyan-300">9. Organização da C.A / Caixa:</label>
-                <select id="aplica-caixa" onchange="controlarSecao('caixa')" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500">
-                    <option value="">Se aplica?</option>
-                    <option value="Sim">Sim, se aplica</option>
-                    <option value="NA">Não se aplica (N/A)</option>
-                </select>
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <label class="block font-semibold text-cyan-300">9. Organização da C.A / Caixa:</label>
+                    <div class="w-full md:w-48">
+                        <label class="block text-[10px] text-slate-400 mb-1">Se aplica?</label>
+                        <select id="aplica-caixa" onchange="controlarSecao('caixa')" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                            <option value="">Selecione...</option>
+                            <option value="Sim">Sim</option>
+                            <option value="Nao">Não</option>
+                        </select>
+                    </div>
+                </div>
 
-                <div id="conteudo-caixa" class="secao-condicional space-y-3 pt-2 border-t border-slate-800">
+                <div id="conteudo-caixa" class="secao-condicional space-y-4 pt-3 border-t border-slate-800">
                     <div>
-                        <label class="block text-xs text-slate-300 mb-1">Status da Caixa:</label>
+                        <label class="block text-xs text-slate-300 mb-1">Status da Organização:</label>
                         <select id="org-ca" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
                             <option value="APROVADO">APROVADO</option>
                             <option value="REPROVADO">REPROVADO</option>
@@ -152,27 +144,32 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs text-slate-300 mb-1">10. Foto da Caixa Externa:</label>
-                            <input type="file" id="foto-caixa-ext" accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                            <label class="block text-xs text-slate-300 mb-1">10. Foto da Caixa Externa (Máx: 1 arquivo):</label>
+                            <input type="file" id="foto-caixa-ext" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
                         </div>
                         <div>
-                            <label class="block text-xs text-slate-300 mb-1">11. Foto da Caixa Interna:</label>
-                            <input type="file" id="foto-caixa-int" accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                            <label class="block text-xs text-slate-300 mb-1">11. Foto da Caixa Interna (Máx: 1 arquivo):</label>
+                            <input type="file" id="foto-caixa-int" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 12. Lançamento do Drop (Com Se Aplica) -->
+            <!-- 12 & 13. Lançamento do Drop com Se Aplica -->
             <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-800 space-y-4">
-                <label class="block font-semibold text-cyan-300">12. Lançamento do Drop:</label>
-                <select id="aplica-drop" onchange="controlarSecao('drop')" required class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500">
-                    <option value="">Se aplica?</option>
-                    <option value="Sim">Sim, se aplica</option>
-                    <option value="NA">Não se aplica (N/A)</option>
-                </select>
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <label class="block font-semibold text-cyan-300">12. Lançamento do Drop está correto?</label>
+                    <div class="w-full md:w-48">
+                        <label class="block text-[10px] text-slate-400 mb-1">Se aplica?</label>
+                        <select id="aplica-drop" onchange="controlarSecao('drop')" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                            <option value="">Selecione...</option>
+                            <option value="Sim">Sim</option>
+                            <option value="Nao">Não</option>
+                        </select>
+                    </div>
+                </div>
 
-                <div id="conteudo-drop" class="secao-condicional space-y-3 pt-2 border-t border-slate-800">
+                <div id="conteudo-drop" class="secao-condicional space-y-3 pt-3 border-t border-slate-800">
                     <div>
                         <label class="block text-xs text-slate-300 mb-1">Status do Lançamento:</label>
                         <select id="lanc-drop" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
@@ -181,15 +178,134 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-300 mb-1">13. Foto do Lançamento do Drop:</label>
-                        <input type="file" id="foto-lanc-drop" accept="image/*" capture="environment" class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                        <label class="block text-xs text-slate-300 mb-1">13. Foto Lançamento do Drop (Máx: 1 arquivo):</label>
+                        <input type="file" id="foto-lanc-drop" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
                     </div>
                 </div>
             </div>
 
-            <!-- Situação Final -->
+            <!-- 14 & 15. Ancoragem alça roldana com Se Aplica -->
+            <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-800 space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <label class="block font-semibold text-cyan-300">14. Ancoragem da alça pré-formada na roldana no poste celesc e poste da residencia:</label>
+                    <div class="w-full md:w-48">
+                        <label class="block text-[10px] text-slate-400 mb-1">Se aplica?</label>
+                        <select id="aplica-roldana" onchange="controlarSecao('roldana')" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                            <option value="">Selecione...</option>
+                            <option value="Sim">Sim</option>
+                            <option value="Nao">Não</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="conteudo-roldana" class="secao-condicional space-y-3 pt-3 border-t border-slate-800">
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">Status da Ancoragem:</label>
+                        <select id="ancoragem-roldana" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                            <option value="APROVADO">APROVADO</option>
+                            <option value="REPROVADO">REPROVADO</option>
+                            <option value="N/A (FTTA)">N/A (FTTA)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">15. Foto da ancoragem na roldana (Até 5 arquivos):</label>
+                        <input type="file" id="foto-ancoragem-roldana" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 16 & 17. Ancoragem do cabo no pimentão com Se Aplica -->
+            <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-800 space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <label class="block font-semibold text-cyan-300">16. Ancoragem do cabo no pimentão (residencia):</label>
+                    <div class="w-full md:w-48">
+                        <label class="block text-[10px] text-slate-400 mb-1">Se aplica?</label>
+                        <select id="aplica-pimentao" onchange="controlarSecao('pimentao')" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                            <option value="">Selecione...</option>
+                            <option value="Sim">Sim</option>
+                            <option value="Nao">Não</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="conteudo-pimentao" class="secao-condicional space-y-3 pt-3 border-t border-slate-800">
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">Status da Ancoragem:</label>
+                        <select id="ancoragem-pimentao" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                            <option value="APROVADO">APROVADO</option>
+                            <option value="REPROVADO">REPROVADO</option>
+                            <option value="N/A (FTTA)">N/A (FTTA)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">17. Foto da ancoragem no pimentão (Máx: 1 arquivo):</label>
+                        <input type="file" id="foto-ancoragem-pimentao" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 18 & 19. Acabamento do Drop com Se Aplica -->
+            <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-800 space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <label class="block font-semibold text-cyan-300">18. Acabamento do Drop (placa de identificação, espiral caixa):</label>
+                    <div class="w-full md:w-48">
+                        <label class="block text-[10px] text-slate-400 mb-1">Se aplica?</label>
+                        <select id="aplica-acabamento" onchange="controlarSecao('acabamento')" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                            <option value="">Selecione...</option>
+                            <option value="Sim">Sim</option>
+                            <option value="Nao">Não</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="conteudo-acabamento" class="secao-condicional space-y-3 pt-3 border-t border-slate-800">
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">Status do Acabamento:</label>
+                        <select id="acabamento-drop" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                            <option value="APROVADO">APROVADO</option>
+                            <option value="REPROVADO">REPROVADO</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">19. Foto do acabamento do Drop (Até 5 arquivos):</label>
+                        <input type="file" id="foto-acabamento-drop" multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 20 & 21. Organização do DG com Se Aplica -->
+            <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-800 space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <label class="block font-semibold text-cyan-300">20. Organização do DG:</label>
+                    <div class="w-full md:w-48">
+                        <label class="block text-[10px] text-slate-400 mb-1">Se aplica?</label>
+                        <select id="aplica-dg" onchange="controlarSecao('dg')" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+                            <option value="">Selecione...</option>
+                            <option value="Sim">Sim</option>
+                            <option value="Nao">Não</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="conteudo-dg" class="secao-condicional space-y-3 pt-3 border-t border-slate-800">
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">Status do DG:</label>
+                        <select id="organizacao-dg" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                            <option value="APROVADO">APROVADO</option>
+                            <option value="REPROVADO">REPROVADO</option>
+                            <option value="N/A">N/A</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-300 mb-1">21. Foto da organização do DG (Máx: 1 arquivo):</label>
+                        <input type="file" id="foto-organizacao-dg" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-cyan-600 file:text-white">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 22. Situação Final -->
             <div>
-                <label class="block font-semibold text-slate-300 mb-2">22. Situação Final da Vistoria:</label>
+                <label class="block font-semibold text-slate-300 mb-2">22. Situação final da vistoria:</label>
                 <div class="grid grid-cols-2 gap-4">
                     <label class="cursor-pointer border border-emerald-500/50 bg-emerald-500/10 hover:bg-emerald-500/20 p-3 rounded-xl flex items-center justify-center gap-2 transition">
                         <input type="radio" name="status" value="APROVADO" required class="accent-emerald-500">
@@ -197,15 +313,15 @@
                     </label>
                     <label class="cursor-pointer border border-rose-500/50 bg-rose-500/10 hover:bg-rose-500/20 p-3 rounded-xl flex items-center justify-center gap-2 transition">
                         <input type="radio" name="status" value="PENDENCIA-REFAZER" required class="accent-rose-500">
-                        <span class="font-bold text-rose-400">🔴 PENDÊNCIA / REFAZER</span>
+                        <span class="font-bold text-rose-400">🔴 PENDENCIA-REFAZER</span>
                     </label>
                 </div>
             </div>
 
-            <!-- Observações Finais -->
+            <!-- 23. Observações Finais -->
             <div>
-                <label class="block font-semibold text-slate-300 mb-2">23. Observações finais (Obrigatório em caso de pendência):</label>
-                <textarea id="observacoes" rows="3" placeholder="Descreva detalhadamente os motivos identificados em caso de reprovação..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500 text-sm"></textarea>
+                <label class="block font-semibold text-slate-300 mb-2">23. Observações finais. caso pendencia, descreva os motivos identificados!</label>
+                <textarea id="observacoes" rows="3" placeholder="Descreva detalhadamente os motivos identificados em caso de pendência..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-cyan-500 text-sm"></textarea>
             </div>
 
             <!-- Botão Enviar -->
@@ -248,49 +364,29 @@
             return emailOuLogin;
         }
 
-        // Recuperação dos dados do localStorage enviado pelo extrator
-        let dadosSalvos = null;
-        try {
-            dadosSalvos = JSON.parse(localStorage.getItem('protocoloEmAtendimento'));
-        } catch (e) {
-            console.error("Erro ao ler localStorage", e);
-        }
-
+        // Recuperação dos dados da URL / LocalStorage
         const params = new URLSearchParams(window.location.search);
+        let protocoloID = params.get('protocolo') || 'PRT-998822';
+        let tecnicoExecutorUrl = params.get('tecnico') || 'Não informado';
 
-        // Captura o protocolo
-        let protocoloID = dadosSalvos?.protocolo || dadosSalvos?.detalhesItem?.protocolo || params.get('protocolo') || 'PRT-998822';
-
-        // Captura o técnico executor
-        let tecnicoExecutorUrl = dadosSalvos?.tecnico || dadosSalvos?.tecnicoExecutor || dadosSalvos?.detalhesItem?.tecnico || params.get('tecnico') || 'Não informado';
-
-        // Captura e valida o endereço de forma inteligente (evitando IDs numéricos puros e links)
-        let enderecoCliente = '';
-        
-        function ehEnderecoValido(texto) {
-            return texto && typeof texto === 'string' && /[a-zA-Zá-úÁ-Ú]/.test(texto) && !texto.startsWith('http');
+        const dadosSalvos = localStorage.getItem('protocoloEmAtendimento');
+        if (dadosSalvos) {
+            try {
+                let parsed = JSON.parse(dadosSalvos);
+                if (parsed.protocolo) protocoloID = parsed.protocolo;
+                if (parsed.tecnico) tecnicoExecutorUrl = parsed.tecnico;
+            } catch (e) {
+                console.error("Erro ao ler localStorage", e);
+            }
         }
-
-        if (ehEnderecoValido(dadosSalvos?.endereco)) {
-            enderecoCliente = dadosSalvos.endereco;
-        } else if (ehEnderecoValido(dadosSalvos?.detalhesItem?.endereco)) {
-            enderecoCliente = dadosSalvos.detalhesItem.endereco;
-        } else if (dadosSalvos?.detalhesItem?.linhaOriginal) {
-            let colunas = dadosSalvos.detalhesItem.linhaOriginal;
-            let colunaEncontrada = colunas.find(col => ehEnderecoValido(col) && (col.includes(',') || col.length > 10));
-            if (colunaEncontrada) enderecoCliente = colunaEncontrada;
-        }
-
-        enderecoCliente = enderecoCliente || params.get('endereco') || 'Endereço não informado';
 
         let emailLoginSalvo = params.get('email') || params.get('login') || localStorage.getItem('usuarioEmail') || 'cristian.besminoff';
         const tecnicoQualidadeFormatado = formatarNomeQualidade(emailLoginSalvo);
 
         // Inserção na tela
+        document.getElementById('txt-tecnico-qualidade').innerText = tecnicoQualidadeFormatado;
         document.getElementById('txt-protocolo').innerText = protocoloID;
         document.getElementById('txt-tecnico-executor').innerText = tecnicoExecutorUrl;
-        document.getElementById('txt-tecnico-qualidade').innerText = tecnicoQualidadeFormatado;
-        document.getElementById('txt-endereco').innerText = "Endereço: " + enderecoCliente;
 
         // Função para alternar caixas de edição condicional (Protocolo e Executor)
         window.controlarEdicao = function(tipo) {
@@ -304,7 +400,7 @@
             }
         }
 
-        // Função para seções condicionais do formulário principal
+        // Função para seções condicionais baseadas em "Se aplica? (Sim / Não)"
         window.controlarSecao = function(nome) {
             const selectAplica = document.getElementById(`aplica-${nome}`);
             const blocoConteudo = document.getElementById(`conteudo-${nome}`);
@@ -324,8 +420,14 @@
             });
         }
 
-        window.abrirGPS = function() {
-            window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoCliente)}`, '_blank');
+        async function filesArrayToBase64(fileList) {
+            if (!fileList || fileList.length === 0) return null;
+            let arr = [];
+            for (let i = 0; i < fileList.length; i++) {
+                let b64 = await fileToBase64(fileList[i]);
+                arr.push(b64);
+            }
+            return arr;
         }
 
         window.enviarVistoria = async function(event) {
@@ -343,44 +445,63 @@
                     ? (document.getElementById('input-executor-custom').value || tecnicoExecutorUrl) 
                     : tecnicoExecutorUrl;
 
-                const fExt = document.getElementById('foto-caixa-ext')?.files[0];
-                const fDrop = document.getElementById('foto-lanc-drop')?.files[0];
+                const aplicaCaixa = document.getElementById('aplica-caixa').value;
+                const aplicaDrop = document.getElementById('aplica-drop').value;
+                const aplicaRoldana = document.getElementById('aplica-roldana').value;
+                const aplicaPimentao = document.getElementById('aplica-pimentao').value;
+                const aplicaAcabamento = document.getElementById('aplica-acabamento').value;
+                const aplicaDg = document.getElementById('aplica-dg').value;
+
+                const fExt = aplicaCaixa === 'Sim' ? document.getElementById('foto-caixa-ext')?.files[0] : null;
+                const fInt = aplicaCaixa === 'Sim' ? document.getElementById('foto-caixa-int')?.files[0] : null;
+                const fDrop = aplicaDrop === 'Sim' ? document.getElementById('foto-lanc-drop')?.files[0] : null;
+                const fRoldana = aplicaRoldana === 'Sim' ? document.getElementById('foto-ancoragem-roldana')?.files : null;
+                const fPimentao = aplicaPimentao === 'Sim' ? document.getElementById('foto-ancoragem-pimentao')?.files[0] : null;
+                const fAcabamento = aplicaAcabamento === 'Sim' ? document.getElementById('foto-acabamento-drop')?.files : null;
+                const fDg = aplicaDg === 'Sim' ? document.getElementById('foto-organizacao-dg')?.files[0] : null;
                 
                 const dadosVistoria = {
-                    protocolo: protocoloFinal,
-                    tecnicoQualidade: tecnicoQualidadeFormatado,
-                    tecnicoExecutor: executorFinal,
-                    enderecoCliente: enderecoCliente,
-                    estado: document.getElementById('estado').value,
-                    cidade: document.getElementById('cidade').value,
-                    empresaFiscalizada: document.getElementById('empresa').value,
-                    tipoVistoria: document.getElementById('tipo-vistoria').value,
-                    apr: document.getElementById('apr').value,
+                    tecnicoQualidade: tecnicoQualidadeFormatado, // 1
+                    estado: document.getElementById('estado').value, // 2
+                    cidade: document.getElementById('cidade').value, // 3
+                    protocolo: protocoloFinal, // 4
+                    empresaFiscalizada: document.getElementById('empresa').value, // 5
+                    tecnicoExecutor: executorFinal, // 6
+                    tipoVistoria: document.getElementById('tipo-vistoria').value, // 7
+                    apr: document.getElementById('apr').value, // 8
                     
-                    aplicaCaixa: document.getElementById('aplica-caixa').value,
-                    orgCaixa: document.getElementById('aplica-caixa').value === 'Sim' ? document.getElementById('org-ca').value : 'N/A',
+                    aplicaCaixa: aplicaCaixa,
+                    orgCa: aplicaCaixa === 'Sim' ? document.getElementById('org-ca').value : 'N/A', // 9
                     
-                    aplicaDrop: document.getElementById('aplica-drop').value,
-                    lancDrop: document.getElementById('aplica-drop').value === 'Sim' ? document.getElementById('lanc-drop').value : 'N/A',
+                    aplicaDrop: aplicaDrop,
+                    lancDrop: aplicaDrop === 'Sim' ? document.getElementById('lanc-drop').value : 'N/A', // 12
+                    
+                    aplicaRoldana: aplicaRoldana,
+                    ancoragemRoldana: aplicaRoldana === 'Sim' ? document.getElementById('ancoragem-roldana').value : 'N/A', // 14
+                    
+                    aplicaPimentao: aplicaPimentao,
+                    ancoragemPimentao: aplicaPimentao === 'Sim' ? document.getElementById('ancoragem-pimentao').value : 'N/A', // 16
+                    
+                    aplicaAcabamento: aplicaAcabamento,
+                    acabamentoDrop: aplicaAcabamento === 'Sim' ? document.getElementById('acabamento-drop').value : 'N/A', // 18
+                    
+                    aplicaDg: aplicaDg,
+                    organizacaoDg: aplicaDg === 'Sim' ? document.getElementById('organizacao-dg').value : 'N/A', // 20
 
-                    statusFinal: document.querySelector('input[name="status"]:checked').value,
-                    observacoes: document.getElementById('observacoes').value,
+                    statusFinal: document.querySelector('input[name="status"]:checked').value, // 22
+                    observacoes: document.getElementById('observacoes').value, // 23
                     dataHora: new Date().toISOString(),
 
-                    fotoCaixaExt: fExt ? await fileToBase64(fExt) : null,
-                    fotoLancDrop: fDrop ? await fileToBase64(fDrop) : null
+                    fotoCaixaExt: fExt ? await fileToBase64(fExt) : null, // 10
+                    fotoCaixaInt: fInt ? await fileToBase64(fInt) : null, // 11
+                    fotoLancDrop: fDrop ? await fileToBase64(fDrop) : null, // 13
+                    fotoAncoragemRoldana: await filesArrayToBase64(fRoldana), // 15
+                    fotoAncoragemPimentao: fPimentao ? await fileToBase64(fPimentao) : null, // 17
+                    fotoAcabamentoDrop: await filesArrayToBase64(fAcabamento), // 19
+                    fotoOrganizacaoDg: fDg ? await fileToBase64(fDg) : null // 21
                 };
 
                 await addDoc(collection(db, "vistorias"), dadosVistoria);
-                
-                if (dadosSalvos && dadosSalvos.indice !== undefined) {
-                    let listaCompleta = JSON.parse(localStorage.getItem('linhasProcessadasCompletasLeaflet') || '[]');
-                    if (listaCompleta[dadosSalvos.indice]) {
-                        listaCompleta[dadosSalvos.indice].status = dadosVistoria.statusFinal;
-                        localStorage.setItem('linhasProcessadasCompletasLeaflet', JSON.stringify(listaCompleta));
-                    }
-                }
-
                 alert("Fiscalização salva com sucesso! O protocolo foi processado e removido da fila.");
                 
                 localStorage.removeItem('protocoloEmAtendimento');
