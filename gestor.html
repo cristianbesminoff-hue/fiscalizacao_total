@@ -29,22 +29,78 @@
         <div class="glass rounded-2xl p-5 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-2xl no-print">
             <div>
                 <h1 class="text-xl md:text-2xl font-extrabold text-cyan-400 tracking-wider">PAINEL DO GESTOR</h1>
-                <p class="text-xs text-slate-400">Unifique - Monitoramento Geral e Exportação de Vistoria</p>
+                <p class="text-xs text-slate-400">Unifique - Monitoramento Geral e Gestão de Acessos</p>
             </div>
             <div class="flex items-center gap-3 flex-wrap">
                 <button onclick="gerarBackupSemanal()" id="btn-backup" class="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold rounded-xl transition shadow-lg flex items-center gap-2">
                     📥 Baixar Backup Geral (.ZIP)
                 </button>
                 <button onclick="confirmarZerarBanco()" class="px-4 py-2 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white text-xs font-bold rounded-xl transition border border-rose-500/50 flex items-center gap-2">
-                    🗑️ Zerar Banco de Dados
+                    🗑️ Zerar Banco de Vistorias
                 </button>
                 <a href="index.html" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition border border-slate-700">
-                    ← Voltar ao Início
+                    ← Sair / Voltar ao Início
                 </a>
             </div>
         </div>
 
-        <!-- Filtros Dinâmicos -->
+        <!-- SEÇÃO: GESTÃO DE LOGINS E ACESSOS -->
+        <div class="glass rounded-2xl p-5 md:p-6 shadow-2xl space-y-5 no-print border border-cyan-500/30">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <div>
+                    <h2 class="text-base font-bold text-cyan-300">🔐 Gestão de Logins e Usuários do Sistema</h2>
+                    <p class="text-xs text-slate-400">Cadastre novos operadores, pause acessos por férias ou remova colaboradores desligados.</p>
+                </div>
+            </div>
+
+            <!-- Formulário para Novo Cadastro -->
+            <form onsubmit="cadastrarUsuario(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Nome do Colaborador</label>
+                    <input type="text" id="novo-nome" required placeholder="Ex: João Silva" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">E-mail Corporativo</label>
+                    <input type="email" id="novo-email" required placeholder="usuario@redeunifique.com.br" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Senha de Acesso</label>
+                    <input type="text" id="novo-senha" required placeholder="Senha inicial" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Perfil / Módulo</label>
+                    <select id="novo-perfil" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                        <option value="tecnico">Técnico (Extrator)</option>
+                        <option value="gestor">Gestor (Painel Completo)</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" id="btn-cadastrar-usuario" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition shadow-lg">
+                        ➕ Cadastrar Acesso
+                    </button>
+                </div>
+            </form>
+
+            <!-- Tabela de Usuários Cadastrados -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-700 text-slate-400 bg-slate-900/40">
+                            <th class="p-3">Nome</th>
+                            <th class="p-3">E-mail</th>
+                            <th class="p-3">Perfil</th>
+                            <th class="p-3">Status Atual</th>
+                            <th class="p-3 text-right">Ações de Gestão</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-usuarios" class="divide-y divide-slate-800">
+                        <tr><td colspan="5" class="p-4 text-center text-slate-500">Carregando usuários...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Filtros Dinâmicos de Vistorias -->
         <div class="glass rounded-2xl p-5 shadow-2xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 no-print">
             <div>
                 <label class="block text-xs font-semibold text-slate-300 mb-1">Estado</label>
@@ -121,9 +177,7 @@
                         </tr>
                     </thead>
                     <tbody id="tabela-vistorias" class="divide-y divide-slate-800">
-                        <tr>
-                            <td colspan="8" class="p-4 text-center text-slate-500">Buscando dados no Firebase...</td>
-                        </tr>
+                        <tr><td colspan="8" class="p-4 text-center text-slate-500">Buscando dados no Firebase...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -134,8 +188,6 @@
     <!-- MODAL DE DETALHES E IMPRESSÃO EM PDF -->
     <div id="modal-detalhes" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center z-50 p-2 md:p-6 overflow-y-auto">
         <div class="glass max-w-4xl w-full rounded-2xl p-5 md:p-8 shadow-2xl border border-slate-700 space-y-6 max-h-[90vh] overflow-y-auto print-container">
-            
-            <!-- Cabeçalho do Modal / Ações -->
             <div class="flex justify-between items-center border-b border-slate-700 pb-4 no-print">
                 <h2 class="text-lg font-extrabold text-cyan-400">🔍 Detalhes Completos da Vistoria</h2>
                 <div class="flex items-center gap-3">
@@ -147,20 +199,10 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Conteúdo Relatório Completo -->
-            <div id="conteudo-detalhes-relatorio" class="space-y-6 text-xs text-slate-200">
-                <!-- Injetado Dinamicamente via JavaScript -->
-            </div>
-
-            <!-- Rodapé Ações (Visível apenas na tela) -->
+            <div id="conteudo-detalhes-relatorio" class="space-y-6 text-xs text-slate-200"></div>
             <div class="flex justify-end gap-3 pt-4 border-t border-slate-700 no-print">
-                <button onclick="window.print()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition shadow-lg">
-                    🖨️ Imprimir / Salvar PDF
-                </button>
-                <button onclick="fecharModalDetalhes()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition border border-slate-700">
-                    Fechar
-                </button>
+                <button onclick="window.print()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition shadow-lg">🖨️ Imprimir / Salvar PDF</button>
+                <button onclick="fecharModalDetalhes()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition border border-slate-700">Fechar</button>
             </div>
         </div>
     </div>
@@ -175,31 +217,22 @@
                     <p class="text-xs text-slate-300">Confirmação de segurança necessária</p>
                 </div>
             </div>
-            
-            <p class="text-xs text-slate-200 leading-relaxed font-semibold">
-                ATENÇÃO TODO BANCO DE DADOS SERA ZERADO DESEJA CONTINUAR?
-            </p>
-
+            <p class="text-xs text-slate-200 leading-relaxed font-semibold">ATENÇÃO TODO BANCO DE DADOS DE VISTORIAS SERÁ ZERADO. DESEJA CONTINUAR?</p>
             <div id="container-senha" class="space-y-2 hidden">
                 <label class="block text-xs font-semibold text-slate-300">Senha do Administrador:</label>
                 <input type="password" id="input-senha-admin" placeholder="Digite a senha..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-rose-500">
             </div>
-
             <div class="flex gap-3 pt-2">
-                <button onclick="fecharModalZerar()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition border border-slate-700">
-                    Não
-                </button>
-                <button onclick="processarRespostaZerar()" id="btn-modal-sim" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition shadow-lg">
-                    Sim
-                </button>
+                <button onclick="fecharModalZerar()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition border border-slate-700">Não</button>
+                <button onclick="processarRespostaZerar()" id="btn-modal-sim" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition shadow-lg">Sim</button>
             </div>
         </div>
     </div>
 
-    <!-- Script Consolidado do Gestor com Garantia de Detalhes e PDF -->
+    <!-- Script Consolidado do Gestor (Vistorias + Gestão de Logins) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDIY1qa9sWjI3n58TJ31s0EvF8L-5uui4",
@@ -214,10 +247,127 @@
         const db = getFirestore(app);
 
         let listaVistorias = [];
+        let listaUsuarios = [];
         let graficoStatusInstance = null;
         let graficoEstadosInstance = null;
         let etapaZerar = 1;
 
+        // --- GESTÃO DE USUÁRIOS / LOGINS ---
+        async function carregarUsuarios() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "usuarios_sistema"));
+                listaUsuarios = [];
+                querySnapshot.forEach((documento) => {
+                    listaUsuarios.push({ id: documento.id, ...documento.data() });
+                });
+                renderizarTabelaUsuarios();
+            } catch (e) {
+                console.error("Erro ao carregar usuários:", e);
+                document.getElementById('tabela-usuarios').innerHTML = `<tr><td colspan="5" class="p-4 text-center text-rose-400">Erro ao carregar usuários do Firebase.</td></tr>`;
+            }
+        }
+
+        window.cadastrarUsuario = async function(event) {
+            event.preventDefault();
+            const nome = document.getElementById('novo-nome').value.trim();
+            const email = document.getElementById('novo-email').value.trim().toLowerCase();
+            const senha = document.getElementById('novo-senha').value.trim();
+            const perfil = document.getElementById('novo-perfil').value;
+            const btn = document.getElementById('btn-cadastrar-usuario');
+
+            btn.disabled = true;
+            btn.textContent = "Salvando...";
+
+            try {
+                // Verificar se email já existe
+                const existente = listaUsuarios.find(u => u.email === email);
+                if (existente) {
+                    alert("Este e-mail já está cadastrado no sistema.");
+                    btn.disabled = false;
+                    btn.textContent = "➕ Cadastrar Acesso";
+                    return;
+                }
+
+                await addDoc(collection(db, "usuarios_sistema"), {
+                    nome,
+                    email,
+                    senha,
+                    perfil,
+                    status: "ativo" // status podem ser: ativo, pausado
+                });
+
+                alert("Usuário cadastrado com sucesso!");
+                document.getElementById('novo-nome').value = '';
+                document.getElementById('novo-email').value = '';
+                document.getElementById('novo-senha').value = '';
+                carregarUsuarios();
+            } catch (e) {
+                console.error("Erro ao cadastrar usuário:", e);
+                alert("Erro ao cadastrar usuário no banco de dados.");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "➕ Cadastrar Acesso";
+            }
+        };
+
+        function renderizarTabelaUsuarios() {
+            const tbody = document.getElementById('tabela-usuarios');
+            if (listaUsuarios.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">Nenhum usuário cadastrado.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = listaUsuarios.map(u => {
+                let badgeStatus = u.status === 'pausado' 
+                    ? `<span class="px-2 py-1 bg-amber-500/20 text-amber-400 border border-amber-500/40 rounded-md font-bold">PAUSADO (FÉRIAS)</span>`
+                    : `<span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-md font-bold">ATIVO</span>`;
+
+                let btnPausarReativar = u.status === 'pausado'
+                    ? `<button onclick="alterarStatusUsuario('${u.id}', 'ativo')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[10px] font-bold transition">Reativar</button>`
+                    : `<button onclick="alterarStatusUsuario('${u.id}', 'pausado')" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-[10px] font-bold transition">Pausar (Férias)</button>`;
+
+                return `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="p-3 font-bold text-white">${u.nome}</td>
+                        <td class="p-3 text-cyan-300 font-mono">${u.email}</td>
+                        <td class="p-3 uppercase text-slate-300 font-semibold">${u.perfil}</td>
+                        <td class="p-3">${badgeStatus}</td>
+                        <td class="p-3 text-right space-x-2">
+                            ${btnPausarReativar}
+                            <button onclick="excluirUsuario('${u.id}', '${u.email}')" class="px-2.5 py-1 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/40 rounded-lg text-[10px] font-bold transition">Excluir (Demitido)</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        window.alterarStatusUsuario = async function(id, novoStatus) {
+            try {
+                await updateDoc(doc(db, "usuarios_sistema", id), { status: novoStatus });
+                carregarUsuarios();
+            } catch (e) {
+                console.error("Erro ao alterar status:", e);
+                alert("Erro ao atualizar status do usuário.");
+            }
+        };
+
+        window.excluirUsuario = async function(id, email) {
+            if (email === "cristian.besminoff@redeunifique.com.br" || email === "gestor@redeunifique.com.br") {
+                alert("Você não pode excluir o gestor mestre do sistema.");
+                return;
+            }
+            if (confirm(`Confirma a exclusão definitiva do cadastro de ${email} (Demitido)?`)) {
+                try {
+                    await deleteDoc(doc(db, "usuarios_sistema", id));
+                    carregarUsuarios();
+                } catch (e) {
+                    console.error("Erro ao excluir usuário:", e);
+                    alert("Erro ao excluir usuário.");
+                }
+            }
+        };
+
+        // --- GESTÃO DE VISTORIAS ---
         async function carregarDadosGestor() {
             try {
                 const q = query(collection(db, "vistorias"), orderBy("dataHora", "desc"));
@@ -328,7 +478,6 @@
             }).join('');
         }
 
-        // Função para abrir o modal completo com todos os dados e fotos
         window.abrirDetalhesVistoria = function(id) {
             const v = listaVistorias.find(item => item.id === id);
             if (!v) return;
@@ -369,24 +518,21 @@
                             <div><strong class="text-slate-400">Situação Final:</strong> <span class="font-bold ${v.statusFinal === 'APROVADO' ? 'text-emerald-400' : 'text-rose-400'}">${v.statusFinal || '-'}</span></div>
                         </div>
                     </div>
-
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-3">
                         <h3 class="font-bold text-cyan-300 text-sm border-b border-slate-800 pb-2">Itens Fiscalizados & Status</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                            <div><strong>9. Organização C.A (Aplica?):</strong> ${v.aplicaCaixa || 'N/A'} | Status: ${v.orgCa || 'N/A'}</div>
-                            <div><strong>12. Lançamento Drop (Aplica?):</strong> ${v.aplicaDrop || 'N/A'} | Status: ${v.lancDrop || 'N/A'}</div>
-                            <div><strong>14. Ancoragem Roldana (Aplica?):</strong> ${v.aplicaRoldana || 'N/A'} | Status: ${v.ancoragemRoldana || 'N/A'}</div>
-                            <div><strong>16. Ancoragem Pimentão (Aplica?):</strong> ${v.aplicaPimentao || 'N/A'} | Status: ${v.ancoragemPimentao || 'N/A'}</div>
-                            <div><strong>18. Acabamento Drop (Aplica?):</strong> ${v.aplicaAcabamento || 'N/A'} | Status: ${v.acabamentoDrop || 'N/A'}</div>
-                            <div><strong>20. Organização DG (Aplica?):</strong> ${v.aplicaDg || 'N/A'} | Status: ${v.organizacaoDg || 'N/A'}</div>
+                            <div><strong>9. Organização C.A:</strong> ${v.orgCa || 'N/A'}</div>
+                            <div><strong>12. Lançamento Drop:</strong> ${v.lancDrop || 'N/A'}</div>
+                            <div><strong>14. Ancoragem Roldana:</strong> ${v.ancoragemRoldana || 'N/A'}</div>
+                            <div><strong>16. Ancoragem Pimentão:</strong> ${v.ancoragemPimentao || 'N/A'}</div>
+                            <div><strong>18. Acabamento Drop:</strong> ${v.acabamentoDrop || 'N/A'}</div>
+                            <div><strong>20. Organização DG:</strong> ${v.organizacaoDg || 'N/A'}</div>
                         </div>
                     </div>
-
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-2">
                         <strong class="text-slate-400">23. Observações Finais / Motivos de Pendência:</strong>
                         <p class="text-white bg-slate-950 p-3 rounded-lg border border-slate-800 text-xs whitespace-pre-wrap">${v.observacoes || 'Nenhuma observação registrada.'}</p>
                     </div>
-
                     <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-3">
                         <h3 class="font-bold text-cyan-300 text-sm border-b border-slate-800 pb-2">Evidências Fotográficas Anexadas</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -426,17 +572,9 @@
                 type: 'doughnut',
                 data: {
                     labels: ['Aprovados', 'Pendência / Refazer'],
-                    datasets: [{
-                        data: [aprovados, pendencias],
-                        backgroundColor: ['#10b981', '#f43f5e'],
-                        borderWidth: 0
-                    }]
+                    datasets: [{ data: [aprovados, pendencias], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 0 }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { color: '#f8fafc', font: { size: 11 } } } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#f8fafc', font: { size: 11 } } } } }
             });
 
             const ctxEstados = document.getElementById('graficoEstados').getContext('2d');
@@ -445,16 +583,10 @@
                 type: 'bar',
                 data: {
                     labels: Object.keys(estadosContagem),
-                    datasets: [{
-                        label: 'Vistoria(s)',
-                        data: Object.values(estadosContagem),
-                        backgroundColor: '#06b6d4',
-                        borderRadius: 6
-                    }]
+                    datasets: [{ label: 'Vistoria(s)', data: Object.values(estadosContagem), backgroundColor: '#06b6d4', borderRadius: 6 }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
                         x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
@@ -488,25 +620,22 @@
                     alert('Senha de administrador incorreta!');
                     return;
                 }
-
                 const btnSim = document.getElementById('btn-modal-sim');
                 btnSim.disabled = true;
                 btnSim.textContent = 'Apagando dados...';
-
                 try {
                     const querySnapshot = await getDocs(collection(db, "vistorias"));
-                    const promessasDeExclusao = [];
-                    querySnapshot.forEach((documento) => {
-                        promessasDeExclusao.push(deleteDoc(doc(db, "vistorias", documento.id)));
+                    const promessas = [];
+                    querySnapshot.forEach((docSnap) => {
+                        promessas.push(deleteDoc(doc(db, "vistorias", docSnap.id)));
                     });
-
-                    await Promise.all(promessasDeExclusao);
-                    alert('Banco de dados zerado com sucesso!');
+                    await Promise.all(promessas);
+                    alert('Banco de dados de vistorias zerado com sucesso!');
                     fecharModalZerar();
                     carregarDadosGestor();
                 } catch (e) {
-                    console.error('Erro ao zerar o banco:', e);
-                    alert('Ocorreu um erro ao tentar zerar o banco de dados.');
+                    console.error('Erro ao zerar:', e);
+                    alert('Erro ao tentar zerar o banco de dados.');
                 } finally {
                     btnSim.disabled = false;
                     btnSim.textContent = 'Confirmar Exclusão';
@@ -520,47 +649,30 @@
                 alert("Não há registros carregados para gerar o backup.");
                 return;
             }
-
             const textoOriginal = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = "📦 Compactando arquivos...";
-
             try {
                 const zip = new JSZip();
                 let relatorioGeral = [];
                 let contador = 1;
-
                 listaVistorias.forEach((data) => {
                     const protocoloLimpo = (data.protocolo || `DOC-${contador}`).replace(/[/\\?%*:|"<>]/g, '-');
                     const pastaProtocolo = zip.folder(`Protocolo_${protocoloLimpo}`);
-
-                    relatorioGeral.push({
-                        idFirebase: data.id,
-                        ...data,
-                        fotoCaixaExt: data.fotoCaixaExt ? "[Arquivo Anexado]" : "N/A",
-                        fotoCaixaInt: data.fotoCaixaInt ? "[Arquivo Anexado]" : "N/A",
-                        fotoLancDrop: data.fotoLancDrop ? "[Arquivo Anexado]" : "N/A",
-                        fotoAncoragemRoldana: data.fotoAncoragemRoldana ? "[Arquivos Anexados]" : "N/A",
-                        fotoAncoragemPimentao: data.fotoAncoragemPimentao ? "[Arquivo Anexado]" : "N/A",
-                        fotoAcabamentoDrop: data.fotoAcabamentoDrop ? "[Arquivos Anexados]" : "N/A",
-                        fotoOrganizacaoDg: data.fotoOrganizacaoDg ? "[Arquivo Anexado]" : "N/A"
-                    });
+                    relatorioGeral.push({ idFirebase: data.id, ...data });
 
                     const adicionarBase64NoZip = (base64Data, nomeArquivo) => {
                         if (!base64Data) return;
                         if (Array.isArray(base64Data)) {
                             base64Data.forEach((b64, idx) => {
                                 if (b64 && b64.includes('base64,')) {
-                                    const base64Content = b64.split('base64,')[1];
-                                    pastaProtocolo.file(`${nomeArquivo}_${idx + 1}.${obterExtensao(b64)}`, base64Content, { base64: true });
+                                    pastaProtocolo.file(`${nomeArquivo}_${idx + 1}.${obterExtensao(b64)}`, b64.split('base64,')[1], { base64: true });
                                 }
                             });
                         } else if (typeof base64Data === 'string' && base64Data.includes('base64,')) {
-                            const base64Content = base64Data.split('base64,')[1];
-                            pastaProtocolo.file(`${nomeArquivo}.${obterExtensao(base64Data)}`, base64Content, { base64: true });
+                            pastaProtocolo.file(`${nomeArquivo}.${obterExtensao(base64Data)}`, base64Data.split('base64,')[1], { base64: true });
                         }
                     };
-
                     adicionarBase64NoZip(data.fotoCaixaExt, 'Caixa_Externa');
                     adicionarBase64NoZip(data.fotoCaixaInt, 'Caixa_Interna');
                     adicionarBase64NoZip(data.fotoLancDrop, 'Drop_Lancamento');
@@ -568,41 +680,34 @@
                     adicionarBase64NoZip(data.fotoAncoragemPimentao, 'Pimentao_Ancoragem');
                     adicionarBase64NoZip(data.fotoAcabamentoDrop, 'Acabamento_Drop');
                     adicionarBase64NoZip(data.fotoOrganizacaoDg, 'DG_Organizacao');
-
                     contador++;
                 });
 
                 zip.file("Relatorio_Geral_Vistorias.json", JSON.stringify(relatorioGeral, null, 2));
-
                 const conteudoZip = await zip.generateAsync({ type: "blob" });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(conteudoZip);
-                const dataAtual = new Date().toISOString().slice(0, 10);
-                link.download = `Backup_Vistorias_${dataAtual}.zip`;
+                link.download = `Backup_Vistorias_${new Date().toISOString().slice(0, 10)}.zip`;
                 link.click();
 
                 btn.innerHTML = "✅ Backup Concluído!";
-                setTimeout(() => {
-                    btn.innerHTML = textoOriginal;
-                    btn.disabled = false;
-                }, 3000);
-
+                setTimeout(() => { btn.innerHTML = textoOriginal; btn.disabled = false; }, 3000);
             } catch (e) {
-                console.error("Erro ao gerar backup ZIP:", e);
-                alert("Ocorreu um erro ao compactar os arquivos.");
+                console.error("Erro no backup:", e);
+                alert("Erro ao compactar arquivos.");
                 btn.innerHTML = textoOriginal;
                 btn.disabled = false;
             }
         };
 
-        function obterExtensao(b64String) {
-            if (b64String.includes('image/jpeg')) return 'jpg';
-            if (b64String.includes('image/png')) return 'png';
-            if (b64String.includes('video/mp4')) return 'mp4';
-            if (b64String.includes('application/pdf')) return 'pdf';
+        function obterExtensao(b64) {
+            if (b64.includes('image/jpeg')) return 'jpg';
+            if (b64.includes('image/png')) return 'png';
             return 'bin';
         }
 
+        // Inicialização
+        carregarUsuarios();
         carregarDadosGestor();
     </script>
 </body>
