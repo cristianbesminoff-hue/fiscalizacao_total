@@ -260,7 +260,6 @@
         }
         .select-status:disabled { background-color: #edf2f7; color: #a0aec0; cursor: not-allowed; }
 
-        /* Estilos para os marcadores numerados no mapa (DivIcon) */
         .numero-marcador {
             background-color: #2b6cb0;
             color: white;
@@ -273,7 +272,6 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
-        /* Seção Inferior: Relatórios Separados */
         .secao-inferior {
             margin-top: 25px;
             display: grid;
@@ -341,7 +339,6 @@
         }
         .btn-revistar:hover { background-color: #2c7a7b; }
 
-        /* Modo de exportação PDF: remove limites de altura e oculta controles desnecessários */
         .pdf-export-mode {
             background: #fff !important;
             padding: 15px;
@@ -386,7 +383,6 @@
             </div>
         </div>
 
-        <!-- Seção Coordenadas -->
         <div id="blocoCoordenadas">
             <div class="grid-2">
                 <div class="control-group">
@@ -444,9 +440,7 @@
             </table>
         </div>
 
-        <!-- Seção Inferior: Relatórios Separados (Concluídos e Não Concluídos) -->
         <div class="secao-inferior" id="secaoInferiorHistorico" style="display: none;">
-            <!-- Painel de Concluídos com Sucesso -->
             <div class="painel-historico">
                 <h4>🟢 Concluídos com Sucesso (<span id="contadorConcluidos">0</span>)</h4>
                 <ul class="lista-historico" id="listaConcluidosInferior">
@@ -454,7 +448,6 @@
                 </ul>
             </div>
 
-            <!-- Painel de Não Concluídos (Disponíveis para Nova Vistoria) -->
             <div class="painel-historico">
                 <h4>🔴 Não Concluídos / Disponíveis para Nova Vistoria (<span id="contadorNaoConcluidos">0</span>)</h4>
                 <ul class="lista-historico" id="listaNaoConcluidosInferior">
@@ -609,7 +602,6 @@
             }
         });
 
-        // Algoritmo de Vizinho Mais Próximo
         let rotaOtimizada = [];
         let naoVisitados = [...arrayComCoordenadas];
         
@@ -810,10 +802,7 @@
     }
 
     function executarLimpezaParcial() {
-        // Mantém apenas os itens que foram concluídos (executados)
         linhasProcessadasCompletas = linhasProcessadasCompletas.filter(item => item.status === 'concluido');
-        
-        // Salva a nova lista reduzida apenas com os executados
         salvarEstadoLocal();
 
         if (mapaLeaflet) {
@@ -852,6 +841,11 @@
         } else {
             mapaLeaflet.setView([pontosAtivosNoMapa[0].lat, pontosAtivosNoMapa[0].lon], 12);
         }
+
+        // Força a atualização do tamanho do mapa caso tenha sido renderizado oculto inicialmente
+        setTimeout(() => {
+            mapaLeaflet.invalidateSize();
+        }, 200);
 
         if (camadaMarcadores) {
             mapaLeaflet.removeLayer(camadaMarcadores);
