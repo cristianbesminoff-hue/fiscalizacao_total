@@ -6,7 +6,7 @@
     <title>Roteirizador Inteligente - OpenStreetMap</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- Leaflet CSS & JS (Alternativa gratuita sem chave) -->
+    <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -307,7 +307,20 @@
         }
         .select-status:disabled { background-color: #edf2f7; color: #a0aec0; cursor: not-allowed; }
 
-        /* Estilos para os novos painéis inferiores (Concluídos e Não Concluídos) */
+        /* Estilos para os marcadores numerados no mapa (DivIcon) */
+        .numero-marcador {
+            background-color: #2b6cb0;
+            color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+            line-height: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* Seção Inferior: Relatórios Separados */
         .secao-inferior {
             margin-top: 25px;
             display: grid;
@@ -410,7 +423,7 @@
         <div class="control-group" style="margin-top: 12px;">
             <label>2. Modo de Localização:</label>
             <div class="modo-selector">
-                <label><input type="radio" name="modoLocalizacao" value="coordenadas" checked onchange="alternarModo()"> Latitude / Coordenadas Diretas</label>
+                <label><input type="radio" name="modoLocalizacao" value="coordenadas" checked> Latitude / Coordenadas Diretas</label>
             </div>
         </div>
 
@@ -456,7 +469,7 @@
         <h3 style="font-size: 14px; margin-bottom: 5px; color: #2d3748;">Lista Sequencial Otimizada (<span id="contadorLinhas">0</span> registros)</h3>
         
         <div class="instructions" id="instrucoesRota" style="display:none;">
-            📋 <strong>Pronto:</strong> Pinos carregados no mapa interativo sem restrições de chave.
+            📋 <strong>Pronto:</strong> Pinos numerados e carregados no mapa interativo correspondendo à lista.
         </div>
 
         <div id="mapaVisual"></div>
@@ -859,7 +872,17 @@
         let bounds = [];
 
         pontos.forEach((pt, index) => {
-            let marker = L.marker([pt.lat, pt.lon]).bindPopup(`<b>Parada #${index + 1}</b><br>Status: ${pt.status || 'pendente'}<br>Lat: ${pt.lat}, Lon: ${pt.lon}`);
+            // Criação do ícone numerado correspondente à sequência da lista
+            let numeroIcone = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="numero-marcador">${index + 1}</div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+
+            let marker = L.marker([pt.lat, pt.lon], { icon: numeroIcone })
+                .bindPopup(`<b>Parada #${index + 1}</b><br>Status: ${pt.status || 'pendente'}<br>Lat: ${pt.lat}, Lon: ${pt.lon}`);
+            
             camadaMarcadores.addLayer(marker);
             bounds.push([pt.lat, pt.lon]);
         });
@@ -931,7 +954,6 @@
     function atualizarStatusItem(index, novoStatus) {
         if (!novoStatus) return;
         
-        // Pega data e horário atual do sistema formatados
         const agora = new Date();
         const dataFormatada = agora.toLocaleDateString('pt-BR');
         const horaFormatada = agora.toLocaleTimeString('pt-BR');
@@ -943,7 +965,6 @@
         renderizarTabelaEValores();
     }
 
-    // Função para retornar o item não concluído ao status de pendente para uma nova vistoria
     function revistarItem(index) {
         linhasProcessadasCompletas[index].status = 'pendente';
         linhasProcessadasCompletas[index].timestamp = null;
