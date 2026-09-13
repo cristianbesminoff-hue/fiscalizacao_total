@@ -13,9 +13,9 @@
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
     <!-- Container Principal de Login -->
-    <div class="w-full max-w-md glass rounded-2xl shadow-2xl p-8 border border-slate-700">
+    <div class="w-full max-w-md glass rounded-2xl shadow-2xl p-8 border border-slate-700 space-y-6">
         
-        <div class="text-center mb-8">
+        <div class="text-center">
             <h1 class="text-3xl font-extrabold text-cyan-400 tracking-wider">FISCALIZAÇÃO TOTAL</h1>
             <p class="text-xs text-slate-400 mt-1">Plataforma Operacional de Qualidade - Unifique</p>
         </div>
@@ -36,7 +36,19 @@
             </button>
         </form>
 
-        <div id="msg-erro" class="mt-4 text-center text-xs text-rose-400 font-semibold hidden"></div>
+        <div id="msg-erro" class="text-center text-xs text-rose-400 font-semibold hidden"></div>
+
+        <!-- Divisor -->
+        <div class="relative flex py-2 items-center">
+            <div class="flex-grow border-t border-slate-700"></div>
+            <span class="flex-shrink mx-4 text-slate-500 text-[10px] uppercase tracking-wider">ou acesso externo</span>
+            <div class="flex-grow border-t border-slate-700"></div>
+        </div>
+
+        <!-- Botão Vistoria FTTA -->
+        <a href="https://cristianbesminoff-hue.github.io/VistoriaFTTA/" target="_blank" class="w-full py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-cyan-300 font-semibold rounded-xl shadow-md transition flex items-center justify-center gap-2 text-sm">
+            📡 Acessar Vistoria FTTA
+        </a>
     </div>
 
     <!-- Rodapé com Direitos Autorais -->
