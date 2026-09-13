@@ -285,6 +285,7 @@
         .status-pendente { background-color: #ecc94b; }
         .status-concluido { background-color: #48bb78; }
         .status-nao-concluido { background-color: #f56565; }
+        .status-em-execucao { background-color: #3182ce; }
 
         .btn-executar {
             background-color: #3182ce;
@@ -297,12 +298,14 @@
             font-weight: bold;
         }
         .btn-executar:hover { background-color: #2b6cb0; }
+        .btn-executar:disabled { background-color: #a0aec0; cursor: not-allowed; }
 
         .select-status {
             font-size: 11px;
             padding: 2px;
             border-radius: 3px;
         }
+        .select-status:disabled { background-color: #edf2f7; color: #a0aec0; cursor: not-allowed; }
 
         .pdf-export-mode {
             background: #fff !important;
@@ -626,13 +629,16 @@
 
         let primeiroPonto = null;
 
+        // Verifica se existe algum item em execução ou pendente de desfecho na tabela
+        let emExecucaoGlobal = linhasProcessadasCompletas.some(item => item.status === 'em-execucao');
+
         linhasProcessadasCompletas.forEach((item, rowIndex) => {
             let tr = document.createElement('tr');
             
             let classeBolinha = 'status-pendente';
             if (item.status === 'concluido') classeBolinha = 'status-concluido';
             else if (item.status === 'nao-concluido') classeBolinha = 'status-nao-concluido';
-            else if (item.status === 'em-execucao') classeBolinha = 'status-pendente';
+            else if (item.status === 'em-execucao') classeBolinha = 'status-em-execucao';
 
             let seqHtml = `<td style="text-align: center; font-weight: bold; background: #edf2f7;">#${rowIndex + 1}</td>`;
             let statusHtml = `<td style="text-align: center;"><span class="status-dot ${classeBolinha}" title="${item.status || 'pendente'}"></span></td>`;
@@ -643,10 +649,20 @@
                 linhaHtml += `<td>${valor}</td>`;
             });
 
+            // Lógica de bloqueio: se houver algum item em execução, bloqueia os botões das outras linhas. 
+            // Se esta linha for a em execução, o botão fica desativado e o select fica liberado para escolha.
+            let desativarBotao = emExecucaoGlobal && item.status !== 'em-execucao';
+            if (item.status === 'concluido' || item.status === 'nao-concluido') {
+                desativarBotao = true; // Já finalizado
+            }
+
+            let selectHabilitado = (item.status === 'em-execucao');
+            let selectDisabledAttr = selectHabilitado ? '' : 'disabled';
+
             let acaoHtml = `
                 <td style="text-align: center;">
-                    <button class="btn-executar" onclick="enviarParaTecnico(${rowIndex})">Executar</button>
-                    <select class="select-status" onchange="atualizarStatusItem(${rowIndex}, this.value)">
+                    <button class="btn-executar" ${desativarBotao ? 'disabled' : ''} onclick="enviarParaTecnico(${rowIndex})">${item.status === 'em-execucao' ? 'Em Andamento' : 'Executar'}</button>
+                    <select class="select-status" ${selectDisabledAttr} onchange="atualizarStatusItem(${rowIndex}, this.value)">
                         <option value="">Status...</option>
                         <option value="concluido" ${item.status === 'concluido' ? 'selected' : ''}>Concluído</option>
                         <option value="nao-concluido" ${item.status === 'nao-concluido' ? 'selected' : ''}>Não Concluído</option>
