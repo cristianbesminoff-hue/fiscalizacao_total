@@ -13,9 +13,9 @@
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
     <!-- Container Principal de Login -->
-    <div class="w-full max-w-md glass rounded-2xl shadow-2xl p-8 border border-slate-700 space-y-6">
+    <div class="w-full max-w-md glass rounded-2xl shadow-2xl p-8 border border-slate-700">
         
-        <div class="text-center">
+        <div class="text-center mb-8">
             <h1 class="text-3xl font-extrabold text-cyan-400 tracking-wider">FISCALIZAÇÃO TOTAL</h1>
             <p class="text-xs text-slate-400 mt-1">Plataforma Operacional de Qualidade - Unifique</p>
         </div>
@@ -31,24 +31,12 @@
                 <input type="password" id="senha" required placeholder="••••••••" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-cyan-500">
             </div>
 
-            <button type="submit" class="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg transition transform active:scale-95 text-sm uppercase tracking-wider">
+            <button type="submit" id="btn-entrar" class="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg transition transform active:scale-95 text-sm uppercase tracking-wider">
                 Acessar Sistema
             </button>
         </form>
 
-        <div id="msg-erro" class="text-center text-xs text-rose-400 font-semibold hidden"></div>
-
-        <!-- Divisor -->
-        <div class="relative flex py-2 items-center">
-            <div class="flex-grow border-t border-slate-700"></div>
-            <span class="flex-shrink mx-4 text-slate-500 text-[10px] uppercase tracking-wider">ou acesso externo</span>
-            <div class="flex-grow border-t border-slate-700"></div>
-        </div>
-
-        <!-- Botão Vistoria FTTA -->
-        <a href="https://cristianbesminoff-hue.github.io/VistoriaFTTA/" target="_blank" class="w-full py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-cyan-300 font-semibold rounded-xl shadow-md transition flex items-center justify-center gap-2 text-sm">
-            📡 Acessar Vistoria FTTA
-        </a>
+        <div id="msg-erro" class="mt-4 text-center text-xs text-rose-400 font-semibold hidden"></div>
     </div>
 
     <!-- Rodapé com Direitos Autorais -->
@@ -58,43 +46,86 @@
         <p class="text-[10px] text-slate-600">Unifique Telecomunicações</p>
     </footer>
 
-    <script>
-        function realizarLogin(event) {
+    <!-- Script de Autenticação Integrado ao Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIY1qa9sWjI3n58TJ31s0EvF8L-5uui4",
+            authDomain: "fiscalizacao-total.firebaseapp.com",
+            projectId: "fiscalizacao-total",
+            storageBucket: "fiscalizacao-total.firebasestorage.app",
+            messagingSenderId: "916695238680",
+            appId: "1:916695238680:web:3dc3eb58d475ace3b9b6d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.realizarLogin = async function(event) {
             event.preventDefault();
             
-            const email = document.getElementById('email').value.trim();
+            const email = document.getElementById('email').value.trim().toLowerCase();
             const senha = document.getElementById('senha').value.trim();
             const msgErro = document.getElementById('msg-erro');
+            const btnEntrar = document.getElementById('btn-entrar');
 
-            // Credenciais e Senhas Específicas
-            const tecnicosAutorizados = [
-                "cristian.besminoff@redeunifique.com.br"
-            ];
-            const senhaTecnico = "102030";
+            msgErro.classList.add('hidden');
+            btnEntrar.disabled = true;
+            btnEntrar.textContent = "Verificando...";
 
-            const emailGestor = "gestor@redeunifique.com.br";
-            const senhaGestor = "unifique123";
+            try {
+                // Consulta no Firebase para encontrar o e-mail
+                const q = query(collection(db, "usuarios_sistema"), where("email", "==", email));
+                const querySnapshot = await getDocs(q);
 
-            // Verificação de Perfil e Senha Correspondente
-            if (email === emailGestor) {
-                if (senha !== senhaGestor) {
-                    msgErro.innerText = "Senha incorreta para o Gestor.";
+                if (querySnapshot.empty) {
+                    msgErro.innerText = "E-mail não cadastrado ou sem acesso.";
                     msgErro.classList.remove('hidden');
+                    btnEntrar.disabled = false;
+                    btnEntrar.textContent = "Acessar Sistema";
                     return;
                 }
-                alert("Acesso autorizado: Painel do Gestor.");
-                window.location.href = "gestor.html";
-            } else if (tecnicosAutorizados.includes(email)) {
-                if (senha !== senhaTecnico) {
-                    msgErro.innerText = "Senha incorreta para o Técnico.";
+
+                let usuarioData = null;
+                querySnapshot.forEach((doc) => {
+                    usuarioData = doc.data();
+                });
+
+                // Validação de Status (Férias ou Inativo)
+                if (usuarioData.status === "pausado") {
+                    msgErro.innerText = "Acesso temporariamente pausado (Férias/Afastamento). Contate o gestor.";
                     msgErro.classList.remove('hidden');
+                    btnEntrar.disabled = false;
+                    btnEntrar.textContent = "Acessar Sistema";
                     return;
                 }
-                alert("Acesso autorizado: Módulo Extrator.");
-                window.location.href = "extrator.html";
-            } else {
-                msgErro.innerText = "E-mail não autorizado no sistema.";
+
+                // Validação de Senha
+                if (usuarioData.senha !== senha) {
+                    msgErro.innerText = "Senha incorreta.";
+                    msgNavErro();
+                    btnEntrar.disabled = false;
+                    btnEntrar.textContent = "Acessar Sistema";
+                    return;
+                }
+
+                // Direcionamento com base no perfil cadastrado
+                if (usuarioData.perfil === "gestor") {
+                    alert("Acesso autorizado: Painel do Gestor.");
+                    window.location.href = "gestor.html";
+                } else {
+                    alert("Acesso autorizado: Módulo Extrator.");
+                    window.location.href = "extrator.html";
+                }
+
+            } catch (e) {
+                console.error("Erro no login:", e);
+                msgErro.innerText = "Erro ao conectar com o banco de dados.";
                 msgErro.classList.remove('hidden');
+                btnEntrar.disabled = false;
+                btnEntrar.textContent = "Acessar Sistema";
             }
         }
     </script>
