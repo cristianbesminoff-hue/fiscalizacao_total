@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roteirizador Inteligente - OpenStreetMap</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -179,20 +178,35 @@
             flex-wrap: wrap;
         }
 
-        .btn-limpar-pendentes {
+        .btn-zerar-rota {
+            background-color: #c05621;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 200px;
+            font-size: 14px;
+            display: none;
+        }
+        .btn-zerar-rota:hover { background-color: #9c4221; }
+
+        .btn-finalizar-mes {
             background-color: #742a2a;
             color: white;
             border: none;
             font-weight: bold;
             cursor: pointer;
-            padding: 10px;
+            padding: 12px;
             border-radius: 4px;
             flex: 1;
-            min-width: 140px;
+            min-width: 200px;
             font-size: 14px;
             display: none;
         }
-        .btn-limpar-pendentes:hover { background-color: #551a1a; }
+        .btn-finalizar-mes:hover { background-color: #551a1a; }
 
         .btn-back {
             display: block;
@@ -338,25 +352,6 @@
             margin-top: 4px;
         }
         .btn-revistar:hover { background-color: #2c7a7b; }
-
-        .pdf-export-mode {
-            background: #fff !important;
-            padding: 15px;
-        }
-        .pdf-export-mode .table-responsive {
-            max-height: none !important;
-            overflow: visible !important;
-            border: none !important;
-        }
-        .pdf-export-mode #mapaVisual, 
-        .pdf-export-mode .button-row, 
-        .pdf-export-mode .instructions, 
-        .pdf-export-mode .form-section, 
-        .pdf-export-mode .btn-back,
-        .pdf-export-mode .secao-inferior,
-        .pdf-export-mode h2 {
-            display: none !important;
-        }
     </style>
 </head>
 <body>
@@ -457,7 +452,8 @@
         </div>
 
         <div class="button-row">
-            <button class="btn-limpar-pendentes" id="btnZerarDados" onclick="zerarTodosDadosSistema()" style="display: none;">⚠️ Zerar Dados e Baixar Backup PDF</button>
+            <button class="btn-zerar-rota" id="btnZerarRota" onclick="zerarRotaAtual()" style="display: none;">🔄 Zerar Rota</button>
+            <button class="btn-finalizar-mes" id="btnFinalizarMes" onclick="finalizarMesSistema()" style="display: none;">🏁 Finalizar Mês</button>
         </div>
     </div>
 
@@ -625,7 +621,9 @@
             }
         }
 
-        linhasProcessadasCompletas = rotaOtimizada;
+        // Mantém os concluídos já existentes e adiciona os novos pendentes/processados
+        let jaConcluidos = linhasProcessadasCompletas.filter(item => item.status === 'concluido');
+        linhasProcessadasCompletas = [...jaConcluidos, ...rotaOtimizada];
         salvarEstadoLocal();
 
         statusDiv.innerText = "";
@@ -646,7 +644,8 @@
         const thead = document.getElementById('cabecalhoTabela');
         const tbody = document.getElementById('corpoTabela');
         const contador = document.getElementById('contadorLinhas');
-        const btnZerarDados = document.getElementById('btnZerarDados');
+        const btnZerarRota = document.getElementById('btnZerarRota');
+        const btnFinalizarMes = document.getElementById('btnFinalizarMes');
         const instrucoes = document.getElementById('instrucoesRota');
         
         const secaoInferior = document.getElementById('secaoInferiorHistorico');
@@ -657,11 +656,15 @@
 
         thead.innerHTML = '';
         tbody.innerHTML = '';
-        contador.innerText = linhasProcessadasCompletas.length;
+
+        let itensAtivos = linhasProcessadasCompletas.filter(item => item.status !== 'concluido');
+        contador.innerText = itensAtivos.length;
 
         if (linhasProcessadasCompletas.length === 0) {
-            tbody.innerHTML = `<tr><td>Nenhum registro ativo restante. Utilize a importação ou limpe para reiniciar.</td></tr>`;
-            btnZerarDados.style.display = 'none';
+            tbody.innerHTML = `<tr><td>Sua lista aparecerá aqui.</td></tr>`;
+            thead.innerHTML = `<tr><th>Aguardando processamento...</th></tr>`;
+            btnZerarRota.style.display = 'none';
+            btnFinalizarMes.style.display = 'none';
             instrucoes.style.display = 'none';
             secaoInferior.style.display = 'none';
             if (mapaLeaflet) {
@@ -687,16 +690,38 @@
         let htmlNaoConcluidos = '';
         let countConcluidos = 0;
         let countNaoConcluidos = 0;
+        let sequencialTabela = 0;
 
         linhasProcessadasCompletas.forEach((item, rowIndex) => {
+            if (item.status === 'concluido') {
+                countConcluidos++;
+                let resumoItem = '';
+                indicesTabelaGlobais.slice(0, 3).forEach(idx => {
+                    let val = item.linhaOriginal[idx] !== undefined ? item.linhaOriginal[idx] : '';
+                    if (val) resumoItem += val + ' | ';
+                });
+                if (!resumoItem) resumoItem = `Parada #${rowIndex + 1}`;
+
+                htmlConcluidos += `
+                    <li class="item-historico">
+                        <span class="status-dot status-concluido" style="margin-top: 3px;"></span>
+                        <div class="item-historico-conteudo">
+                            <strong>#${countConcluidos} - ${resumoItem}</strong>
+                            <div class="item-historico-meta">Finalizado em: ${item.timestamp || 'Data não registrada'}</div>
+                        </div>
+                    </li>
+                `;
+                return; // Não exibe concluídos na tabela principal
+            }
+
+            sequencialTabela++;
             let tr = document.createElement('tr');
             
             let classeBolinha = 'status-pendente';
-            if (item.status === 'concluido') classeBolinha = 'status-concluido';
-            else if (item.status === 'nao-concluido') classeBolinha = 'status-nao-concluido';
+            if (item.status === 'nao-concluido') classeBolinha = 'status-nao-concluido';
             else if (item.status === 'em-execucao') classeBolinha = 'status-em-execucao';
 
-            let seqHtml = `<td style="text-align: center; font-weight: bold; background: #edf2f7;">#${rowIndex + 1}</td>`;
+            let seqHtml = `<td style="text-align: center; font-weight: bold; background: #edf2f7;">#${sequencialTabela}</td>`;
             let statusHtml = `<td style="text-align: center;"><span class="status-dot ${classeBolinha}" title="${item.status || 'pendente'}"></span></td>`;
             let linhaHtml = seqHtml + statusHtml;
 
@@ -706,9 +731,6 @@
             });
 
             let desativarBotao = emExecucaoGlobal && item.status !== 'em-execucao';
-            if (item.status === 'concluido' || item.status === 'nao-concluido') {
-                desativarBotao = true;
-            }
 
             let selectHabilitado = (item.status === 'em-execucao');
             let selectDisabledAttr = selectHabilitado ? '' : 'disabled';
@@ -735,18 +757,7 @@
             });
             if (!resumoItem) resumoItem = `Parada #${rowIndex + 1}`;
 
-            if (item.status === 'concluido') {
-                countConcluidos++;
-                htmlConcluidos += `
-                    <li class="item-historico">
-                        <span class="status-dot status-concluido" style="margin-top: 3px;"></span>
-                        <div class="item-historico-conteudo">
-                            <strong>#${countConcluidos} - ${resumoItem}</strong>
-                            <div class="item-historico-meta">Finalizado em: ${item.timestamp || 'Data não registrada'}</div>
-                        </div>
-                    </li>
-                `;
-            } else if (item.status === 'nao-concluido') {
+            if (item.status === 'nao-concluido') {
                 countNaoConcluidos++;
                 htmlNaoConcluidos += `
                     <li class="item-historico">
@@ -761,6 +772,10 @@
             }
         });
 
+        if (sequencialTabela === 0) {
+            tbody.innerHTML = `<tr><td colspan="${indicesTabelaGlobais.length + 3}" style="text-align: center;">Nenhum item pendente na rota atual.</td></tr>`;
+        }
+
         contadorConcluidos.innerText = countConcluidos;
         contadorNaoConcluidos.innerText = countNaoConcluidos;
 
@@ -768,40 +783,17 @@
         listaNaoConcluidosInferior.innerHTML = htmlNaoConcluidos || '<li>Nenhum item pendente de nova vistoria.</li>';
         secaoInferior.style.display = 'grid';
 
-        btnZerarDados.style.display = 'block';
+        btnZerarRota.style.display = 'block';
+        btnFinalizarMes.style.display = 'block';
         instrucoes.style.display = 'block';
 
         desenharMapaLeaflet(linhasProcessadasCompletas);
     }
 
-    function zerarTodosDadosSistema() {
-        let confirmacao = confirm("⚠️ ATENÇÃO: Deseja baixar um backup em PDF da lista atual com todos os itens concluídos, manter apenas eles e limpar o mapa e os demais registros?");
-        if (!confirmacao) {
-            return;
-        }
+    function zerarRotaAtual() {
+        let confirmacao = confirm("⚠️ Deseja apagar todos os dados do mapa e da lista otimizada atual, mantendo apenas os registros concluídos abaixo?");
+        if (!confirmacao) return;
 
-        const elemento = document.getElementById('painelPrincipal');
-        elemento.classList.add('pdf-export-mode');
-
-        const opcoes = {
-            margin:       10,
-            filename:     'backup_rota_openstreetmap.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, windowWidth: document.documentElement.scrollWidth },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
-
-        html2pdf().from(elemento).set(opcoes).save().then(() => {
-            elemento.classList.remove('pdf-export-mode');
-            executarLimpezaParcial();
-        }).catch(err => {
-            console.error(err);
-            elemento.classList.remove('pdf-export-mode');
-            alert("Erro ao gerar o PDF de backup. O sistema não foi alterado.");
-        });
-    }
-
-    function executarLimpezaParcial() {
         linhasProcessadasCompletas = linhasProcessadasCompletas.filter(item => item.status === 'concluido');
         salvarEstadoLocal();
 
@@ -812,7 +804,37 @@
         }
 
         renderizarTabelaEValores();
-        alert("Backup em PDF gerado com sucesso. Os itens concluídos foram mantidos e o mapa/demais registros foram limpos.");
+    }
+
+    function finalizarMesSistema() {
+        let confirmacao = confirm("🏁 ATENÇÃO: Deseja finalizar o mês? Todos os dados, incluindo os concluídos, serão apagados e a página ficará completamente limpa para o próximo mês.");
+        if (!confirmacao) return;
+
+        linhasProcessadasCompletas = [];
+        cabecalhosGlobais = [];
+        indicesTabelaGlobais = [];
+        dadosBrutos = [];
+
+        localStorage.removeItem('linhasProcessadasCompletasLeaflet');
+        localStorage.removeItem('cabecalhosGlobaisLeaflet');
+        localStorage.removeItem('indicesTabelaGlobaisLeaflet');
+        localStorage.removeItem('protocoloEmAtendimento');
+
+        if (mapaLeaflet) {
+            mapaLeaflet.remove();
+            mapaLeaflet = null;
+            camadaMarcadores = null;
+        }
+
+        document.getElementById('arquivoExcel').value = '';
+        document.getElementById('nomeArquivo').innerText = 'Nenhum arquivo selecionado';
+        document.getElementById('selectColunaLat').innerHTML = '<option value="">Carregue a planilha...</option>';
+        document.getElementById('selectColunaLon').innerHTML = '<option value="">Carregue a planilha...</option>';
+        document.getElementById('seletorColunas').innerHTML = '<span style="font-size: 12px; color: #718096; padding: 5px;">Carregue uma planilha primeiro...</span>';
+        document.getElementById('btnProcessar').disabled = true;
+
+        renderizarTabelaEValores();
+        alert("Sistema limpo com sucesso para o novo mês.");
     }
 
     function desenharMapaLeaflet(pontos) {
@@ -842,7 +864,6 @@
             mapaLeaflet.setView([pontosAtivosNoMapa[0].lat, pontosAtivosNoMapa[0].lon], 12);
         }
 
-        // Força a atualização do tamanho do mapa caso tenha sido renderizado oculto inicialmente
         setTimeout(() => {
             mapaLeaflet.invalidateSize();
         }, 200);
@@ -853,19 +874,21 @@
 
         camadaMarcadores = L.layerGroup();
         let bounds = [];
+        let seqVisual = 0;
 
-        pontos.forEach((pt, index) => {
+        pontos.forEach((pt) => {
             if (pt.status === 'concluido' || pt.status === 'nao-concluido') return;
+            seqVisual++;
 
             let numeroIcone = L.divIcon({
                 className: 'custom-div-icon',
-                html: `<div class="numero-marcador">${index + 1}</div>`,
+                html: `<div class="numero-marcador">${seqVisual}</div>`,
                 iconSize: [24, 24],
                 iconAnchor: [12, 12]
             });
 
             let marker = L.marker([pt.lat, pt.lon], { icon: numeroIcone })
-                .bindPopup(`<b>Parada #${index + 1}</b><br>Status: ${pt.status || 'pendente'}<br>Lat: ${pt.lat}, Lon: ${pt.lon}`);
+                .bindPopup(`<b>Parada #${seqVisual}</b><br>Status: ${pt.status || 'pendente'}<br>Lat: ${pt.lat}, Lon: ${pt.lon}`);
             
             camadaMarcadores.addLayer(marker);
             bounds.push([pt.lat, pt.lon]);
