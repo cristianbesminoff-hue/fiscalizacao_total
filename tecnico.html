@@ -35,6 +35,17 @@
                 <span id="txt-tecnico-qualidade" class="font-semibold text-cyan-300 text-base block">Identificando...</span>
             </div>
 
+            <!-- Bloco de Endereço e Botão GPS -->
+            <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800 space-y-3">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">📍 Endereço do Cliente (Extrator):</label>
+                    <span id="txt-endereco-cliente" class="text-white font-medium text-xs block bg-slate-950 p-2.5 rounded-lg border border-slate-800">Carregando endereço...</span>
+                </div>
+                <button type="button" onclick="abrirGPS()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                    🗺️ Abrir Endereço no Google Maps
+                </button>
+            </div>
+
             <!-- Estado e Cidade -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -72,7 +83,7 @@
                 </div>
             </div>
 
-            <!-- Empresa & Técnico Executor -->
+            <!-- Empresa & Vistoria -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block font-semibold text-slate-300 mb-2">5. Empresa Fiscalizada:</label>
@@ -120,7 +131,7 @@
                 </select>
             </div>
 
-            <!-- 9 & 10 & 11. Organização da C.A e Fotos (Externa / Interna) com Se Aplica -->
+            <!-- 9, 10 & 11. Organização da C.A e Fotos com Se Aplica -->
             <div class="p-4 bg-slate-900/40 rounded-xl border border-slate-800 space-y-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
                     <label class="block font-semibold text-cyan-300">9. Organização da C.A / Caixa:</label>
@@ -332,7 +343,7 @@
 
     </div>
 
-    <!-- Script de Controle, Base64 e Firebase -->
+    <!-- Script de Controle, Base64, GPS e Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -368,6 +379,7 @@
         const params = new URLSearchParams(window.location.search);
         let protocoloID = params.get('protocolo') || 'PRT-998822';
         let tecnicoExecutorUrl = params.get('tecnico') || 'Não informado';
+        let enderecoCliente = params.get('endereco') || 'Endereço não informado';
 
         const dadosSalvos = localStorage.getItem('protocoloEmAtendimento');
         if (dadosSalvos) {
@@ -375,6 +387,7 @@
                 let parsed = JSON.parse(dadosSalvos);
                 if (parsed.protocolo) protocoloID = parsed.protocolo;
                 if (parsed.tecnico) tecnicoExecutorUrl = parsed.tecnico;
+                if (parsed.endereco) enderecoCliente = parsed.endereco;
             } catch (e) {
                 console.error("Erro ao ler localStorage", e);
             }
@@ -387,6 +400,16 @@
         document.getElementById('txt-tecnico-qualidade').innerText = tecnicoQualidadeFormatado;
         document.getElementById('txt-protocolo').innerText = protocoloID;
         document.getElementById('txt-tecnico-executor').innerText = tecnicoExecutorUrl;
+        document.getElementById('txt-endereco-cliente').innerText = enderecoCliente;
+
+        // Função do Botão GPS para abrir o Google Maps
+        window.abrirGPS = function() {
+            if (enderecoCliente && enderecoCliente !== 'Endereço não informado') {
+                window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoCliente)}`, '_blank');
+            } else {
+                alert("Endereço não disponível para navegação.");
+            }
+        }
 
         // Função para alternar caixas de edição condicional (Protocolo e Executor)
         window.controlarEdicao = function(tipo) {
@@ -461,44 +484,45 @@
                 const fDg = aplicaDg === 'Sim' ? document.getElementById('foto-organizacao-dg')?.files[0] : null;
                 
                 const dadosVistoria = {
-                    tecnicoQualidade: tecnicoQualidadeFormatado, // 1
-                    estado: document.getElementById('estado').value, // 2
-                    cidade: document.getElementById('cidade').value, // 3
-                    protocolo: protocoloFinal, // 4
-                    empresaFiscalizada: document.getElementById('empresa').value, // 5
-                    tecnicoExecutor: executorFinal, // 6
-                    tipoVistoria: document.getElementById('tipo-vistoria').value, // 7
-                    apr: document.getElementById('apr').value, // 8
+                    tecnicoQualidade: tecnicoQualidadeFormatado,
+                    estado: document.getElementById('estado').value,
+                    cidade: document.getElementById('cidade').value,
+                    protocolo: protocoloFinal,
+                    endereco: enderecoCliente,
+                    empresaFiscalizada: document.getElementById('empresa').value,
+                    tecnicoExecutor: executorFinal,
+                    tipoVistoria: document.getElementById('tipo-vistoria').value,
+                    apr: document.getElementById('apr').value,
                     
                     aplicaCaixa: aplicaCaixa,
-                    orgCa: aplicaCaixa === 'Sim' ? document.getElementById('org-ca').value : 'N/A', // 9
+                    orgCa: aplicaCaixa === 'Sim' ? document.getElementById('org-ca').value : 'N/A',
                     
                     aplicaDrop: aplicaDrop,
-                    lancDrop: aplicaDrop === 'Sim' ? document.getElementById('lanc-drop').value : 'N/A', // 12
+                    lancDrop: aplicaDrop === 'Sim' ? document.getElementById('lanc-drop').value : 'N/A',
                     
                     aplicaRoldana: aplicaRoldana,
-                    ancoragemRoldana: aplicaRoldana === 'Sim' ? document.getElementById('ancoragem-roldana').value : 'N/A', // 14
+                    ancoragemRoldana: aplicaRoldana === 'Sim' ? document.getElementById('ancoragem-roldana').value : 'N/A',
                     
                     aplicaPimentao: aplicaPimentao,
-                    ancoragemPimentao: aplicaPimentao === 'Sim' ? document.getElementById('ancoragem-pimentao').value : 'N/A', // 16
+                    ancoragemPimentao: aplicaPimentao === 'Sim' ? document.getElementById('ancoragem-pimentao').value : 'N/A',
                     
                     aplicaAcabamento: aplicaAcabamento,
-                    acabamentoDrop: aplicaAcabamento === 'Sim' ? document.getElementById('acabamento-drop').value : 'N/A', // 18
+                    acabamentoDrop: aplicaAcabamento === 'Sim' ? document.getElementById('acabamento-drop').value : 'N/A',
                     
                     aplicaDg: aplicaDg,
-                    organizacaoDg: aplicaDg === 'Sim' ? document.getElementById('organizacao-dg').value : 'N/A', // 20
+                    organizacaoDg: aplicaDg === 'Sim' ? document.getElementById('organizacao-dg').value : 'N/A',
 
-                    statusFinal: document.querySelector('input[name="status"]:checked').value, // 22
-                    observacoes: document.getElementById('observacoes').value, // 23
+                    statusFinal: document.querySelector('input[name="status"]:checked').value,
+                    observacoes: document.getElementById('observacoes').value,
                     dataHora: new Date().toISOString(),
 
-                    fotoCaixaExt: fExt ? await fileToBase64(fExt) : null, // 10
-                    fotoCaixaInt: fInt ? await fileToBase64(fInt) : null, // 11
-                    fotoLancDrop: fDrop ? await fileToBase64(fDrop) : null, // 13
-                    fotoAncoragemRoldana: await filesArrayToBase64(fRoldana), // 15
-                    fotoAncoragemPimentao: fPimentao ? await fileToBase64(fPimentao) : null, // 17
-                    fotoAcabamentoDrop: await filesArrayToBase64(fAcabamento), // 19
-                    fotoOrganizacaoDg: fDg ? await fileToBase64(fDg) : null // 21
+                    fotoCaixaExt: fExt ? await fileToBase64(fExt) : null,
+                    fotoCaixaInt: fInt ? await fileToBase64(fInt) : null,
+                    fotoLancDrop: fDrop ? await fileToBase64(fDrop) : null,
+                    fotoAncoragemRoldana: await filesArrayToBase64(fRoldana),
+                    fotoAncoragemPimentao: fPimentao ? await fileToBase64(fPimentao) : null,
+                    fotoAcabamentoDrop: await filesArrayToBase64(fAcabamento),
+                    fotoOrganizacaoDg: fDg ? await fileToBase64(fDg) : null
                 };
 
                 await addDoc(collection(db, "vistorias"), dadosVistoria);
