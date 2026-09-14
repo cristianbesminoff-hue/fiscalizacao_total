@@ -348,7 +348,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Configuração exata extraída do seu console do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDIY1qa9sWjI3n58TJ31s0EvF8L-5uui4",
             authDomain: "fiscalizacao-total.firebaseapp.com",
@@ -379,15 +378,16 @@
             }
         }
 
-        // CAPTURA O NOME CORRETO DO TÉCNICO LOGADO NO INDEX.HTML
+        // CAPTURA E FORMATA O NOME DO TÉCNICO LOGADO NO INDEX.HTML
         let nomeLogadoLocal = localStorage.getItem('usuarioNome');
-        let tecnicoQualidadeFormatado = "";
+        let tecnicoQualidadeFormatado = "Técnico Não Identificado";
 
         if (nomeLogadoLocal) {
-            let partes = nomeLogadoLocal.split(/[\.\-_@]/).filter(Boolean);
+            if (nomeLogadoLocal.includes('@')) {
+                nomeLogadoLocal = nomeLogadoLocal.split('@')[0];
+            }
+            let partes = nomeLogadoLocal.split(/[\.\-_ ]/).filter(Boolean);
             tecnicoQualidadeFormatado = partes.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
-        } else {
-            tecnicoQualidadeFormatado = "Técnico Não Identificado";
         }
 
         // Inserção na tela
