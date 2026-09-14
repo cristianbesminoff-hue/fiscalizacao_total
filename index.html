@@ -108,7 +108,6 @@
 
                 if (usuarioData.senha !== senha) {
                     msgErro.innerText = "Senha incorreta.";
-                    msgErros.classList.remove('hidden'); // Ajustado caso precise
                     msgErro.classList.remove('hidden');
                     btnEntrar.disabled = false;
                     btnEntrar.textContent = "Acessar Sistema";
@@ -117,8 +116,14 @@
 
                 // SALVA OS DADOS DO USUÁRIO LOGADO NO BROWSER
                 localStorage.setItem('usuarioEmail', email);
-                let nomeDoBanco = usuarioData.nome || email.split('@')[0];
-                localStorage.setItem('usuarioNome', nomeDoBanco);
+
+                // Extrai o nome do e-mail (ex: anderson.azevedo -> Anderson Azevedo)
+                let parteEmail = email.split('@')[0];
+                let partesNome = parteEmail.split(/[\.\-_]/).filter(Boolean);
+                let nomeFormatado = partesNome.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
+
+                let nomeFinal = (usuarioData.nome && usuarioData.nome.trim() !== '') ? usuarioData.nome : nomeFormatado;
+                localStorage.setItem('usuarioNome', nomeFinal);
 
                 if (usuarioData.perfil === "gestor") {
                     alert("Acesso autorizado: Painel do Gestor.");
