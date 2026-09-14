@@ -82,11 +82,8 @@
             btnEntrar.textContent = "Verificando...";
 
             try {
-                console.log("Tentando buscar o e-mail:", email);
                 const q = query(collection(db, "usuarios_sistema"), where("email", "==", email));
                 const querySnapshot = await getDocs(q);
-
-                console.log("Total de documentos encontrados:", querySnapshot.size);
 
                 if (querySnapshot.empty) {
                     msgErro.innerText = "E-mail não cadastrado ou sem acesso.";
@@ -99,7 +96,6 @@
                 let usuarioData = null;
                 querySnapshot.forEach((doc) => {
                     usuarioData = doc.data();
-                    console.log("Dados do usuário encontrados:", usuarioData);
                 });
 
                 if (usuarioData.status === "pausado") {
@@ -112,11 +108,17 @@
 
                 if (usuarioData.senha !== senha) {
                     msgErro.innerText = "Senha incorreta.";
+                    msgErros.classList.remove('hidden'); // Ajustado caso precise
                     msgErro.classList.remove('hidden');
                     btnEntrar.disabled = false;
                     btnEntrar.textContent = "Acessar Sistema";
                     return;
                 }
+
+                // SALVA OS DADOS DO USUÁRIO LOGADO NO BROWSER
+                localStorage.setItem('usuarioEmail', email);
+                let nomeDoBanco = usuarioData.nome || email.split('@')[0];
+                localStorage.setItem('usuarioNome', nomeDoBanco);
 
                 if (usuarioData.perfil === "gestor") {
                     alert("Acesso autorizado: Painel do Gestor.");
