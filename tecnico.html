@@ -361,21 +361,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        function formatarNomeQualidade(emailOuLogin) {
-            if (!emailOuLogin) return "Cristian Besminoff";
-            let base = emailOuLogin.split('@')[0];
-            let partes = base.split(/[\.\-_]/).filter(Boolean);
-            
-            if (partes.length >= 2) {
-                let p1 = partes[0].charAt(0).toUpperCase() + partes[0].slice(1).toLowerCase();
-                let p2 = partes[1].charAt(0).toUpperCase() + partes[1].slice(1).toLowerCase();
-                return `${p1} ${p2}`;
-            } else if (partes.length === 1) {
-                return partes[0].charAt(0).toUpperCase() + partes[0].slice(1).toLowerCase();
-            }
-            return emailOuLogin;
-        }
-
         // Recuperação dos dados da URL / LocalStorage
         const params = new URLSearchParams(window.location.search);
         let protocoloID = params.get('protocolo') || 'PRT-998822';
@@ -394,8 +379,16 @@
             }
         }
 
-        let emailLoginSalvo = params.get('email') || params.get('login') || localStorage.getItem('usuarioEmail') || 'cristian.besminoff';
-        const tecnicoQualidadeFormatado = formatarNomeQualidade(emailLoginSalvo);
+        // CAPTURA O NOME CORRETO DO TÉCNICO LOGADO NO INDEX.HTML
+        let nomeLogadoLocal = localStorage.getItem('usuarioNome');
+        let tecnicoQualidadeFormatado = "";
+
+        if (nomeLogadoLocal) {
+            let partes = nomeLogadoLocal.split(/[\.\-_@]/).filter(Boolean);
+            tecnicoQualidadeFormatado = partes.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
+        } else {
+            tecnicoQualidadeFormatado = "Técnico Não Identificado";
+        }
 
         // Inserção na tela
         document.getElementById('txt-tecnico-qualidade').innerText = tecnicoQualidadeFormatado;
@@ -472,7 +465,6 @@
         async function filesArrayToBase64(fileList) {
             if (!fileList || fileList.length === 0) return null;
             let arr = [];
-            // Limita no máximo a 3 arquivos por campo múltiplo para garantir que não estoure o documento
             let limiteArquivos = Math.min(fileList.length, 3);
             for (let i = 0; i < limiteArquivos; i++) {
                 let b64 = await comprimirImagem(fileList[i], 640, 0.5);
