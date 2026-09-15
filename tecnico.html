@@ -378,7 +378,7 @@
             }
         }
 
-        // CAPTURA E FORMATA O NOME DO TÉCNICO LOGADO NO INDEX.HTML
+        // CAPTURA E FORMATA O NOME DO TÉCNICO LOGADO NO INDEX.HTML (GARANTINDO NOME E SOBRENOME)
         let nomeLogadoLocal = localStorage.getItem('usuarioNome');
         let tecnicoQualidadeFormatado = "Técnico Não Identificado";
 
@@ -386,7 +386,7 @@
             if (nomeLogadoLocal.includes('@')) {
                 nomeLogadoLocal = nomeLogadoLocal.split('@')[0];
             }
-            let partes = nomeLogadoLocal.split(/[\.\-_ ]/).filter(Boolean);
+            let partes = nomeLogadoLocal.replace(/[\.\-_]/g, ' ').split(/\s+/).filter(Boolean);
             tecnicoQualidadeFormatado = partes.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
         }
 
