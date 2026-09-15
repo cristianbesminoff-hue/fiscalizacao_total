@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fiscalização Total - Unifique[cite: 1]</title>
+    <title>Fiscalização Total - Unifique</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -114,23 +114,15 @@
                     return;
                 }
 
-                // SALVA OS DADOS DO USUÁRIO LOGADO NO BROWSER
+                // Salva o e-mail no navegador para persistir a sessão nas outras telas
                 localStorage.setItem('usuarioEmail', email);
-
-                // Extrai nome e sobrenome do e-mail substituindo pontos, hífens e underlines por espaços
-                let parteEmail = email.split('@')[0];
-                let partesNome = parteEmail.replace(/[\.\-_]/g, ' ').split(/\s+/).filter(Boolean);
-                let nomeFormatado = partesNome.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
-
-                let nomeFinal = (usuarioData.nome && usuarioData.nome.trim() !== '') ? usuarioData.nome : nomeFormatado;
-                localStorage.setItem('usuarioNome', nomeFinal);
 
                 if (usuarioData.perfil === "gestor") {
                     alert("Acesso autorizado: Painel do Gestor.");
-                    window.location.href = "gestor.html";
+                    window.location.href = `gestor.html?email=${encodeURIComponent(email)}`;
                 } else {
                     alert("Acesso autorizado: Módulo Extrator.");
-                    window.location.href = "extrator.html";
+                    window.location.href = `extrator.html?email=${encodeURIComponent(email)}`;
                 }
 
             } catch (e) {
