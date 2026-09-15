@@ -117,9 +117,9 @@
                 // SALVA OS DADOS DO USUÁRIO LOGADO NO BROWSER
                 localStorage.setItem('usuarioEmail', email);
 
-                // Extrai o nome do e-mail (ex: anderson.azevedo -> Anderson Azevedo)
+                // Extrai nome e sobrenome do e-mail substituindo pontos, hífens e underlines por espaços
                 let parteEmail = email.split('@')[0];
-                let partesNome = parteEmail.split(/[\.\-_]/).filter(Boolean);
+                let partesNome = parteEmail.replace(/[\.\-_]/g, ' ').split(/\s+/).filter(Boolean);
                 let nomeFormatado = partesNome.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
 
                 let nomeFinal = (usuarioData.nome && usuarioData.nome.trim() !== '') ? usuarioData.nome : nomeFormatado;
