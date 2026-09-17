@@ -574,28 +574,44 @@
             return;
         }
 
-        statusDiv.innerText = "⚡ Lendo coordenadas diretamente da planilha...";
+        statusDiv.innerText = "⚡ Verificando dados e filtrando já concluídos...";
         const cidadeBusca = document.getElementById('cidadeFiltroCoord').value.trim();
 
+        // Isola os registros que já estão concluídos para cruzar com a nova base
+        let jaConcluidos = linhasProcessadasCompletas.filter(item => item.status === 'concluido');
+
         let dadosFiltrados = dadosBrutos.filter(linha => {
-            if (!cidadeBusca) return true;
-            return linha.some(celula => celula && celula.toString().toLowerCase().includes(cidadeBusca.toLowerCase()));
+            if (cidadeBusca) {
+                let bateCidade = linha.some(celula => celula && celula.toString().toLowerCase().includes(cidadeBusca.toLowerCase()));
+                if (!bateCidade) return false;
+            }
+
+            let latVal = parseFloat(linha[indiceLat]);
+            let lonVal = parseFloat(linha[indiceLon]);
+
+            if (isNaN(latVal) || isNaN(lonVal)) return false;
+
+            // Bate os dados da linha nova com os itens já concluídos (baseado em Latitude e Longitude)
+            let jaFoiConcluido = jaConcluidos.some(concluido => {
+                return Math.abs(concluido.lat - latVal) < 0.00001 && Math.abs(concluido.lon - lonVal) < 0.00001;
+            });
+
+            // Se já foi concluído antes, exclui da nova varredura retornando false
+            return !jaFoiConcluido;
         });
 
         dadosFiltrados.forEach((linha) => {
             let latVal = parseFloat(linha[indiceLat]);
             let lonVal = parseFloat(linha[indiceLon]);
 
-            if (!isNaN(latVal) && !isNaN(lonVal)) {
-                arrayComCoordenadas.push({
-                    linhaOriginal: linha,
-                    lat: latVal,
-                    lon: lonVal,
-                    display_name: `Lat: ${latVal}, Lon: ${lonVal}`,
-                    status: 'pendente',
-                    timestamp: null
-                });
-            }
+            arrayComCoordenadas.push({
+                linhaOriginal: linha,
+                lat: latVal,
+                lon: lonVal,
+                display_name: `Lat: ${latVal}, Lon: ${lonVal}`,
+                status: 'pendente',
+                timestamp: null
+            });
         });
 
         let rotaOtimizada = [];
@@ -621,9 +637,9 @@
             }
         }
 
-        // Mantém os concluídos já existentes e adiciona os novos pendentes/processados
-        let jaConcluidos = linhasProcessadasCompletas.filter(item => item.status === 'concluido');
-        linhasProcessadasCompletas = [...jaConcluidos, ...rotaOtimizada];
+        // Mantém os concluídos intactos e adiciona apenas os novos pendentes recalculados
+        let naoConcluidosAntigos = linhasProcessadasCompletas.filter(item => item.status === 'nao-concluido');
+        linhasProcessadasCompletas = [...jaConcluidos, ...naoConcluidosAntigos, ...rotaOtimizada];
         salvarEstadoLocal();
 
         statusDiv.innerText = "";
@@ -711,7 +727,7 @@
                         </div>
                     </li>
                 `;
-                return; // Não exibe concluídos na tabela principal
+                return; 
             }
 
             sequencialTabela++;
@@ -731,7 +747,6 @@
             });
 
             let desativarBotao = emExecucaoGlobal && item.status !== 'em-execucao';
-
             let selectHabilitado = (item.status === 'em-execucao');
             let selectDisabledAttr = selectHabilitado ? '' : 'disabled';
 
@@ -839,7 +854,6 @@
 
     function desenharMapaLeaflet(pontos) {
         const divMapa = document.getElementById('mapaVisual');
-        
         let pontosAtivosNoMapa = pontos.filter(pt => pt.status !== 'nao-concluido' && pt.status !== 'concluido');
 
         if (pontosAtivosNoMapa.length === 0) {
@@ -954,7 +968,6 @@
         };
         
         localStorage.setItem('protocoloEmAtendimento', JSON.stringify(dadosExecucao));
-
         window.location.href = 'tecnico.html';
     }
 
