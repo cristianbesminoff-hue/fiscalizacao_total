@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitação e Controle de EPIs</title>
+    <!-- Tailwind CSS for modern responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 text-white p-2.5 rounded-xl shadow">
+                    <i class="fa-solid fa-hard-hat text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold">Gestão de EPIs</h1>
+                    <p class="text-xs text-slate-400">Solicitação e Controle Operacional</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="switchTab('form')" id="btnTabForm" class="px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-plus-circle"></i> Nova Solicitação
+                </button>
+                <button onclick="switchTab('history')" id="btnTabHistory" class="px-4 py-2 text-sm font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Histórico <span id="badgeCount" class="bg-blue-500 text-white text-[10px] px-1.5 py-0.2 rounded-full">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-4xl w-full mx-auto p-4 sm:p-6">
+
+        <!-- TAB 1: NEW REQUEST FORM -->
+        <section id="tabForm" class="space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+                <div class="border-b border-slate-100 pb-4 mb-6">
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-list text-blue-600"></i> Formulário de Solicitação de EPI
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">Preencha os dados do colaborador e selecione os equipamentos necessários.</p>
+                </div>
+
+                <form id="epiForm" onsubmit="submitEpiRequest(event)" class="space-y-5">
+                    
+                    <!-- Collaborator Details -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nome do Colaborador / Técnico *</label>
+                            <input type="text" id="collabName" required placeholder="Ex: Carlos Silva" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Matrícula / ID *</label>
+                            <input type="text" id="collabId" required placeholder="Ex: 12948" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        </div>
+                    </div>
+
+                    <!-- EPI Selection via Autocomplete -->
+                    <div class="relative">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">EPI Desejado (Digite para buscar) *</label>
+                        <div class="relative flex items-center">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-slate-400 text-sm"></i>
+                            <input type="text" id="epiSearchInput" autocomplete="off" placeholder="Digite para filtrar (ex: Luva, Capacete, Óculos)..." oninput="filterEpiOptions()" onfocus="showDropdown()" class="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            <button type="button" onclick="toggleDropdown()" class="absolute right-3.5 text-slate-400 hover:text-slate-600">
+                                <i class="fa-solid fa-chevron-down text-xs" id="dropdownArrow"></i>
+                            </button>
+                        </div>
+
+                        <!-- Dropdown Options Box -->
+                        <div id="epiDropdown" class="absolute z-20 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-56 overflow-y-auto hidden">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Custom EPI input if "Outro EPI" selected -->
+                    <div id="customEpiContainer" class="hidden">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Especifique o Outro EPI *</label>
+                        <input type="text" id="customEpiName" placeholder="Digite o nome do EPI..." class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    </div>
+
+                    <!-- Quantity & Reason -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Quantidade *</label>
+                            <input type="number" id="epiQuantity" min="1" value="1" required class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Motivo / Observação</label>
+                            <input type="text" id="epiReason" placeholder="Ex: Substituição por desgaste, Novo colaborador..." class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-4 flex justify-end">
+                        <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-check"></i> Registrar Solicitação
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </section>
+
+        <!-- TAB 2: HISTORY & VERIFICATION -->
+        <section id="tabHistory" class="space-y-6 hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4 mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-blue-600"></i> Histórico de Solicitações
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">Consulte, verifique e exporte o histórico salvo no seu dispositivo.</p>
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <button onclick="exportToPDF()" class="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-pdf"></i> Baixar Relatório PDF
+                        </button>
+                        <button onclick="clearHistory()" class="px-3 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-xs rounded-xl transition" title="Limpar Tudo">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search Filter in History -->
+                <div class="mb-4">
+                    <div class="relative">
+                        <i class="fa-solid fa-filter absolute left-3.5 text-slate-400 text-sm"></i>
+                        <input type="text" id="historyFilter" oninput="renderHistory()" placeholder="Filtrar por nome, matrícula ou EPI..." class="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    </div>
+                </div>
+
+                <!-- History List Container -->
+                <div id="historyList" class="space-y-3">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-3">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMessage" class="text-sm font-medium">Solicitação salva com sucesso!</span>
+    </div>
+
+    <script>
+        // Allowed EPI list provided by user
+        const allowedEpiList = [
+            "Óculos Escuros",
+            "Óculos Transparente",
+            "Capacete",
+            "Cinto Paraquedista",
+            "Talabarte de Posicionamento",
+            "Luva Isolante",
+            "Luva de Cobertura",
+            "Luva de Vaqueta",
+            "Detector de Tensão",
+            "Eureka",
+            "Corda Linha de Vida",
+            "Fita Catraca",
+            "Fita de Ancoragem 1,20",
+            "Fita de Ancoragem 0,80",
+            "Calça Antichama",
+            "Jaleco Antichama",
+            "Camisa",
+            "Botina",
+            "Escada",
+            "Cones",
+            "Outro EPI (abre digitação)"
+        ];
+
+        let selectedEpiValue = "";
+        let requestsHistory = JSON.parse(localStorage.getItem('epi_requests_history')) || [];
+
+        window.onload = function() {
+            updateBadgeCount();
+            renderEpiDropdown(allowedEpiList);
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                const container = document.getElementById('epiSearchInput').parentElement.parentElement;
+                if (!container.contains(e.target)) {
+                    document.getElementById('epiDropdown').classList.add('hidden');
+                    document.getElementById('dropdownArrow').classList.remove('rotate-180');
+                }
+            });
+        };
+
+        // Tab Switching
+        function switchTab(tabName) {
+            const formSec = document.getElementById('tabForm');
+            const historySec = document.getElementById('tabHistory');
+            const btnForm = document.getElementById('btnTabForm');
+            const btnHistory = document.getElementById('btnTabHistory');
+
+            if (tabName === 'form') {
+                formSec.classList.remove('hidden');
+                historySec.classList.add('hidden');
+                btnForm.className = "px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition shadow-sm flex items-center gap-2";
+                btnHistory.className = "px-4 py-2 text-sm font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center gap-2";
+            } else {
+                formSec.classList.add('hidden');
+                historySec.classList.remove('hidden');
+                btnHistory.className = "px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition shadow-sm flex items-center gap-2";
+                btnForm.className = "px-4 py-2 text-sm font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center gap-2";
+                renderHistory();
+            }
+        }
+
+        // Render EPI Dropdown options
+        function renderEpiDropdown(items) {
+            const dropdown = document.getElementById('epiDropdown');
+            if (items.length === 0) {
+                dropdown.innerHTML = `<div class="p-3 text-xs text-slate-400 text-center">Nenhum EPI encontrado</div>`;
+                return;
+            }
+
+            let html = '';
+            items.forEach(item => {
+                html += `
+                    <div onclick="selectEpi('${item}')" class="px-4 py-2.5 text-sm hover:bg-blue-50 hover:text-blue-700 cursor-pointer transition border-b border-slate-100 last:border-b-0 flex items-center justify-between">
+                        <span>${item}</span>
+                        ${item.includes('Outro') ? '<i class="fa-solid fa-pen-to-square text-xs text-amber-500"></i>' : ''}
+                    </div>
+                `;
+            });
+            dropdown.innerHTML = html;
+        }
+
+        function filterEpiOptions() {
+            const query = document.getElementById('epiSearchInput').value.toLowerCase();
+            const filtered = allowedEpiList.filter(item => item.toLowerCase().includes(query));
+            renderEpiDropdown(filtered);
+            document.getElementById('epiDropdown').classList.remove('hidden');
+            document.getElementById('dropdownArrow').classList.add('rotate-180');
+        }
+
+        function showDropdown() {
+            const query = document.getElementById('epiSearchInput').value.toLowerCase();
+            const filtered = allowedEpiList.filter(item => item.toLowerCase().includes(query));
+            renderEpiDropdown(filtered);
+            document.getElementById('epiDropdown').classList.remove('hidden');
+            document.getElementById('dropdownArrow').classList.add('rotate-180');
+        }
+
+        function toggleDropdown() {
+            const dropdown = document.getElementById('epiDropdown');
+            const arrow = document.getElementById('dropdownArrow');
+            if (dropdown.classList.contains('hidden')) {
+                showDropdown();
+            } else {
+                dropdown.classList.add('hidden');
+                arrow.classList.remove('rotate-180');
+            }
+        }
+
+        function selectEpi(itemName) {
+            selectedEpiValue = itemName;
+            document.getElementById('epiSearchInput').value = itemName;
+            document.getElementById('epiDropdown').classList.add('hidden');
+            document.getElementById('dropdownArrow').classList.remove('rotate-180');
+
+            const customContainer = document.getElementById('customEpiContainer');
+            const customInput = document.getElementById('customEpiName');
+
+            if (itemName.includes('Outro EPI')) {
+                customContainer.classList.remove('hidden');
+                customInput.required = true;
+                customInput.focus();
+            } else {
+                customContainer.classList.add('hidden');
+                customInput.required = false;
+                customInput.value = '';
+            }
+        }
+
+        // Submit Request & Save to LocalStorage with Exact Date & Time
+        function submitEpiRequest(e) {
+            e.preventDefault();
+
+            const collabName = document.getElementById('collabName').value.trim();
+            const collabId = document.getElementById('collabId').value.trim();
+            const quantity = document.getElementById('epiQuantity').value;
+            const reason = document.getElementById('epiReason').value.trim();
+
+            if (!selectedEpiValue) {
+                showToast("Por favor, selecione um EPI da lista.", "error");
+                return;
+            }
+
+            let finalEpiName = selectedEpiValue;
+            if (selectedEpiValue.includes('Outro EPI')) {
+                finalEpiName = document.getElementById('customEpiName').value.trim();
+                if (!finalEpiName) {
+                    showToast("Por favor, especifique o nome do EPI.", "error");
+                    return;
+                }
+            }
+
+            // Get exact date and time formatted in PT-BR
+            const now = new Date();
+            const formattedDate = now.toLocaleDateString('pt-BR');
+            const formattedTime = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const timestampIso = now.toISOString();
+
+            const newRequest = {
+                id: 'EPI-' + Math.floor(100000 + Math.random() * 900000),
+                collabName,
+                collabId,
+                epiName: finalEpiName,
+                quantity,
+                reason: reason || 'Não informado',
+                date: formattedDate,
+                time: formattedTime,
+                timestamp: timestampIso
+            };
+
+            requestsHistory.unshift(newRequest);
+            localStorage.setItem('epi_requests_history', JSON.stringify(requestsHistory));
+
+            updateBadgeCount();
+            document.getElementById('epiForm').reset();
+            selectedEpiValue = "";
+            document.getElementById('customEpiContainer').classList.add('hidden');
+
+            showToast("Solicitação de EPI registrada com sucesso!");
+            switchTab('history');
+        }
+
+        // Render History List
+        function renderHistory() {
+            const listContainer = document.getElementById('historyList');
+            const filterText = document.getElementById('historyFilter').value.toLowerCase();
+
+            const filteredHistory = requestsHistory.filter(item => 
+                item.collabName.toLowerCase().includes(filterText) ||
+                item.collabId.toLowerCase().includes(filterText) ||
+                item.epiName.toLowerCase().includes(filterText) ||
+                item.date.includes(filterText)
+            );
+
+            if (filteredHistory.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                        <i class="fa-solid fa-box-open text-slate-300 text-3xl mb-2"></i>
+                        <p class="text-sm font-medium text-slate-600">Nenhuma solicitação encontrada.</p>
+                        <p class="text-xs text-slate-400 mt-1">Registre sua primeira solicitação na aba ao lado.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filteredHistory.forEach((item, index) => {
+                html += `
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded">${item.id}</span>
+                                <span class="text-xs text-slate-500"><i class="fa-regular fa-calendar mr-1"></i>${item.date} às ${item.time}</span>
+                            </div>
+                            <h4 class="text-sm font-bold text-slate-800">${item.epiName} <span class="text-xs font-normal text-slate-500">(Qtd: ${item.quantity})</span></h4>
+                            <p class="text-xs text-slate-600"><i class="fa-solid fa-user text-slate-400 mr-1"></i>${item.collabName} (Mat: ${item.collabId})</p>
+                            <p class="text-xs text-slate-500 bg-slate-50 p-1.5 rounded border border-slate-100"><i class="fa-solid fa-circle-info text-slate-400 mr-1"></i>Motivo: ${item.reason}</p>
+                        </div>
+                        <div class="flex items-center gap-2 self-end sm:self-center">
+                            <button onclick="deleteRequest('${item.id}')" class="w-8 h-8 flex items-center justify-center bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition" title="Excluir item">
+                                <i class="fa-solid fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            listContainer.innerHTML = html;
+        }
+
+        function deleteRequest(id) {
+            if (confirm("Deseja realmente excluir este registro do histórico?")) {
+                requestsHistory = requestsHistory.filter(item => item.id !== id);
+                localStorage.setItem('epi_requests_history', JSON.stringify(requestsHistory));
+                updateBadgeCount();
+                renderHistory();
+                showToast("Registro removido com sucesso!");
+            }
+        }
+
+        function clearHistory() {
+            if (requestsHistory.length === 0) return;
+            if (confirm("Tem certeza que deseja apagar todo o histórico de solicitações?")) {
+                requestsHistory = [];
+                localStorage.setItem('epi_requests_history', JSON.stringify(requestsHistory));
+                updateBadgeCount();
+                renderHistory();
+                showToast("Histórico limpo com sucesso!");
+            }
+        }
+
+        function updateBadgeCount() {
+            document.getElementById('badgeCount').textContent = requestsHistory.length;
+        }
+
+        // Export to PDF using jsPDF
+        function exportToPDF() {
+            if (requestsHistory.length === 0) {
+                showToast("Não há dados no histórico para exportar.", "error");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Header styling
+            doc.setFillColor(15, 23, 42); // Slate 900
+            doc.rect(0, 0, 210, 25, "F");
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.text("RELATÓRIO DE SOLICITAÇÃO DE EPIs", 14, 16);
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 140, 16);
+
+            let y = 35;
+            doc.setTextColor(15, 23, 42);
+
+            requestsHistory.forEach((item, index) => {
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+
+                doc.setFillColor(241, 245, 249); // Slate 100
+                doc.roundedRect(14, y, 182, 22, 2, 2, "F");
+
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(11);
+                doc.text(`${index + 1}. ${item.epiName} (Qtd: ${item.quantity})`, 18, y + 7);
+
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(9);
+                doc.setTextColor(71, 85, 105);
+                doc.text(`Colaborador: ${item.collabName} (Mat: ${item.collabId})`, 18, y + 13);
+                doc.text(`Data/Hora: ${item.date} às ${item.time}`, 18, y + 18);
+                doc.text(`Motivo: ${item.reason}`, 110, y + 13);
+
+                y += 27;
+            });
+
+            // Save PDF file (works directly on mobile browsers and desktop)
+            doc.save(`relatorio_epis_${new Date().toISOString().slice(0,10)}.pdf`);
+            showToast("Relatório PDF gerado com sucesso!");
+        }
+
+        // Toast Notification helper
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
