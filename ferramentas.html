@@ -3,501 +3,459 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitação e Controle de Ferramentas</title>
-    <!-- Tailwind CSS for modern responsive styling -->
+    <title>Controle de Ferramentas - Fiscalização Total</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- jsPDF for PDF export -->
+    <!-- jsPDF para geração de relatórios em PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col p-4 md:p-8">
 
-    <!-- Header -->
-    <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <div class="flex items-center space-x-3">
-                <div class="bg-blue-600 text-white p-2.5 rounded-xl shadow">
-                    <i class="fa-solid fa-toolbox text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold">Gestão de Ferramentas</h1>
-                    <p class="text-xs text-slate-400">Solicitação e Controle Operacional</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2">
-                <button onclick="switchTab('form')" id="btnTabForm" class="px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition shadow-sm flex items-center gap-2">
-                    <i class="fa-solid fa-plus-circle"></i> Nova Solicitação
-                </button>
-                <button onclick="switchTab('history')" id="btnTabHistory" class="px-4 py-2 text-sm font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center gap-2">
-                    <i class="fa-solid fa-clock-rotate-left"></i> Histórico <span id="badgeCount" class="bg-blue-500 text-white text-[10px] px-1.5 py-0.2 rounded-full">0</span>
-                </button>
-            </div>
+    <!-- Cabeçalho -->
+    <header class="w-full max-w-5xl mx-auto mb-6 flex flex-col md:flex-row justify-between items-center glass p-6 rounded-2xl shadow-xl border border-slate-700">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-blue-400 tracking-wider">CONTROLE DE FERRAMENTAS</h1>
+            <p class="text-xs text-slate-400 mt-1">Módulo Operacional • Unifique Telecomunicações</p>
+        </div>
+        <div class="mt-4 md:mt-0 flex gap-3">
+            <button onclick="abrirRelatorioGeral()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-blue-400 font-semibold rounded-xl border border-blue-500/30 transition text-xs uppercase tracking-wider">
+                📊 Relatório Geral
+            </button>
+            <a href="index.html" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl border border-slate-600 transition text-xs uppercase tracking-wider">
+                ← Voltar ao Início
+            </a>
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="flex-grow max-w-4xl w-full mx-auto p-4 sm:p-6">
-
-        <!-- TAB 1: NEW REQUEST FORM -->
-        <section id="tabForm" class="space-y-6">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
-                <div class="border-b border-slate-100 pb-4 mb-6">
-                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-clipboard-list text-blue-600"></i> Formulário de Solicitação de Ferramenta
-                    </h2>
-                    <p class="text-xs text-slate-500 mt-1">Preencha os dados do colaborador e selecione os itens necessários.</p>
+    <!-- Conteúdo Principal -->
+    <main class="w-full max-w-5xl mx-auto space-y-6 flex-grow">
+        
+        <!-- Formulário de Registro -->
+        <div class="glass p-6 rounded-2xl shadow-xl border border-slate-700">
+            <h2 class="text-lg font-bold text-slate-200 mb-4 uppercase tracking-wide border-b border-slate-700 pb-2">Registrar Solicitação / Empréstimo</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">Nome do Técnico:</label>
+                    <input type="text" id="nome-tecnico" placeholder="Ex: João da Silva" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-blue-500">
                 </div>
-
-                <form id="toolForm" onsubmit="submitToolRequest(event)" class="space-y-5">
-                    
-                    <!-- Collaborator Details -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nome do Técnico / Colaborador *</label>
-                            <input type="text" id="collabName" required placeholder="Ex: Roberto Carlos" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Matrícula / ID / Setor *</label>
-                            <input type="text" id="collabId" required placeholder="Ex: 48920 - Infraestrutura" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                        </div>
-                    </div>
-
-                    <!-- Tool Selection via Autocomplete -->
-                    <div class="relative">
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Ferramenta Desejada (Digite para buscar) *</label>
-                        <div class="relative flex items-center">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-slate-400 text-sm"></i>
-                            <input type="text" id="toolSearchInput" autocomplete="off" placeholder="Digite para filtrar (ex: Alicate, Clivador, Chave)..." oninput="filterToolOptions()" onfocus="showDropdown()" class="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                            <button type="button" onclick="toggleDropdown()" class="absolute right-3.5 text-slate-400 hover:text-slate-600">
-                                <i class="fa-solid fa-chevron-down text-xs" id="dropdownArrow"></i>
-                            </button>
-                        </div>
-
-                        <!-- Dropdown Options Box -->
-                        <div id="toolDropdown" class="absolute z-20 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-56 overflow-y-auto hidden">
-                            <!-- Populated via JS -->
-                        </div>
-                    </div>
-
-                    <!-- Custom Tool input if "Outra Ferramenta" selected -->
-                    <div id="customToolContainer" class="hidden">
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Especifique a Outra Ferramenta *</label>
-                        <input type="text" id="customToolName" placeholder="Digite o nome do equipamento..." class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                    </div>
-
-                    <!-- Quantity & Reason -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Quantidade *</label>
-                            <input type="number" id="toolQuantity" min="1" value="1" required class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Observações / Motivo</label>
-                            <input type="text" id="toolReason" placeholder="Ex: Substituição por desgaste, Nova obra, Calibração..." class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                        </div>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <div class="pt-4 flex justify-end">
-                        <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-check"></i> Registrar Solicitação
-                        </button>
-                    </div>
-
-                </form>
-            </div>
-        </section>
-
-        <!-- TAB 2: HISTORY & VERIFICATION -->
-        <section id="tabHistory" class="space-y-6 hidden">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-4 mb-6">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                            <i class="fa-solid fa-clock-rotate-left text-blue-600"></i> Histórico de Ferramentas
-                        </h2>
-                        <p class="text-xs text-slate-500 mt-1">Consulte, verifique e exporte o histórico salvo no seu dispositivo.</p>
-                    </div>
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <button onclick="exportToPDF()" class="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-file-pdf"></i> Baixar Relatório PDF
-                        </button>
-                        <button onclick="clearHistory()" class="px-3 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-xs rounded-xl transition" title="Limpar Tudo">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Search Filter in History -->
-                <div class="mb-4">
-                    <div class="relative">
-                        <i class="fa-solid fa-filter absolute left-3.5 text-slate-400 text-sm"></i>
-                        <input type="text" id="historyFilter" oninput="renderHistory()" placeholder="Filtrar por técnico, matrícula ou ferramenta..." class="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                    </div>
-                </div>
-
-                <!-- History List Container -->
-                <div id="historyList" class="space-y-3">
-                    <!-- Populated via JS -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">Zona / Base / Cidade:</label>
+                    <input type="text" id="zona-tecnico" placeholder="Ex: Zona Sul / Canoas" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-blue-500">
                 </div>
             </div>
-        </section>
+
+            <!-- Seleção de Ferramentas -->
+            <div class="mb-6">
+                <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">Selecionar Ferramenta da Lista (42 Itens):</label>
+                <div class="flex gap-2">
+                    <select id="select-ferramenta" class="flex-grow bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-blue-500">
+                        <option value="">-- Selecione uma ferramenta --</option>
+                    </select>
+                    <input type="number" id="qtd-ferramenta" value="1" min="1" class="w-20 bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm text-center focus:outline-none focus:border-blue-500">
+                    <button type="button" onclick="adicionarItemCarrinho()" class="px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition text-sm">
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ferramenta Personalizada / Outra -->
+            <div class="mb-6 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                <label class="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">Outra Ferramenta (Fora da Lista):</label>
+                <div class="flex gap-2">
+                    <input type="text" id="outra-ferramenta-nome" placeholder="Nome da ferramenta personalizada" class="flex-grow bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white text-sm focus:outline-none focus:border-blue-500">
+                    <input type="number" id="outra-ferramenta-qtd" value="1" min="1" class="w-20 bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white text-sm text-center focus:outline-none focus:border-blue-500">
+                    <button type="button" onclick="adicionarOutroItem()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-xl transition text-sm">
+                        Incluir Outra
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cesta de Itens Adicionados -->
+            <div class="mb-6">
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Ferramentas na Solicitação Atual:</h3>
+                <div id="cesta-container" class="bg-slate-900/80 border border-slate-700 rounded-xl p-4 max-h-48 overflow-y-auto space-y-2">
+                    <p class="text-xs text-slate-500 text-center py-4">Nenhuma ferramenta adicionada ainda.</p>
+                </div>
+            </div>
+
+            <button onclick="salvarSolicitude()" class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg transition transform active:scale-95 text-sm uppercase tracking-wider">
+                Salvar Solicitação de Ferramentas
+            </button>
+        </div>
+
+        <!-- Lista de Solicitações Salvas -->
+        <div class="glass p-6 rounded-2xl shadow-xl border border-slate-700">
+            <h2 class="text-lg font-bold text-slate-200 mb-4 uppercase tracking-wide border-b border-slate-700 pb-2">Histórico de Solicitações Registradas</h2>
+            <div id="lista-registros" class="space-y-4">
+                <p class="text-sm text-slate-400 text-center py-6">Nenhum registro encontrado no armazenamento local.</p>
+            </div>
+        </div>
 
     </main>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-3">
-        <i class="fa-solid fa-circle-check text-emerald-400"></i>
-        <span id="toastMessage" class="text-sm font-medium">Solicitação salva com sucesso!</span>
+    <!-- Modal Relatório Geral -->
+    <div id="modal-geral" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="glass w-full max-w-3xl rounded-2xl p-6 border border-slate-700 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
+                <h3 class="text-lg font-bold text-blue-400">Consolidado Geral de Ferramentas</h3>
+                <button onclick="fecharRelatorioGeral()" class="text-slate-400 hover:text-white font-bold text-lg">✕</button>
+            </div>
+            <div id="conteudo-relatorio-geral" class="flex-grow overflow-y-auto space-y-4 text-sm text-slate-300">
+                <!-- Conteúdo gerado dinamicamente -->
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-700 flex justify-end gap-3">
+                <button onclick="exportarRelatorioGeralPDF()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-xs uppercase tracking-wider">
+                    📄 Exportar Relatório em PDF
+                </button>
+                <button onclick="fecharRelatorioGeral()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs uppercase tracking-wider">
+                    Fechar
+                </button>
+            </div>
+        </div>
     </div>
 
+    <!-- Rodapé -->
+    <footer class="mt-12 text-center text-xs text-slate-500 space-y-1">
+        <p>Criado e Desenvolvido por <span class="text-blue-400 font-semibold">Cristian Azevedo Besminoff</span></p>
+        <p class="text-[11px] text-slate-400 font-medium">© 2026 • Todos os direitos reservados</p>
+    </footer>
+
+    <!-- Lógica da Aplicação -->
     <script>
-        // Exact tool list provided
-        const allowedToolList = [
-            "Alicate de Corte",
-            "Alicate Universal",
-            "Alicate de Bico",
-            "Chave BAP",
-            "Chave de Guarita",
-            "Chave Philips P",
-            "Chave Philips M",
-            "Chave Philips G",
-            "Chave de Fenda P",
-            "Chave de Fenda M",
-            "Chave de Fenda G",
-            "Alicate Decapador",
-            "Alicate Striper",
-            "Power Meter",
-            "Clivador",
-            "Clivador de Fusão",
-            "Caneta de Limpeza",
-            "Frasco de Álcool",
-            "Caneta Laser",
-            "Máquina de Fusão",
-            "Bancada Naval",
-            "Morsa",
+        // Lista oficial com os 42 itens de ferramentas
+        const listaFerramentas42 = [
+            "Alicate de Crimpar RJ45/RJ11",
+            "Alicate de Corte Diagonal",
+            "Alicate de Bico Meia-Cana",
+            "Alicate Amperímetro Digital",
+            "Chave de Fenda 1/8 x 3",
+            "Chave de Fenda 3/16 x 4",
+            "Chave Philips 1/8 x 3",
+            "Chave Philips 3/16 x 4",
+            "Chave Teste de Tensão",
+            "Jogo de Chaves Allen (Hexagonais)",
+            "Jogo de Chaves Torx",
             "Martelo Unha",
-            "Furadeira",
-            "Decapador",
-            "Alicate Crimpador",
-            "Notebook",
-            "Fusimec (Máquina de Cintar)",
-            "Guia Passa Fio",
-            "OTDR",
-            "Identificador de Fibra Ativa",
-            "Arco de Serra",
-            "Lanterna LED",
-            "Maçarico",
-            "Rotulador Tubo Loose",
-            "Decapador Longitudinal Tubo Loose",
-            "Estilete",
-            "Cavalete de Fibra",
-            "Balde de Lona",
-            "Etiquetadora",
-            "Gabarito",
-            "Outra Ferramenta (abre caixa de digitação)"
+            "Trena de 5 Metros",
+            "Estilete Profissional",
+            "Lanterna de Cabeça LED",
+            "Clivador de Fibra Óptica",
+            "Power Meter (Medidor de Potência Óptica)",
+            "Caneta Laser Visual Fault Locator (VFL)",
+            "Máquina de Fusão de Fibra Óptica",
+            "Decapador de Cabo Drop FTTH",
+            "Decapador de Tubo Loose",
+            "Alicate Abas / Amarra Drop",
+            "Escada Extensiva de Fibra de Vidro",
+            "Escada Tesoura de Fibra de Vidro",
+            "Cinto de Segurança tipo Paraquedista (NR35)",
+            "Talabarte Duplo com Absorvedor de Energia",
+            "Trava-Quedas para Corda",
+            "Corda de Poliamida 12mm",
+            "Capacete de Segurança com Jugular",
+            "Óculos de Proteção Incolor",
+            "Óculos de Proteção Fumê",
+            "Protetor Auricular tipo Plug",
+            "Luva de Raspa de Couro",
+            "Luva Multiuso Antiderrapante",
+            "Bota de Segurança com Biqueira de Composite",
+            "Detector de Tensão sem Contato",
+            "Multímetro Digital Básica",
+            "Soprador Térmico / Termoencolhível",
+            "Pistola de Cola Quente",
+            "Escova de Limpeza para Conectores Ópticos",
+            "Frasco Dispenser de Álcool Isopropílico",
+            "Bolsa / Mochila para Ferramentas Reforçada"
         ];
 
-        let selectedToolValue = "";
-        let requestsHistory = JSON.parse(localStorage.getItem('tool_requests_history')) || [];
+        let cestaAtual = [];
 
-        window.onload = function() {
-            updateBadgeCount();
-            renderToolDropdown(allowedToolList);
-            
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function(e) {
-                const container = document.getElementById('toolSearchInput').parentElement.parentElement;
-                if (!container.contains(e.target)) {
-                    document.getElementById('toolDropdown').classList.add('hidden');
-                    document.getElementById('dropdownArrow').classList.remove('rotate-180');
-                }
+        // Inicializa o select com os 42 itens
+        function inicializarSelect() {
+            const select = document.getElementById('select-ferramenta');
+            listaFerramentas42.forEach(ferramenta => {
+                const opt = document.createElement('option');
+                opt.value = ferramenta;
+                opt.textContent = ferramenta;
+                select.appendChild(opt);
             });
-        };
-
-        // Tab Switching
-        function switchTab(tabName) {
-            const formSec = document.getElementById('tabForm');
-            const historySec = document.getElementById('tabHistory');
-            const btnForm = document.getElementById('btnTabForm');
-            const btnHistory = document.getElementById('btnTabHistory');
-
-            if (tabName === 'form') {
-                formSec.classList.remove('hidden');
-                historySec.classList.add('hidden');
-                btnForm.className = "px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition shadow-sm flex items-center gap-2";
-                btnHistory.className = "px-4 py-2 text-sm font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center gap-2";
-            } else {
-                formSec.classList.add('hidden');
-                historySec.classList.remove('hidden');
-                btnHistory.className = "px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition shadow-sm flex items-center gap-2";
-                btnForm.className = "px-4 py-2 text-sm font-semibold rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center gap-2";
-                renderHistory();
-            }
         }
 
-        // Render Tool Dropdown options
-        function renderToolDropdown(items) {
-            const dropdown = document.getElementById('toolDropdown');
-            if (items.length === 0) {
-                dropdown.innerHTML = `<div class="p-3 text-xs text-slate-400 text-center">Nenhuma ferramenta encontrada</div>`;
+        function adicionarItemCarrinho() {
+            const select = document.getElementById('select-ferramenta');
+            const qtdInput = document.getElementById('qtd-ferramenta');
+            const nome = select.value;
+            const qtd = parseInt(qtdInput.value);
+
+            if (!nome) {
+                alert("Selecione uma ferramenta da lista.");
                 return;
             }
 
-            let html = '';
-            items.forEach(item => {
-                html += `
-                    <div onclick="selectTool('${item}')" class="px-4 py-2.5 text-sm hover:bg-blue-50 hover:text-blue-700 cursor-pointer transition border-b border-slate-100 last:border-b-0 flex items-center justify-between">
-                        <span>${item}</span>
-                        ${item.includes('Outra Ferramenta') ? '<i class="fa-solid fa-pen-to-square text-xs text-amber-500"></i>' : ''}
-                    </div>
-                `;
-            });
-            dropdown.innerHTML = html;
+            cestaAtual.push({ nome, qtd });
+            select.value = "";
+            qtdInput.value = "1";
+            renderizarCesta();
         }
 
-        function filterToolOptions() {
-            const query = document.getElementById('toolSearchInput').value.toLowerCase();
-            const filtered = allowedToolList.filter(item => item.toLowerCase().includes(query));
-            renderToolDropdown(filtered);
-            document.getElementById('toolDropdown').classList.remove('hidden');
-            document.getElementById('dropdownArrow').classList.add('rotate-180');
-        }
+        function adicionarOutroItem() {
+            const inputNome = document.getElementById('outra-ferramenta-nome');
+            const inputQtd = document.getElementById('outra-ferramenta-qtd');
+            const nome = inputNome.value.trim();
+            const qtd = parseInt(inputQtd.value);
 
-        function showDropdown() {
-            const query = document.getElementById('toolSearchInput').value.toLowerCase();
-            const filtered = allowedToolList.filter(item => item.toLowerCase().includes(query));
-            renderToolDropdown(filtered);
-            document.getElementById('toolDropdown').classList.remove('hidden');
-            document.getElementById('dropdownArrow').classList.add('rotate-180');
-        }
-
-        function toggleDropdown() {
-            const dropdown = document.getElementById('toolDropdown');
-            const arrow = document.getElementById('dropdownArrow');
-            if (dropdown.classList.contains('hidden')) {
-                showDropdown();
-            } else {
-                dropdown.classList.add('hidden');
-                arrow.classList.remove('rotate-180');
-            }
-        }
-
-        function selectTool(itemName) {
-            selectedToolValue = itemName;
-            document.getElementById('toolSearchInput').value = itemName;
-            document.getElementById('toolDropdown').classList.add('hidden');
-            document.getElementById('dropdownArrow').classList.remove('rotate-180');
-
-            const customContainer = document.getElementById('customToolContainer');
-            const customInput = document.getElementById('customToolName');
-
-            if (itemName.includes('Outra Ferramenta')) {
-                customContainer.classList.remove('hidden');
-                customInput.required = true;
-                customInput.focus();
-            } else {
-                customContainer.classList.add('hidden');
-                customInput.required = false;
-                customInput.value = '';
-            }
-        }
-
-        // Submit Request & Save to LocalStorage with Exact Date & Time
-        function submitToolRequest(e) {
-            e.preventDefault();
-
-            const collabName = document.getElementById('collabName').value.trim();
-            const collabId = document.getElementById('collabId').value.trim();
-            const quantity = document.getElementById('toolQuantity').value;
-            const reason = document.getElementById('toolReason').value.trim();
-
-            if (!selectedToolValue) {
-                showToast("Por favor, selecione uma ferramenta da lista.", "error");
+            if (!nome) {
+                alert("Digite o nome da ferramenta personalizada.");
                 return;
             }
 
-            let finalToolName = selectedToolValue;
-            if (selectedToolValue.includes('Outra Ferramenta')) {
-                finalToolName = document.getElementById('customToolName').value.trim();
-                if (!finalToolName) {
-                    showToast("Por favor, especifique o nome da ferramenta.", "error");
-                    return;
-                }
+            cestaAtual.push({ nome: `${nome} (Personalizado)`, qtd });
+            inputNome.value = "";
+            inputQtd.value = "1";
+            renderizarCesta();
+        }
+
+        function removerItemCesta(index) {
+            cestaAtual.splice(index, 1);
+            renderizarCesta();
+        }
+
+        function renderizarCesta() {
+            const container = document.getElementById('cesta-container');
+            if (cestaAtual.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Nenhuma ferramenta adicionada ainda.</p>`;
+                return;
             }
 
-            // Get exact date and time formatted in PT-BR
-            const now = new Date();
-            const formattedDate = now.toLocaleDateString('pt-BR');
-            const formattedTime = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const timestampIso = now.toISOString();
+            container.innerHTML = cestaAtual.map((item, idx) => `
+                <div class="flex justify-between items-center bg-slate-800/80 p-2.5 rounded-lg border border-slate-700 text-xs">
+                    <span class="text-slate-200 font-medium">${item.nome} - <strong class="text-blue-400">Qtd: ${item.qtd}</strong></span>
+                    <button onclick="removerItemCesta(${idx})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1">Remover</button>
+                </div>
+            `).join('');
+        }
 
-            const newRequest = {
-                id: 'TOOL-' + Math.floor(100000 + Math.random() * 900000),
-                collabName,
-                collabId,
-                toolName: finalToolName,
-                quantity,
-                reason: reason || 'Não informado',
-                date: formattedDate,
-                time: formattedTime,
-                timestamp: timestampIso
+        function salvarSolicitude() {
+            const tecnico = document.getElementById('nome-tecnico').value.trim();
+            const zona = document.getElementById('zona-tecnico').value.trim();
+
+            if (!tecnico || !zona) {
+                alert("Preencha o nome do técnico e a zona/base.");
+                return;
+            }
+
+            if (cestaAtual.length === 0) {
+                alert("Adicione pelo menos uma ferramenta na cesta.");
+                return;
+            }
+
+            const agora = new Date();
+            const dataHora = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            const novoRegistro = {
+                id: Date.now(),
+                tecnico,
+                zona,
+                dataHora,
+                itens: [...cestaAtual]
             };
 
-            requestsHistory.unshift(newRequest);
-            localStorage.setItem('tool_requests_history', JSON.stringify(requestsHistory));
+            let registros = JSON.parse(localStorage.getItem('solicitacoes_ferramentas')) || [];
+            registros.unshift(novoRegistro);
+            localStorage.setItem('solicitacoes_ferramentas', JSON.stringify(registros));
 
-            updateBadgeCount();
-            document.getElementById('toolForm').reset();
-            selectedToolValue = "";
-            document.getElementById('customToolContainer').classList.add('hidden');
-
-            showToast("Solicitação de ferramenta registrada com sucesso!");
-            switchTab('history');
+            // Limpa formulário
+            document.getElementById('nome-tecnico').value = "";
+            document.getElementById('zona-tecnico').value = "";
+            cestaAtual = [];
+            renderizarCesta();
+            carregarRegistros();
+            alert("Solicitação de ferramentas salva com sucesso!");
         }
 
-        // Render History List
-        function renderHistory() {
-            const listContainer = document.getElementById('historyList');
-            const filterText = document.getElementById('historyFilter').value.toLowerCase();
+        function carregarRegistros() {
+            const container = document.getElementById('lista-registros');
+            const registros = JSON.parse(localStorage.getItem('solicitacoes_ferramentas')) || [];
 
-            const filteredHistory = requestsHistory.filter(item => 
-                item.collabName.toLowerCase().includes(filterText) ||
-                item.collabId.toLowerCase().includes(filterText) ||
-                item.toolName.toLowerCase().includes(filterText) ||
-                item.date.includes(filterText)
-            );
-
-            if (filteredHistory.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                        <i class="fa-solid fa-box-open text-slate-300 text-3xl mb-2"></i>
-                        <p class="text-sm font-medium text-slate-600">Nenhuma solicitação encontrada.</p>
-                        <p class="text-xs text-slate-400 mt-1">Registre sua primeira solicitação na aba ao lado.</p>
-                    </div>
-                `;
+            if (registros.length === 0) {
+                container.innerHTML = `<p class="text-sm text-slate-400 text-center py-6">Nenhum registro encontrado no armazenamento local.</p>`;
                 return;
             }
 
-            let html = '';
-            filteredHistory.forEach((item) => {
-                html += `
-                    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                        <div class="space-y-1">
-                            <div class="flex items-center gap-2">
-                                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded">${item.id}</span>
-                                <span class="text-xs text-slate-500"><i class="fa-regular fa-calendar mr-1"></i>${item.date} às ${item.time}</span>
-                            </div>
-                            <h4 class="text-sm font-bold text-slate-800">${item.toolName} <span class="text-xs font-normal text-slate-500">(Qtd: ${item.quantity})</span></h4>
-                            <p class="text-xs text-slate-600"><i class="fa-solid fa-user text-slate-400 mr-1"></i>${item.collabName} (Mat/Setor: ${item.collabId})</p>
-                            <p class="text-xs text-slate-500 bg-slate-50 p-1.5 rounded border border-slate-100"><i class="fa-solid fa-circle-info text-slate-400 mr-1"></i>Obs: ${item.reason}</p>
+            container.innerHTML = registros.map(reg => `
+                <div class="bg-slate-900/80 border border-slate-700/80 rounded-xl p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-white text-sm">${reg.tecnico}</h3>
+                            <span class="text-[11px] bg-blue-900/60 text-blue-300 px-2 py-0.5 rounded-full border border-blue-700/50">${reg.zona}</span>
                         </div>
-                        <div class="flex items-center gap-2 self-end sm:self-center">
-                            <button onclick="deleteRequest('${item.id}')" class="w-8 h-8 flex items-center justify-center bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg transition" title="Excluir item">
-                                <i class="fa-solid fa-trash text-xs"></i>
-                            </button>
+                        <p class="text-xs text-slate-400 mt-1">Registrado em: ${reg.dataHora}</p>
+                        <div class="mt-2 text-xs text-slate-300 space-y-1">
+                            ${reg.itens.map(i => `• ${i.nome} (Qtd:${i.qtd})`).join('<br>')}
                         </div>
                     </div>
-                `;
-            });
-
-            listContainer.innerHTML = html;
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <button onclick="gerarPDFIndividual(${reg.id})" class="flex-1 md:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-xs transition">
+                            📄 Baixar PDF
+                        </button>
+                        <button onclick="excluirRegistro(${reg.id})" class="px-3 py-2 bg-rose-600/20 hover:bg-rose-600/40 text-rose-400 border border-rose-500/30 rounded-xl text-xs transition">
+                            Excluir
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        function deleteRequest(id) {
-            if (confirm("Deseja realmente excluir este registro do histórico?")) {
-                requestsHistory = requestsHistory.filter(item => item.id !== id);
-                localStorage.setItem('tool_requests_history', JSON.stringify(requestsHistory));
-                updateBadgeCount();
-                renderHistory();
-                showToast("Registro removido com sucesso!");
+        function excluirRegistro(id) {
+            if (confirm("Deseja realmente excluir este registro?")) {
+                let registros = JSON.parse(localStorage.getItem('solicitacoes_ferramentas')) || [];
+                registros = registros.filter(r => r.id !== id);
+                localStorage.setItem('solicitacoes_ferramentas', JSON.stringify(registros));
+                carregarRegistros();
             }
         }
 
-        function clearHistory() {
-            if (requestsHistory.length === 0) return;
-            if (confirm("Tem certeza que deseja apagar todo o histórico de solicitações?")) {
-                requestsHistory = [];
-                localStorage.setItem('tool_requests_history', JSON.stringify(requestsHistory));
-                updateBadgeCount();
-                renderHistory();
-                showToast("Histórico limpo com sucesso!");
-            }
-        }
-
-        function updateBadgeCount() {
-            document.getElementById('badgeCount').textContent = requestsHistory.length;
-        }
-
-        // Export to PDF using jsPDF
-        function exportToPDF() {
-            if (requestsHistory.length === 0) {
-                showToast("Não há dados no histórico para exportar.", "error");
-                return;
-            }
+        function gerarPDFIndividual(id) {
+            const registros = JSON.parse(localStorage.getItem('solicitacoes_ferramentas')) || [];
+            const reg = registros.find(r => r.id === id);
+            if (!reg) return;
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            // Header styling
-            doc.setFillColor(15, 23, 42); // Slate 900
-            doc.rect(0, 0, 210, 25, "F");
-
-            doc.setTextColor(255, 255, 255);
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(15);
-            doc.text("RELATÓRIO DE SOLICITAÇÃO DE FERRAMENTAS", 14, 16);
+            doc.setFontSize(16);
+            doc.setTextColor(30, 64, 175);
+            doc.text("UNIFIQUE - CONTROLE DE FERRAMENTAS", 14, 20);
+
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Data do Registro: ${reg.dataHora}`, 14, 28);
+
+            doc.setFontSize(12);
+            doc.setTextColor(50, 50, 50);
+            doc.text(`Técnico: ${reg.tecnico}`, 14, 38);
+            doc.text(`Zona / Base: ${reg.zona}`, 14, 46);
+
+            doc.setLineWidth(0.5);
+            doc.setLineColor(200, 200, 200);
+            doc.line(14, 52, 196, 52);
+
+            doc.setFont("helvetica", "bold");
+            doc.text("Item / Ferramenta", 14, 60);
+            doc.text("Quantidade", 160, 60);
 
             doc.setFont("helvetica", "normal");
-            doc.setFontSize(9);
-            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 135, 16);
-
-            let y = 35;
-            doc.setTextColor(15, 23, 42);
-
-            requestsHistory.forEach((item, index) => {
+            let y = 68;
+            reg.itens.forEach(item => {
                 if (y > 270) {
                     doc.addPage();
                     y = 20;
                 }
-
-                doc.setFillColor(241, 245, 249); // Slate 100
-                doc.roundedRect(14, y, 182, 22, 2, 2, "F");
-
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(11);
-                doc.text(`${index + 1}. ${item.toolName} (Qtd: ${item.quantity})`, 18, y + 7);
-
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(9);
-                doc.setTextColor(71, 85, 105);
-                doc.text(`Técnico: ${item.collabName} (Mat/Setor: ${item.collabId})`, 18, y + 13);
-                doc.text(`Data/Hora: ${item.date} às ${item.time}`, 18, y + 18);
-                doc.text(`Obs: ${item.reason}`, 110, y + 13);
-
-                y += 27;
+                doc.text(item.nome, 14, y);
+                doc.text(String(item.qtd), 160, y);
+                y += 8;
             });
 
-            // Save PDF file (works directly on mobile browsers and desktop)
-            doc.save(`relatorio_ferramentas_${new Date().toISOString().slice(0,10)}.pdf`);
-            showToast("Relatório PDF gerado com sucesso!");
+            doc.setFontSize(9);
+            doc.setTextColor(150, 150, 150);
+            doc.text("Gerado automaticamente pelo Sistema de Fiscalização Total - Cristian Azevedo Besminoff", 14, 285);
+
+            doc.save(`Ferramentas_${reg.tecnico.replace(/\s+/g, '_')}.pdf`);
         }
 
-        // Toast Notification helper
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMessage').textContent = message;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+        function abrirRelatorioGeral() {
+            const registros = JSON.parse(localStorage.getItem('solicitacoes_ferramentas')) || [];
+            const container = document.getElementById('conteudo-relatorio-geral');
+
+            if (registros.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-400 py-4">Nenhum dado consolidado disponível.</p>`;
+            } else {
+                // Soma total de cada ferramenta
+                let totais = {};
+                registros.forEach(reg => {
+                    reg.itens.forEach(item => {
+                        totais[item.nome] = (totais[item.nome] || 0) + item.qtd;
+                    });
+                });
+
+                let html = `<h4 class="font-bold text-slate-200 mb-2">Consolidado Total de Itens Solicitados:</h4><ul class="space-y-1 mb-4 bg-slate-900 p-3 rounded-xl border border-slate-700">`;
+                for (let [ferramenta, qtd] of Object.entries(totais)) {
+                    html += `<li class="flex justify-between text-xs border-b border-slate-800 py-1"><span class="text-slate-300">${ferramenta}</span><strong class="text-blue-400">${qtd} un.</strong></li>`;
+                }
+                html += `</ul>`;
+
+                html += `<h4 class="font-bold text-slate-200 mb-2">Histórico por Técnico:</h4><div class="space-y-3">`;
+                registros.forEach(reg => {
+                    html += `<div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-xs">
+                        <p class="font-bold text-white">${reg.tecnico} (${reg.zona}) - <span class="text-slate-400 font-normal">${reg.dataHora}</span></p>
+                        <p class="text-slate-300 mt-1">${reg.itens.map(i => `${i.nome} (Qtd:${i.qtd})`).join(' | ')}</p>
+                    </div>`;
+                });
+                html += `</div>`;
+
+                container.innerHTML = html;
+            }
+
+            document.getElementById('modal-geral').classList.remove('hidden');
         }
+
+        function fecharRelatorioGeral() {
+            document.getElementById('modal-geral').classList.add('hidden');
+        }
+
+        function exportarRelatorioGeralPDF() {
+            const registros = JSON.parse(localStorage.getItem('solicitacoes_ferramentas')) || [];
+            if (registros.length === 0) return;
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.setTextColor(30, 64, 175);
+            doc.text("RELATÓRIO GERAL - FERRAMENTAS UNIFIQUE", 14, 20);
+
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Data de Emissão: ${new Date().toLocaleDateString('pt-BR')}`, 14, 28);
+
+            let totais = {};
+            registros.forEach(reg => {
+                reg.itens.forEach(item => {
+                    totais[item.nome] = (totais[item.nome] || 0) + item.qtd;
+                });
+            });
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.setTextColor(50, 50, 50);
+            doc.text("Consolidado de Itens:", 14, 38);
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            let y = 46;
+            for (let [ferramenta, qtd] of Object.entries(totais)) {
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+                doc.text(`• ${ferramenta}: ${qtd} un.`, 14, y);
+                y += 7;
+            }
+
+            doc.save(`Relatorio_Geral_Ferramentas.pdf`);
+        }
+
+        // Inicializa ao carregar a página
+        window.onload = function() {
+            inicializarSelect();
+            carregarRegistros();
+        };
     </script>
 </body>
 </html>
