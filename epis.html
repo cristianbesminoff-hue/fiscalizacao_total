@@ -3,460 +3,444 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Solicitação de EPIs - Unifique</title>
+    <title>Controle de EPIs - Fiscalização Total</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- jsPDF para exportação de PDFs -->
+    <!-- jsPDF para geração de relatórios em PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col p-4 md:p-8">
 
-    <header class="w-full max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center glass p-6 rounded-2xl shadow-xl mb-6 border border-slate-700">
+    <!-- Cabeçalho -->
+    <header class="w-full max-w-5xl mx-auto mb-6 flex flex-col md:flex-row justify-between items-center glass p-6 rounded-2xl shadow-xl border border-slate-700">
         <div>
-            <h1 class="text-2xl md:text-3xl font-extrabold text-amber-400 tracking-wider">🦺 CONTROLE DE EPIs</h1>
-            <p class="text-xs text-slate-400 mt-1">Plataforma Operacional de Qualidade - Unifique</p>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-amber-400 tracking-wider">CONTROLE DE EPIs</h1>
+            <p class="text-xs text-slate-400 mt-1">Módulo Operacional • Unifique Telecomunicações</p>
         </div>
-        <div class="mt-4 sm:mt-0 flex gap-3">
-            <button onclick="abrirRelatorioGeral()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition text-xs uppercase tracking-wider flex items-center gap-2">
+        <div class="mt-4 md:mt-0 flex gap-3">
+            <button onclick="abrirRelatorioGeral()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 font-semibold rounded-xl border border-amber-500/30 transition text-xs uppercase tracking-wider">
                 📊 Relatório Geral
             </button>
-            <a href="index.html" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-bold rounded-xl border border-cyan-500/30 transition text-xs uppercase tracking-wider flex items-center gap-2">
+            <a href="index.html" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl border border-slate-600 transition text-xs uppercase tracking-wider">
                 ← Voltar ao Início
             </a>
         </div>
     </header>
 
-    <main class="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow">
+    <!-- Conteúdo Principal -->
+    <main class="w-full max-w-5xl mx-auto space-y-6 flex-grow">
         
-        <!-- Formulário e Seleção de EPIs (2 colunas) -->
-        <section class="lg:col-span-2 glass p-6 rounded-2xl shadow-xl border border-slate-700 flex flex-col justify-between">
-            <form id="form-epi" onsubmit="salvarPedidoEPI(event)" class="space-y-5">
+        <!-- Formulário de Registro -->
+        <div class="glass p-6 rounded-2xl shadow-xl border border-slate-700">
+            <h2 class="text-lg font-bold text-slate-200 mb-4 uppercase tracking-wide border-b border-slate-700 pb-2">Registrar Solicitação / Entrega de EPI</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div>
-                    <h2 class="text-lg font-bold text-slate-200 border-b border-slate-700 pb-2 mb-4">Nova Solicitação de Equipamento</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">Nome do Técnico:</label>
-                            <input type="text" id="nome-tecnico" required placeholder="Ex: Carlos Silva" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">Zona / Região:</label>
-                            <input type="text" id="zona-tecnico" required placeholder="Ex: Zona Norte / Blumenau" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-500">
-                        </div>
-                    </div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">Nome do Técnico:</label>
+                    <input type="text" id="nome-tecnico" placeholder="Ex: João da Silva" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-500">
                 </div>
-
-                <!-- Seção de Seleção de EPIs -->
-                <div class="space-y-3">
-                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wide">Selecionar EPIs da Lista (21 itens):</label>
-                    <div class="flex gap-2">
-                        <select id="select-epi" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-500">
-                            <option value="">-- Escolha um EPI --</option>
-                        </select>
-                        <input type="number" id="qtd-epi" min="1" value="1" class="w-20 bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm text-center focus:outline-none focus:border-amber-500">
-                        <button type="button" onclick="adicionarEPIItem()" class="px-5 py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl transition text-sm">Adicionar</button>
-                    </div>
-
-                    <!-- Campo Outro EPI (Condicional) -->
-                    <div id="container-outro" class="hidden pt-2">
-                        <input type="text" id="outro-epi-nome" placeholder="Especifique o nome do outro EPI..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-500">
-                    </div>
-                </div>
-
-                <!-- Tabela / Lista do Carrinho de EPIs -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">EPIs na Cesta desta Solicitação:</label>
-                    <div class="bg-slate-900/80 border border-slate-700 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead class="bg-slate-800 text-slate-400 uppercase tracking-wider sticky top-0">
-                                <tr>
-                                    <th class="p-3">Equipamento (EPI)</th>
-                                    <th class="p-3 text-center">Qtd</th>
-                                    <th class="p-3 text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="lista-cesta" class="divide-y divide-slate-800">
-                                <tr>
-                                    <td colspan="3" class="p-4 text-center text-slate-500">Nenhum EPI adicionado na cesta ainda.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">Zona / Base / Cidade:</label>
+                    <input type="text" id="zona-tecnico" placeholder="Ex: Zona Norte / Porto Alegre" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-500">
                 </div>
-
-                <button type="submit" id="btn-salvar-pedido" class="w-full py-4 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold rounded-xl shadow-lg transition transform active:scale-95 text-sm uppercase tracking-wider">
-                    Salvar Pedido de EPIs
-                </button>
-            </form>
-        </section>
-
-        <!-- Painel Lateral de Pedidos Salvos -->
-        <section class="glass p-6 rounded-2xl shadow-xl border border-slate-700 flex flex-col">
-            <h2 class="text-lg font-bold text-slate-200 border-b border-slate-700 pb-2 mb-4">Solicitações Registradas</h2>
-            <div id="lista-historico" class="space-y-3 overflow-y-auto max-h-[500px] flex-grow pr-1">
-                <p class="text-xs text-slate-500 text-center py-6">Carregando solicitações...</p>
             </div>
-        </section>
+
+            <!-- Seleção de EPIs -->
+            <div class="mb-6">
+                <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">Selecionar EPI da Lista (21 Itens):</label>
+                <div class="flex gap-2">
+                    <select id="select-epi" class="flex-grow bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-500">
+                        <option value="">-- Selecione um EPI --</option>
+                    </select>
+                    <input type="number" id="qtd-epi" value="1" min="1" class="w-20 bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm text-center focus:outline-none focus:border-amber-500">
+                    <button type="button" onclick="adicionarItemCarrinho()" class="px-5 py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl transition text-sm">
+                        Adicionar
+                    </button>
+                </div>
+            </div>
+
+            <!-- EPI Personalizado / Outro -->
+            <div class="mb-6 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                <label class="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">Outro EPI (Fora da Lista):</label>
+                <div class="flex gap-2">
+                    <input type="text" id="outro-epi-nome" placeholder="Nome do EPI personalizado" class="flex-grow bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white text-sm focus:outline-none focus:border-amber-500">
+                    <input type="number" id="outro-epi-qtd" value="1" min="1" class="w-20 bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-white text-sm text-center focus:outline-none focus:border-amber-500">
+                    <button type="button" onclick="adicionarOutroItem()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-xl transition text-sm">
+                        Incluir Outro
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cesta de Itens Adicionados -->
+            <div class="mb-6">
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">EPIs na Solicitação Atual:</h3>
+                <div id="cesta-container" class="bg-slate-900/80 border border-slate-700 rounded-xl p-4 max-h-48 overflow-y-auto space-y-2">
+                    <p class="text-xs text-slate-500 text-center py-4">Nenhum EPI adicionado ainda.</p>
+                </div>
+            </div>
+
+            <button onclick="salvarSolicitude()" class="w-full py-4 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold rounded-xl shadow-lg transition transform active:scale-95 text-sm uppercase tracking-wider">
+                Salvar Solicitação de EPIs
+            </button>
+        </div>
+
+        <!-- Lista de Solicitações Salvas -->
+        <div class="glass p-6 rounded-2xl shadow-xl border border-slate-700">
+            <h2 class="text-lg font-bold text-slate-200 mb-4 uppercase tracking-wide border-b border-slate-700 pb-2">Histórico de Solicitações Registradas</h2>
+            <div id="lista-registros" class="space-y-4">
+                <p class="text-sm text-slate-400 text-center py-6">Nenhum registro encontrado no armazenamento local.</p>
+            </div>
+        </div>
 
     </main>
 
-    <!-- Modal do Relatório Geral -->
-    <div id="modal-relatorio" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="glass w-full max-w-4xl max-h-[90vh] rounded-2xl p-6 border border-slate-700 flex flex-col shadow-2xl">
-            <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-4">
-                <h3 class="text-xl font-bold text-amber-400">📊 Relatório Geral Consolidado de EPIs</h3>
+    <!-- Modal Relatório Geral -->
+    <div id="modal-geral" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="glass w-full max-w-3xl rounded-2xl p-6 border border-slate-700 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
+                <h3 class="text-lg font-bold text-amber-400">Consolidado Geral de EPIs</h3>
                 <button onclick="fecharRelatorioGeral()" class="text-slate-400 hover:text-white font-bold text-lg">✕</button>
             </div>
-            <div id="conteudo-relatorio-geral" class="overflow-y-auto flex-grow space-y-4 pr-2 text-sm">
+            <div id="conteudo-relatorio-geral" class="flex-grow overflow-y-auto space-y-4 text-sm text-slate-300">
                 <!-- Conteúdo gerado dinamicamente -->
             </div>
-            <div class="border-t border-slate-700 pt-4 mt-4 flex justify-end gap-3">
-                <button onclick="exportarRelatorioGeralPDF()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition text-xs uppercase">🖨️ Exportar PDF Geral</button>
-                <button onclick="fecharRelatorioGeral()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition text-xs uppercase">Fechar</button>
+            <div class="mt-4 pt-3 border-t border-slate-700 flex justify-end gap-3">
+                <button onclick="exportarRelatorioGeralPDF()" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl text-xs uppercase tracking-wider">
+                    📄 Exportar Relatório em PDF
+                </button>
+                <button onclick="fecharRelatorioGeral()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs uppercase tracking-wider">
+                    Fechar
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Rodapé com Direitos Autorais -->
-    <footer class="mt-8 text-center text-xs text-slate-500 space-y-1">
-        <p>Criado e Desenvolvido por <span class="text-amber-400 font-semibold">Cristian Azevedo Besminoff</span></p>
-        <p class="text-[11px] text-slate-400 font-medium">© 2026 • Todos os direitos reservados</p>
-        <p class="text-[10px] text-slate-600">Unifique Telecomunicações</p>
+    <!-- Rodapé -->
+    <footer class="mt-12 text-center text-xs text-slate-500 space-y-1">
+        <p>Criado e Desenvolvido por <span class="text-amber-400 font-semibold">Cristian Azevedo Besminoff</span>[cite: 2]</p>
+        <p class="text-[11px] text-slate-400 font-medium">© 2026 • Todos os direitos reservados[cite: 2]</p>
     </footer>
 
+    <!-- Lógica da Aplicação -->
     <script>
-        // Lista completa de 21 EPIs obrigatórios
-        const listaEPIsOriginal = [
-            "Óculos de Proteção",
-            "Capacete com Jugular",
-            "Cinto Paraquedista com Talabarte Duplo",
+        // Lista oficial com os 21 EPIs especificados
+        const listaEpis21 = [
+            "Óculos Escuros",
+            "Óculos Transparente",
+            "Capacete",
+            "Cinto Paraquedista",
             "Talabarte de Posicionamento",
-            "Botina de Segurança com Biqueira",
-            "Luva de Raspa",
+            "Luva Isolante",
+            "Luva de Cobertura",
             "Luva de Vaqueta",
-            "Luva Isolante Classe 0",
-            "Luva de Malha Pigmentada",
-            "Protetor Auricular Tipo Concha",
-            "Protetor Auricular de Inserção",
-            "Máscara PFF2",
-            "Óculos de Solda",
-            "Perneira de Couro",
-            "Cinto Porta Ferramentas",
-            "Talabarte de Restrição",
-            "Trava-Quedas para Corda",
-            "Corda de Segurança (Corpo de Bombeiro)",
-            "Capa de Chuva (Jaqueta e Calça)",
-            "Colete Refletivo de Alta Visibilidade",
-            "Outro EPI"
+            "Detector de Tensão",
+            "Eureka",
+            "Corda Linha de Vida",
+            "Fita Catraca",
+            "Fita de Ancoragem 1,20m",
+            "Fita de Ancoragem 0,80m",
+            "Calça Antichama",
+            "Jaleco Antichama",
+            "Camisa",
+            "Botina de Segurança",
+            "Escada",
+            "Cones",
+            "Outro EPI (Personalizado)"
         ];
 
         let cestaAtual = [];
 
-        window.addEventListener('DOMContentLoaded', () => {
+        // Inicializa o select com os 21 EPIs
+        function inicializarSelect() {
             const select = document.getElementById('select-epi');
-            listaEPIsOriginal.forEach(epi => {
+            listaEpis21.forEach(epi => {
                 const opt = document.createElement('option');
                 opt.value = epi;
                 opt.textContent = epi;
                 select.appendChild(opt);
             });
+        }
 
-            select.addEventListener('change', (e) => {
-                const containerOutro = document.getElementById('container-outro');
-                if (e.target.value === "Outro EPI") {
-                    containerOutro.classList.remove('hidden');
-                } else {
-                    containerOutro.classList.add('hidden');
-                    document.getElementById('outro-epi-nome').value = '';
-                }
-            });
-
-            carregarHistorico();
-        });
-
-        function adicionarEPIItem() {
+        function adicionarItemCarrinho() {
             const select = document.getElementById('select-epi');
             const qtdInput = document.getElementById('qtd-epi');
-            let nomeEPI = select.value;
-            const qtd = parseInt(qtdInput.value) || 1;
+            let nome = select.value;
+            const qtd = parseInt(qtdInput.value);
 
-            if (!nomeEPI) {
+            if (!nome) {
                 alert("Selecione um EPI da lista.");
                 return;
             }
 
-            if (nomeEPI === "Outro EPI") {
-                const outroNome = document.getElementById('outro-epi-nome').value.trim();
-                if (!outroNome) {
-                    alert("Por favor, especifique o nome do Outro EPI.");
-                    return;
+            if (nome === "Botina de Segurança") {
+                const tamanho = prompt("Informe o tamanho da botina (ex: 39, 40, 41):");
+                if (tamanho) {
+                    nome = `Botina de Segurança (Tam: ${tamanho})`;
                 }
-                nomeEPI = `Outro: ${outroNome}`;
             }
 
-            // Verifica se já existe na cesta
-            const indexExistente = cestaAtual.findIndex(item => item.nome === nomeEPI);
-            if (indexExistente >= 0) {
-                cestaAtual[indexExistente].qtd += qtd;
-            } else {
-                cestaAtual.push({ nome: nomeEPI, qtd: qtd });
-            }
-
-            atualizarTabelaCesta();
+            cestaAtual.push({ nome, qtd });
             select.value = "";
             qtdInput.value = "1";
-            document.getElementById('container-outro').classList.add('hidden');
-            document.getElementById('outro-epi-nome').value = "";
+            renderizarCesta();
+        }
+
+        function adicionarOutroItem() {
+            const inputNome = document.getElementById('outro-epi-nome');
+            const inputQtd = document.getElementById('outro-epi-qtd');
+            const nome = inputNome.value.trim();
+            const qtd = parseInt(inputQtd.value);
+
+            if (!nome) {
+                alert("Digite o nome do EPI personalizado.");
+                return;
+            }
+
+            cestaAtual.push({ nome: `${nome} (Personalizado)`, qtd });
+            inputNome.value = "";
+            inputQtd.value = "1";
+            renderizarCesta();
         }
 
         function removerItemCesta(index) {
             cestaAtual.splice(index, 1);
-            atualizarTabelaCesta();
+            renderizarCesta();
         }
 
-        function atualizarTabelaCesta() {
-            const tbody = document.getElementById('lista-cesta');
+        function renderizarCesta() {
+            const container = document.getElementById('cesta-container');
             if (cestaAtual.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-500">Nenhum EPI adicionado na cesta ainda.</td></tr>`;
+                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Nenhum EPI adicionado ainda.</p>`;
                 return;
             }
 
-            tbody.innerHTML = '';
-            cestaAtual.forEach((item, idx) => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-800/50 transition">
-                        <td class="p-3 text-slate-200 font-medium">${item.nome}</td>
-                        <td class="p-3 text-center text-amber-400 font-bold">${item.qtd}</td>
-                        <td class="p-3 text-center">
-                            <button type="button" onclick="removerItemCesta(${idx})" class="text-rose-400 hover:text-rose-300 font-bold text-xs bg-rose-950/40 px-2 py-1 rounded">Remover</button>
-                        </td>
-                    </tr>
-                `;
-            });
+            container.innerHTML = cestaAtual.map((item, idx) => `
+                <div class="flex justify-between items-center bg-slate-800/80 p-2.5 rounded-lg border border-slate-700 text-xs">
+                    <span class="text-slate-200 font-medium">${item.nome} - <strong class="text-amber-400">Qtd: ${item.qtd}</strong></span>
+                    <button onclick="removerItemCesta(${idx})" class="text-rose-400 hover:text-rose-300 font-bold px-2 py-1">Remover</button>
+                </div>
+            `).join('');
         }
 
-        function salvarPedidoEPI(event) {
-            event.preventDefault();
-            const nomeTecnico = document.getElementById('nome-tecnico').value.trim();
-            const zonaTecnico = document.getElementById('zona-tecnico').value.trim();
+        function salvarSolicitude() {
+            const tecnico = document.getElementById('nome-tecnico').value.trim();
+            const zona = document.getElementById('zona-tecnico').value.trim();
 
-            if (cestaAtual.length === 0) {
-                alert("Adicione pelo menos um EPI na cesta antes de salvar o pedido.");
+            if (!tecnico || !zona) {
+                alert("Preencha o nome do técnico e a zona/base.");
                 return;
             }
 
-            const novoPedido = {
-                id: 'EPI-' + Date.now().toString().slice(-6),
-                data: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
-                tecnico: nomeTecnico,
-                zona: zonaTecnico,
+            if (cestaAtual.length === 0) {
+                alert("Adicione pelo menos um EPI na cesta.");
+                return;
+            }
+
+            const agora = new Date();
+            const dataHora = agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            const novoRegistro = {
+                id: Date.now(),
+                tecnico,
+                zona,
+                dataHora,
                 itens: [...cestaAtual]
             };
 
-            let historico = JSON.parse(localStorage.getItem('pedidosEPIsUnifique') || '[]');
-            historico.unshift(novoPedido);
-            localStorage.setItem('pedidosEPIsUnifique', JSON.stringify(historico));
+            let registros = JSON.parse(localStorage.getItem('solicitacoes_epis')) || [];
+            registros.unshift(novoRegistro);
+            localStorage.setItem('solicitacoes_epis', JSON.stringify(registros));
 
-            // Limpa o formulário
-            document.getElementById('nome-tecnico').value = '';
-            document.getElementById('zona-tecnico').value = '';
+            // Limpa formulário
+            document.getElementById('nome-tecnico').value = "";
+            document.getElementById('zona-tecnico').value = "";
             cestaAtual = [];
-            atualizarTabelaCesta();
-            carregarHistorico();
-
-            alert("Pedido de EPIs salvo com sucesso!");
+            renderizarCesta();
+            carregarRegistros();
+            alert("Solicitação de EPIs salva com sucesso!");
         }
 
-        function carregarHistorico() {
-            const container = document.getElementById('lista-historico');
-            let historico = JSON.parse(localStorage.getItem('pedidosEPIsUnifique') || '[]');
+        function carregarRegistros() {
+            const container = document.getElementById('lista-registros');
+            const registros = JSON.parse(localStorage.getItem('solicitacoes_epis')) || [];
 
-            if (historico.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-6">Nenhum pedido registrado ainda.</p>`;
+            if (registros.length === 0) {
+                container.innerHTML = `<p class="text-sm text-slate-400 text-center py-6">Nenhum registro encontrado no armazenamento local.</p>`;
                 return;
             }
 
-            container.innerHTML = '';
-            historico.forEach((pedido, idx) => {
-                let itensResumo = pedido.itens.map(i => `${i.qtd}x ${i.nome}`).join(', ');
-                container.innerHTML += `
-                    <div class="bg-slate-900 border border-slate-700/80 rounded-xl p-4 shadow space-y-2">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-[10px] font-bold text-amber-400 bg-amber-950/50 px-2 py-0.5 rounded">${pedido.id}</span>
-                                <h3 class="text-sm font-bold text-white mt-1">${pedido.tecnico}</h3>
-                                <p class="text-[11px] text-slate-400">Região: ${pedido.zona} • <span class="text-slate-500">${pedido.data}</span></p>
-                            </div>
-                            <button onclick="excluirPedido(${idx})" class="text-rose-400 hover:text-rose-300 text-xs font-semibold">Excluir</button>
+            container.innerHTML = registros.map(reg => `
+                <div class="bg-slate-900/80 border border-slate-700/80 rounded-xl p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-white text-sm">${reg.tecnico}</h3>
+                            <span class="text-[11px] bg-amber-900/60 text-amber-300 px-2 py-0.5 rounded-full border border-amber-700/50">${reg.zona}</span>
                         </div>
-                        <div class="text-xs text-slate-300 bg-slate-800/60 p-2 rounded-lg border border-slate-700">
-                            <strong>EPIs solicitados:</strong> ${itensResumo}
-                        </div>
-                        <div class="flex gap-2 pt-1">
-                            <button onclick="gerarPDFIndividual('${pedido.id}')" class="flex-1 py-1.5 bg-amber-600/80 hover:bg-amber-600 text-white font-bold rounded-lg text-xs transition text-center">
-                                📄 Baixar PDF Individual
-                            </button>
+                        <p class="text-xs text-slate-400 mt-1">Registrado em: ${reg.dataHora}</p>
+                        <div class="mt-2 text-xs text-slate-300 space-y-1">
+                            ${reg.itens.map(i => `• ${i.nome} (Qtd:${i.qtd})`).join('<br>')}
                         </div>
                     </div>
-                `;
-            });
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <button onclick="gerarPDFIndividual(${reg.id})" class="flex-1 md:flex-none px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl text-xs transition">
+                            📄 Baixar PDF
+                        </button>
+                        <button onclick="excluirRegistro(${reg.id})" class="px-3 py-2 bg-rose-600/20 hover:bg-rose-600/40 text-rose-400 border border-rose-500/30 rounded-xl text-xs transition">
+                            Excluir
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        function excluirPedido(index) {
-            if (confirm("Deseja realmente excluir este registro de solicitação?")) {
-                let historico = JSON.parse(localStorage.getItem('pedidosEPIsUnifique') || '[]');
-                historico.splice(index, 1);
-                localStorage.setItem('pedidosEPIsUnifique', JSON.stringify(historico));
-                carregarHistorico();
+        function excluirRegistro(id) {
+            if (confirm("Deseja realmente excluir este registro?")) {
+                let registros = JSON.parse(localStorage.getItem('solicitacoes_epis')) || [];
+                registros = registros.filter(r => r.id !== id);
+                localStorage.setItem('solicitacoes_epis', JSON.stringify(registros));
+                carregarRegistros();
             }
         }
 
-        function gerarPDFIndividual(pedidoId) {
-            let historico = JSON.parse(localStorage.getItem('pedidosEPIsUnifique') || '[]');
-            const pedido = historico.find(p => p.id === pedidoId);
-            if (!pedido) return;
+        function gerarPDFIndividual(id) {
+            const registros = JSON.parse(localStorage.getItem('solicitacoes_epis')) || [];
+            const reg = registros.find(r => r.id === id);
+            if (!reg) return;
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            doc.setFillColor(15, 23, 42);
-            doc.rect(0, 0, 210, 40, 'F');
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.setTextColor(217, 119, 6); // Amber dark
+            doc.text("UNIFIQUE - CONTROLE DE EPIs", 14, 20);
 
-            doc.setTextColor(245, 158, 11);
-            doc.setFontSize(18);
-            doc.text("UNIFIQUE TELECOMUNICAÇÕES", 14, 20);
-
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(11);
-            doc.text("COMPROVANTE DE SOLICITAÇÃO DE EPIs", 14, 28);
-
-            doc.setTextColor(50, 50, 50);
             doc.setFontSize(10);
-            doc.text(`ID do Pedido: ${pedido.id}`, 14, 52);
-            doc.text(`Data/Hora: ${pedido.data}`, 14, 58);
-            doc.text(`Técnico: ${pedido.tecnico}`, 14, 64);
-            doc.text(`Zona / Região: ${pedido.zona}`, 14, 70);
-
-            doc.line(14, 76, 196, 76);
-
-            doc.setFont(undefined, 'bold');
-            doc.text("Equipamento de Proteção Individual (EPI)", 14, 84);
-            doc.text("Qtd", 170, 84, { align: 'right' });
-            doc.setFont(undefined, 'normal');
-            doc.line(14, 87, 196, 87);
-
-            let y = 94;
-            pedido.itens.forEach(item => {
-                doc.text(item.nome, 14, y);
-                doc.text(String(item.qtd), 170, y, { align: 'right' });
-                y += 8;
-            });
-
-            doc.line(14, y + 2, 196, y + 2);
-
-            doc.setFontSize(8);
             doc.setTextColor(100, 100, 100);
-            doc.text("Documento gerado pela Plataforma Operacional de Qualidade - Unifique", 14, 280);
-            doc.text("Responsável técnico: Cristian Azevedo Besminoff", 14, 285);
+            doc.text(`Data do Registro: ${reg.dataHora}`, 14, 28);
 
-            doc.save(`EPI_${pedido.tecnico.replace(/\s+/g, '_')}_${pedido.id}.pdf`);
-        }
-
-        function abrirRelatorioGeral() {
-            let historico = JSON.parse(localStorage.getItem('pedidosEPIsUnifique') || '[]');
-            const container = document.getElementById('conteudo-relatorio-geral');
-
-            if (historico.length === 0) {
-                container.innerHTML = `<p class="text-center text-slate-400 py-8">Nenhum dado cadastrado para consolidar no relatório geral.</p>`;
-                document.getElementById('modal-relatorio').classList.remove('hidden');
-                document.getElementById('modal-relatorio').classList.add('flex');
-                return;
-            }
-
-            // Consolidar EPIs por nome
-            let totaisEPIs = {};
-            historico.forEach(p => {
-                p.itens.forEach(i => {
-                    totaisEPIs[i.nome] = (totaisEPIs[i.nome] || 0) + i.qtd;
-                });
-            });
-
-            let htmlTotais = `<div class="bg-slate-900 p-4 rounded-xl border border-slate-700 mb-6"><h4 class="font-bold text-amber-400 mb-2">Resumo Geral de Quantidades por EPI:</h4><ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">`;
-            for (let [epi, qtd] of Object.entries(totaisEPIs)) {
-                htmlTotais += `<li class="flex justify-between bg-slate-800/70 p-2 rounded border border-slate-700"><span class="text-slate-200">${epi}</span><span class="font-bold text-amber-400">${qtd} un(s)</span></li>`;
-            }
-            htmlTotais += `</ul></div>`;
-
-            let htmlSolicitacoes = `<h4 class="font-bold text-amber-400 mb-2">Detalhamento por Técnico:</h4><div class="space-y-3">`;
-            historico.forEach(p => {
-                let itensStr = p.itens.map(i => `${i.qtd}x ${i.nome}`).join(' | ');
-                htmlSolicitacoes += `
-                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-700 text-xs">
-                        <div class="flex justify-between font-bold text-white mb-1">
-                            <span>${p.tecnico} (${p.zona})</span>
-                            <span class="text-amber-400">${p.id}</span>
-                        </div>
-                        <p class="text-slate-300"><strong>EPIs:</strong> ${itensStr}</p>
-                        <p class="text-[10px] text-slate-500 mt-1">${p.data}</p>
-                    </div>
-                `;
-            });
-            htmlSolicitacoes += `</div>`;
-
-            container.innerHTML = htmlTotais + htmlSolicitacoes;
-            document.getElementById('modal-relatorio').classList.remove('hidden');
-            document.getElementById('modal-relatorio').classList.add('flex');
-        }
-
-        function fecharRelatorioGeral() {
-            document.getElementById('modal-relatorio').classList.remove('flex');
-            document.getElementById('modal-relatorio').classList.add('hidden');
-        }
-
-        function exportarRelatorioGeralPDF() {
-            let historico = JSON.parse(localStorage.getItem('pedidosEPIsUnifique') || '[]');
-            if (historico.length === 0) return;
-
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            doc.setFillColor(15, 23, 42);
-            doc.rect(0, 0, 210, 40, 'F');
-
-            doc.setTextColor(245, 158, 11);
-            doc.setFontSize(18);
-            doc.text("UNIFIQUE TELECOMUNICAÇÕES", 14, 20);
-
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(11);
-            doc.text("RELATÓRIO GERAL CONSOLIDADO DE EPIs", 14, 28);
-
-            let y = 52;
+            doc.setFontSize(12);
             doc.setTextColor(50, 50, 50);
-            doc.setFontSize(11);
-            doc.setFont(undefined, 'bold');
-            doc.text("Consolidado de Solicitações por Técnico:", 14, y);
-            y += 8;
+            doc.text(`Técnico: ${reg.tecnico}`, 14, 38);
+            doc.text(`Zona / Base: ${reg.zona}`, 14, 46);
 
-            doc.setFont(undefined, 'normal');
-            doc.setFontSize(9);
+            doc.setLineWidth(0.5);
+            doc.setLineColor(200, 200, 200);
+            doc.line(14, 52, 196, 52);
 
-            historico.forEach(p => {
+            doc.setFont("helvetica", "bold");
+            doc.text("Equipamento de Proteção Individual (EPI)", 14, 60);
+            doc.text("Quantidade", 160, 60);
+
+            doc.setFont("helvetica", "normal");
+            let y = 68;
+            reg.itens.forEach(item => {
                 if (y > 270) {
                     doc.addPage();
                     y = 20;
                 }
-                let itensStr = p.itens.map(i => `${i.qtd}x ${i.nome}`).join(', ');
-                doc.text(`• [${p.id}] Técnico: ${p.tecnico} (${p.zona}) - Data: ${p.data}`, 14, y);
-                y += 6;
-                doc.text(`   EPIs: ${itensStr}`, 14, y);
-                y += 10;
+                doc.text(item.nome, 14, y);
+                doc.text(String(item.qtd), 160, y);
+                y += 8;
             });
 
-            doc.save("Relatorio_Geral_EPIs_Unifique.pdf");
+            doc.setFontSize(9);
+            doc.setTextColor(150, 150, 150);
+            doc.text("Gerado automaticamente pelo Sistema de Fiscalização Total - Cristian Azevedo Besminoff", 14, 285);
+
+            doc.save(`EPIs_${reg.tecnico.replace(/\s+/g, '_')}.pdf`);
         }
+
+        function abrirRelatorioGeral() {
+            const registros = JSON.parse(localStorage.getItem('solicitacoes_epis')) || [];
+            const container = document.getElementById('conteudo-relatorio-geral');
+
+            if (registros.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-400 py-4">Nenhum dado consolidado disponível.</p>`;
+            } else {
+                let totais = {};
+                registros.forEach(reg => {
+                    reg.itens.forEach(item => {
+                        totais[item.nome] = (totais[item.nome] || 0) + item.qtd;
+                    });
+                });
+
+                let html = `<h4 class="font-bold text-slate-200 mb-2">Consolidado Total de EPIs Solicitados:</h4><ul class="space-y-1 mb-4 bg-slate-900 p-3 rounded-xl border border-slate-700">`;
+                for (let [epi, qtd] of Object.entries(totais)) {
+                    html += `<li class="flex justify-between text-xs border-b border-slate-800 py-1"><span class="text-slate-300">${epi}</span><strong class="text-amber-400">${qtd} un.</strong></li>`;
+                }
+                html += `</ul>`;
+
+                html += `<h4 class="font-bold text-slate-200 mb-2">Histórico por Técnico:</h4><div class="space-y-3">`;
+                registros.forEach(reg => {
+                    html += `<div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-xs">
+                        <p class="font-bold text-white">${reg.tecnico} (${reg.zona}) - <span class="text-slate-400 font-normal">${reg.dataHora}</span></p>
+                        <p class="text-slate-300 mt-1">${reg.itens.map(i => `${i.nome} (Qtd:${i.qtd})`).join(' | ')}</p>
+                    </div>`;
+                });
+                html += `</div>`;
+
+                container.innerHTML = html;
+            }
+
+            document.getElementById('modal-geral').classList.remove('hidden');
+        }
+
+        function fecharRelatorioGeral() {
+            document.getElementById('modal-geral').classList.add('hidden');
+        }
+
+        function exportarRelatorioGeralPDF() {
+            const registros = JSON.parse(localStorage.getItem('solicitacoes_epis')) || [];
+            if (registros.length === 0) return;
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.setTextColor(217, 119, 6);
+            doc.text("RELATÓRIO GERAL - EPIs UNIFIQUE", 14, 20);
+
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Data de Emissão: ${new Date().toLocaleDateString('pt-BR')}`, 14, 28);
+
+            let totais = {};
+            registros.forEach(reg => {
+                reg.itens.forEach(item => {
+                    totais[item.nome] = (totais[item.nome] || 0) + item.qtd;
+                });
+            });
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.setTextColor(50, 50, 50);
+            doc.text("Consolidado de Itens:", 14, 38);
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            let y = 46;
+            for (let [epi, qtd] of Object.entries(totais)) {
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+                doc.text(`• ${epi}: ${qtd} un.`, 14, y);
+                y += 7;
+            }
+
+            doc.save(`Relatorio_Geral_EPIs.pdf`);
+        }
+
+        // Inicializa ao carregar a página
+        window.onload = function() {
+            inicializarSelect();
+            carregarRegistros();
+        };
     </script>
 </body>
 </html>
