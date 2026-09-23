@@ -4,462 +4,224 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roteirizador Inteligente - OpenStreetMap</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bibliotecas Originais -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 10px;
-            color: #333;
-        }
-        .container {
-            max-width: 950px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-        }
-        h2 { font-size: 18px; margin-top: 0; color: #1a365d; text-align: center; }
-        
-        .form-section {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-        }
-        .control-group {
-            margin-bottom: 12px;
-        }
-        
-        label { font-size: 13px; font-weight: bold; color: #2d3748; display: block; margin-bottom: 4px; }
-        
-        input, select {
-            width: 100%;
-            padding: 10px;
-            font-size: 14px;
-            border: 1px solid #cbd5e0;
-            border-radius: 4px;
-            box-sizing: border-box;
-            background-color: #fff;
+            background-color: #030712;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
         }
 
-        .upload-section {
-            background: #edf2f7;
-            padding: 12px;
-            border-radius: 6px;
-            margin-top: 5px;
-            border: 2px dashed #cbd5e0;
-            text-align: center;
-        }
-        input[type="file"] { display: none; }
-        .custom-file-upload {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            background-color: #2b6cb0;
-            color: white;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        .custom-file-upload:hover { background-color: #2c5282; }
-
-        .file-name {
-            margin-top: 6px;
-            font-size: 12px;
-            color: #4a5568;
-            word-break: break-all;
+        h1, h2, h3, .font-futuristic {
+            font-family: 'Orbitron', sans-serif;
         }
 
-        .modo-selector {
-            display: flex;
-            gap: 15px;
-            background: #edf2f7;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 12px;
-        }
-        .modo-selector label {
-            font-weight: normal;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        .glass-futuristic {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.05), inset 0 0 20px rgba(245, 158, 11, 0.02);
         }
 
-        .checkbox-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 8px;
-            background: #fff;
-            border: 1px solid #cbd5e0;
-            padding: 10px;
-            border-radius: 4px;
-            max-height: 130px;
-            overflow-y: auto;
-            margin-top: 5px;
-        }
-        .checkbox-item {
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .checkbox-item input { width: auto; }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+        .neon-glow-amber {
+            text-shadow: 0 0 10px rgba(245, 158, 11, 0.5), 0 0 20px rgba(245, 158, 11, 0.2);
         }
 
+        .cyber-grid {
+            background-image: linear-gradient(to right, rgba(30, 41, 59, 0.3) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(30, 41, 59, 0.3) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        /* Estilização específica do mapa e componentes do Leaflet no tema escuro */
         #mapaVisual {
             width: 100%;
             height: 400px;
-            border-radius: 6px;
-            margin-top: 15px;
-            border: 1px solid #cbd5e0;
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            border: 1px solid rgba(245, 158, 11, 0.2);
             display: none;
             z-index: 1;
         }
 
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            margin-top: 15px;
-            border: 1px solid #cbd5e0;
-            border-radius: 4px;
-            max-height: 400px;
-        }
-
-        table { width: 100%; border-collapse: collapse; }
-        th, td {
-            padding: 8px 10px;
-            text-align: left;
-            font-size: 11px;
-            border-bottom: 1px solid #cbd5e0;
-            border-right: 1px solid #cbd5e0;
-        }
-        th {
-            background-color: #2b6cb0;
-            color: white;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        tr:nth-child(even) { background-color: #f7fafc; }
-
-        .btn-action {
-            background-color: #319795;
-            color: white;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 12px;
-            margin-top: 15px;
-            border-radius: 4px;
-            width: 100%;
-            font-size: 14px;
-        }
-        .btn-action:hover { background-color: #2c7a7b; }
-
-        .button-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-
-        .btn-zerar-rota {
-            background-color: #c05621;
-            color: white;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 12px;
-            border-radius: 4px;
-            flex: 1;
-            min-width: 200px;
-            font-size: 14px;
-            display: none;
-        }
-        .btn-zerar-rota:hover { background-color: #9c4221; }
-
-        .btn-finalizar-mes {
-            background-color: #742a2a;
-            color: white;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 12px;
-            border-radius: 4px;
-            flex: 1;
-            min-width: 200px;
-            font-size: 14px;
-            display: none;
-        }
-        .btn-finalizar-mes:hover { background-color: #551a1a; }
-
-        .btn-back {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: #4a5568;
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 14px;
-            border-radius: 6px;
-            box-sizing: border-box;
-            margin-top: 15px;
-        }
-        .btn-back:hover { background-color: #2d3748; }
-
-        .instructions {
-            background: #ebf8ff;
-            border-left: 4px solid #3182ce;
-            padding: 10px;
-            font-size: 12px;
-            color: #2b6cb0;
-            margin-bottom: 12px;
-            border-radius: 0 4px 4px 0;
-        }
-
-        #statusCarregamento {
-            font-size: 12px;
-            color: #d97706;
-            font-weight: bold;
-            margin-top: 8px;
-            text-align: center;
-        }
-
-        .status-dot {
-            height: 12px;
-            width: 12px;
-            background-color: #cbd5e0;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        .status-pendente { background-color: #ecc94b; }
-        .status-concluido { background-color: #48bb78; }
-        .status-nao-concluido { background-color: #f56565; }
-        .status-em-execucao { background-color: #3182ce; }
-
-        .btn-executar {
-            background-color: #3182ce;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-            font-weight: bold;
-        }
-        .btn-executar:hover { background-color: #2b6cb0; }
-        .btn-executar:disabled { background-color: #a0aec0; cursor: not-allowed; }
-
-        .select-status {
-            font-size: 11px;
-            padding: 2px;
-            border-radius: 3px;
-        }
-        .select-status:disabled { background-color: #edf2f7; color: #a0aec0; cursor: not-allowed; }
-
         .numero-marcador {
-            background-color: #2b6cb0;
-            color: white;
-            border: 2px solid white;
+            background-color: #d97706;
+            color: #030712;
+            border: 2px solid #fff;
             border-radius: 50%;
             text-align: center;
             font-weight: bold;
             font-size: 11px;
             line-height: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
 
-        .secao-inferior {
-            margin-top: 25px;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
+        input[type="file"] { display: none; }
+        
+        .status-dot {
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            display: inline-block;
         }
-        @media(min-width: 768px) {
-            .secao-inferior {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        .painel-historico {
-            background: #f8fafc;
-            border: 1px solid #cbd5e0;
-            border-radius: 6px;
-            padding: 12px;
-            max-height: 350px;
-            overflow-y: auto;
-        }
-        .painel-historico h4 {
-            font-size: 13px;
-            margin-top: 0;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 2px solid #e2e8f0;
-            color: #1a365d;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .lista-historico {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .item-historico {
-            font-size: 11px;
-            padding: 8px;
-            margin-bottom: 6px;
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 4px;
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-        }
-        .item-historico-conteudo {
-            flex: 1;
-        }
-        .item-historico-meta {
-            font-size: 10px;
-            color: #718096;
-            margin-top: 2px;
-        }
-        .btn-revistar {
-            background-color: #319795;
-            color: white;
-            border: none;
-            padding: 3px 6px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 10px;
-            font-weight: bold;
-            margin-top: 4px;
-        }
-        .btn-revistar:hover { background-color: #2c7a7b; }
+        .status-pendente { background-color: #eab308; }
+        .status-concluido { background-color: #22c55e; }
+        .status-nao-concluido { background-color: #ef4444; }
+        .status-em-execucao { background-color: #3b82f6; }
     </style>
 </head>
-<body>
+<body class="min-h-screen cyber-grid flex flex-col p-4 md:p-8">
 
-<div class="container" id="painelPrincipal">
-    <h2>Roteirizador Inteligente (OpenStreetMap)</h2>
+<div class="w-full max-w-5xl mx-auto space-y-6 flex-grow">
     
-    <div class="form-section">
-        <div class="control-group">
-            <label>1. Carregar Planilha Excel:</label>
-            <div class="upload-section">
-                <label for="arquivoExcel" class="custom-file-upload">
+    <!-- Cabeçalho -->
+    <header class="glass-futuristic p-6 rounded-2xl shadow-xl flex flex-col md:flex-row justify-between items-center">
+        <div>
+            <h2 class="text-xl md:text-2xl font-extrabold text-amber-400 tracking-wider font-futuristic neon-glow-amber">ROTEIRIZADOR INTELIGENTE</h2>
+            <p class="text-xs text-slate-400 mt-1">Módulo de Logística e Campo • OpenStreetMap</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <a href="index.html" class="px-4 py-2 bg-slate-900/80 hover:bg-slate-800 text-slate-300 font-semibold rounded-xl border border-slate-700 transition text-xs uppercase tracking-wider">
+                ← Voltar ao Início
+            </a>
+        </div>
+    </header>
+
+    <!-- Formulário e Configurações -->
+    <div class="glass-futuristic p-6 rounded-2xl shadow-xl space-y-4">
+        
+        <!-- Upload -->
+        <div>
+            <label class="block text-[11px] font-semibold text-amber-300/80 mb-2 uppercase tracking-widest">1. Carregar Planilha Excel:</label>
+            <div class="bg-slate-950/60 p-4 rounded-xl border border-dashed border-slate-700 text-center">
+                <label for="arquivoExcel" class="inline-block px-5 py-3 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-xl transition cursor-pointer text-xs uppercase tracking-wider">
                     📊 Escolher Arquivo (.xlsx, .xls, .csv)
                 </label>
                 <input type="file" id="arquivoExcel" accept=".xlsx, .xls, .csv" onchange="carregarArquivo(event)">
-                <div id="nomeArquivo" class="file-name">Nenhum arquivo selecionado</div>
+                <div id="nomeArquivo" class="text-xs text-slate-400 mt-2">Nenhum arquivo selecionado</div>
             </div>
         </div>
 
-        <div class="control-group" style="margin-top: 12px;">
-            <label>2. Modo de Localização:</label>
-            <div class="modo-selector">
-                <label><input type="radio" name="modoLocalizacao" value="coordenadas" checked> Latitude / Coordenadas Diretas</label>
+        <!-- Modo de Localização -->
+        <div>
+            <label class="block text-[11px] font-semibold text-amber-300/80 mb-2 uppercase tracking-widest">2. Modo de Localização:</label>
+            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 flex gap-4 text-xs text-slate-300">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="modoLocalizacao" value="coordenadas" checked class="accent-amber-500"> Latitude / Coordenadas Diretas
+                </label>
             </div>
         </div>
 
-        <div id="blocoCoordenadas">
-            <div class="grid-2">
-                <div class="control-group">
-                    <label for="selectColunaLat">Coluna de Latitude:</label>
-                    <select id="selectColunaLat">
+        <!-- Bloco Coordenadas -->
+        <div id="blocoCoordenadas" class="space-y-4 bg-slate-950/40 p-4 rounded-xl border border-slate-800/80">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="selectColunaLat" class="block text-[11px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">Coluna de Latitude:</label>
+                    <select id="selectColunaLat" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-400 transition">
                         <option value="">Carregue a planilha...</option>
                     </select>
                 </div>
-                <div class="control-group">
-                    <label for="selectColunaLon">Coluna de Longitude:</label>
-                    <select id="selectColunaLon">
+                <div>
+                    <label for="selectColunaLon" class="block text-[11px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">Coluna de Longitude:</label>
+                    <select id="selectColunaLon" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-400 transition">
                         <option value="">Carregue a planilha...</option>
                     </select>
                 </div>
             </div>
-            <div class="control-group" style="margin-top: 8px;">
-                <label for="cidadeFiltroCoord">Filtrar por Cidade (Opcional):</label>
-                <input id="cidadeFiltroCoord" placeholder="Ex: Canoas, Porto Alegre...">
+            <div>
+                <label for="cidadeFiltroCoord" class="block text-[11px] font-semibold text-slate-400 mb-1 uppercase tracking-wider">Filtrar por Cidade (Opcional):</label>
+                <input id="cidadeFiltroCoord" placeholder="Ex: Canoas, Porto Alegre..." class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-400 transition">
             </div>
         </div>
 
-        <div class="control-group" style="margin-top: 12px;">
-            <label for="nomeTecnicoLogado">Nome do Técnico:</label>
-            <input type="text" id="nomeTecnicoLogado" placeholder="Digite seu nome ou identificação...">
+        <!-- Técnico Logado -->
+        <div>
+            <label for="nomeTecnicoLogado" class="block text-[11px] font-semibold text-amber-300/80 mb-2 uppercase tracking-widest">Nome do Técnico:</label>
+            <input type="text" id="nomeTecnicoLogado" placeholder="Digite seu nome ou identificação..." class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-amber-400 transition">
         </div>
 
-        <div class="control-group" style="margin-top: 12px;">
-            <label>3. Selecione quais colunas deseja exibir na Tabela:</label>
-            <div id="seletorColunas" class="checkbox-container">
-                <span style="font-size: 12px; color: #718096; padding: 5px;">Carregue uma planilha primeiro...</span>
+        <!-- Seletor de Colunas -->
+        <div>
+            <label class="block text-[11px] font-semibold text-amber-300/80 mb-2 uppercase tracking-widest">3. Selecione quais colunas deseja exibir na Tabela:</label>
+            <div id="seletorColunas" class="grid grid-cols-2 md:grid-cols-3 gap-2 bg-slate-950/80 border border-slate-800 p-4 rounded-xl max-h-36 overflow-y-auto">
+                <span class="text-xs text-slate-500 col-span-full text-center py-2">Carregue uma planilha primeiro...</span>
             </div>
         </div>
 
-        <button class="btn-action" onclick="executarProcessamento()" id="btnProcessar" disabled>⚙️ Gerar Rota Otimizada (Leaflet)</button>
-        <div id="statusCarregamento"></div>
+        <button onclick="executarProcessamento()" id="btnProcessar" disabled class="w-full py-4 bg-gradient-to-r from-amber-600 via-orange-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-extrabold rounded-xl shadow-lg transition text-xs uppercase tracking-widest font-futuristic">
+            ⚙️ Gerar Rota Otimizada (Leaflet)
+        </button>
+        <div id="statusCarregamento" class="text-xs text-amber-400 font-bold text-center"></div>
     </div>
 
-    <div id="relatorio-conteudo">
-        <h3 style="font-size: 14px; margin-bottom: 5px; color: #2d3748;">Lista Sequencial Otimizada (<span id="contadorLinhas">0</span> registros)</h3>
+    <!-- Relatório e Tabela -->
+    <div id="relatorio-conteudo" class="glass-futuristic p-6 rounded-2xl shadow-xl space-y-4">
+        <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wide border-b border-slate-800 pb-2 font-futuristic">
+            Lista Sequencial Otimizada (<span id="contadorLinhas" class="text-amber-400">0</span> registros)
+        </h3>
         
-        <div class="instructions" id="instrucoesRota" style="display:none;">
+        <div id="instrucoesRota" style="display:none;" class="bg-amber-950/30 border-l-4 border-amber-500 p-3 text-xs text-amber-300 rounded-r-xl">
             📋 <strong>Pronto:</strong> Pinos numerados e carregados no mapa interativo correspondendo à lista.
         </div>
 
         <div id="mapaVisual"></div>
 
-        <div class="table-responsive" id="areaTabelaExportavel">
-            <table id="tabelaDados">
-                <thead id="cabecalhoTabela">
-                    <tr><th>Aguardando processamento...</th></tr>
+        <!-- Tabela Responsiva Estilizada -->
+        <div class="w-full overflow-x-auto rounded-xl border border-slate-800 max-h-[400px]">
+            <table id="tabelaDados" class="w-full text-left border-collapse">
+                <thead id="cabecalhoTabela" class="bg-slate-900 text-amber-400 text-xs uppercase tracking-wider sticky top-0 z-10">
+                    <tr><th class="p-3">Aguardando processamento...</th></tr>
                 </thead>
-                <tbody id="corpoTabela">
-                    <tr><td>Sua lista aparecerá aqui.</td></tr>
+                <tbody id="corpoTabela" class="text-xs text-slate-300 divide-y divide-slate-800/60 bg-slate-950/40">
+                    <tr><td class="p-4 text-center text-slate-500">Sua lista aparecerá aqui.</td></tr>
                 </tbody>
             </table>
         </div>
 
-        <div class="secao-inferior" id="secaoInferiorHistorico" style="display: none;">
-            <div class="painel-historico">
-                <h4>🟢 Concluídos com Sucesso (<span id="contadorConcluidos">0</span>)</h4>
-                <ul class="lista-historico" id="listaConcluidosInferior">
+        <!-- Seção Inferior: Histórico -->
+        <div id="secaoInferiorHistorico" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2" style="display: none;">
+            <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4 max-h-[300px] overflow-y-auto">
+                <h4 class="text-xs font-bold text-emerald-400 mb-3 border-b border-slate-800 pb-2 uppercase tracking-wider flex items-center gap-2">
+                    🟢 Concluídos com Sucesso (<span id="contadorConcluidos">0</span>)
+                </h4>
+                <ul id="listaConcluidosInferior" class="space-y-2 text-xs text-slate-400">
                     <li>Nenhum item concluído ainda.</li>
                 </ul>
             </div>
 
-            <div class="painel-historico">
-                <h4>🔴 Não Concluídos / Disponíveis para Nova Vistoria (<span id="contadorNaoConcluidos">0</span>)</h4>
-                <ul class="lista-historico" id="listaNaoConcluidosInferior">
+            <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4 max-h-[300px] overflow-y-auto">
+                <h4 class="text-xs font-bold text-rose-400 mb-3 border-b border-slate-800 pb-2 uppercase tracking-wider flex items-center gap-2">
+                    🔴 Não Concluídos / Nova Vistoria (<span id="contadorNaoConcluidos">0</span>)
+                </h4>
+                <ul id="listaNaoConcluidosInferior" class="space-y-2 text-xs text-slate-400">
                     <li>Nenhum item pendente de nova vistoria.</li>
                 </ul>
             </div>
         </div>
 
-        <div class="button-row">
-            <button class="btn-zerar-rota" id="btnZerarRota" onclick="zerarRotaAtual()" style="display: none;">🔄 Zerar Rota</button>
-            <button class="btn-finalizar-mes" id="btnFinalizarMes" onclick="finalizarMesSistema()" style="display: none;">🏁 Finalizar Mês</button>
+        <!-- Botões de Ação Final -->
+        <div class="flex flex-col md:flex-row gap-3 pt-2">
+            <button id="btnZerarRota" onclick="zerarRotaAtual()" style="display: none;" class="flex-1 py-3 bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 font-bold border border-rose-700/50 rounded-xl text-xs uppercase tracking-wider transition">
+                🔄 Zerar Rota
+            </button>
+            <button id="btnFinalizarMes" onclick="finalizarMesSistema()" style="display: none;" class="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-amber-400 font-bold border border-amber-500/30 rounded-xl text-xs uppercase tracking-wider transition">
+                🏁 Finalizar Mês
+            </button>
         </div>
     </div>
 
-    <a href="index.html" class="btn-back">⬅️ Voltar para o Menu Principal</a>
 </div>
 
+<!-- Scripts de Lógica Originais (Mantidos Integrados) -->
 <script>
     let dadosBrutos = [];
     let cabecalhosGlobais = [];
@@ -493,7 +255,7 @@
     function carregarArquivo(e) {
         const arquivo = e.target.files[0];
         if (!arquivo) return;
-        document.getElementById('nomeArquivo').innerText = "Arquivo: " + arquivo.name;
+        document.getElementById('nomeArquivoCima') ? null : document.getElementById('nomeArquivo').innerText = "Arquivo: " + arquivo.name;
 
         const leitor = new FileReader();
         leitor.onload = function(e) {
@@ -544,10 +306,10 @@
                 selectLon.appendChild(optLon);
 
                 let div = document.createElement('div');
-                div.className = 'checkbox-item';
+                div.className = 'flex items-center gap-2 text-xs text-slate-300';
                 div.innerHTML = `
-                    <input type="checkbox" id="col_${index}" value="${index}" checked>
-                    <label for="col_${index}" style="display:inline; font-weight:normal; cursor:pointer;">${col}</label>
+                    <input type="checkbox" id="col_${index}" value="${index}" checked class="accent-amber-500">
+                    <label for="col_${index}" class="cursor-pointer truncate">${col}</label>
                 `;
                 containerCheckboxes.appendChild(div);
             }
@@ -577,7 +339,6 @@
         statusDiv.innerText = "⚡ Verificando dados e filtrando já concluídos...";
         const cidadeBusca = document.getElementById('cidadeFiltroCoord').value.trim();
 
-        // Isola os registros que já estão concluídos para cruzar com a nova base
         let jaConcluidos = linhasProcessadasCompletas.filter(item => item.status === 'concluido');
 
         let dadosFiltrados = dadosBrutos.filter(linha => {
@@ -591,12 +352,10 @@
 
             if (isNaN(latVal) || isNaN(lonVal)) return false;
 
-            // Bate os dados da linha nova com os itens já concluídos (baseado em Latitude e Longitude)
             let jaFoiConcluido = jaConcluidos.some(concluido => {
                 return Math.abs(concluido.lat - latVal) < 0.00001 && Math.abs(concluido.lon - lonVal) < 0.00001;
             });
 
-            // Se já foi concluído antes, exclui da nova varredura retornando false
             return !jaFoiConcluido;
         });
 
@@ -637,7 +396,6 @@
             }
         }
 
-        // Mantém os concluídos intactos e adiciona apenas os novos pendentes recalculados
         let naoConcluidosAntigos = linhasProcessadasCompletas.filter(item => item.status === 'nao-concluido');
         linhasProcessadasCompletas = [...jaConcluidos, ...naoConcluidosAntigos, ...rotaOtimizada];
         salvarEstadoLocal();
@@ -677,8 +435,8 @@
         contador.innerText = itensAtivos.length;
 
         if (linhasProcessadasCompletas.length === 0) {
-            tbody.innerHTML = `<tr><td>Sua lista aparecerá aqui.</td></tr>`;
-            thead.innerHTML = `<tr><th>Aguardando processamento...</th></tr>`;
+            tbody.innerHTML = `<tr><td class="p-4 text-center text-slate-500">Sua lista aparecerá aqui.</td></tr>`;
+            thead.innerHTML = `<tr><th class="p-3">Aguardando processamento...</th></tr>`;
             btnZerarRota.style.display = 'none';
             btnFinalizarMes.style.display = 'none';
             instrucoes.style.display = 'none';
@@ -692,12 +450,12 @@
             return;
         }
 
-        let trHead = '<tr><th style="width: 40px; text-align: center;">Seq</th><th style="width: 60px; text-align: center;">Status</th>';
+        let trHead = '<tr><th class="p-3 text-center w-12">Seq</th><th class="p-3 text-center w-16">Status</th>';
         indicesTabelaGlobais.forEach(idx => {
             let nomeColuna = cabecalhosGlobais[idx] || `Coluna ${idx}`;
-            trHead += `<th>${nomeColuna}</th>`;
+            trHead += `<th class="p-3">${nomeColuna}</th>`;
         });
-        trHead += '<th style="text-align: center; width: 110px;">Ação</th></tr>';
+        trHead += '<th class="p-3 text-center w-28">Ação</th></tr>';
         thead.innerHTML = trHead;
 
         let emExecucaoGlobal = linhasProcessadasCompletas.some(item => item.status === 'em-execucao');
@@ -719,11 +477,11 @@
                 if (!resumoItem) resumoItem = `Parada #${rowIndex + 1}`;
 
                 htmlConcluidos += `
-                    <li class="item-historico">
-                        <span class="status-dot status-concluido" style="margin-top: 3px;"></span>
-                        <div class="item-historico-conteudo">
-                            <strong>#${countConcluidos} - ${resumoItem}</strong>
-                            <div class="item-historico-meta">Finalizado em: ${item.timestamp || 'Data não registrada'}</div>
+                    <li class="p-2.5 bg-slate-900/60 rounded-lg border border-slate-800 flex items-start gap-2">
+                        <span class="status-dot status-concluido mt-1"></span>
+                        <div class="flex-1">
+                            <strong class="text-slate-200">#${countConcluidos} - ${resumoItem}</strong>
+                            <div class="text-[10px] text-slate-500 mt-0.5">Finalizado em: ${item.timestamp || 'Data não registrada'}</div>
                         </div>
                     </li>
                 `;
@@ -732,18 +490,19 @@
 
             sequencialTabela++;
             let tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-900/50 transition";
             
             let classeBolinha = 'status-pendente';
             if (item.status === 'nao-concluido') classeBolinha = 'status-nao-concluido';
             else if (item.status === 'em-execucao') classeBolinha = 'status-em-execucao';
 
-            let seqHtml = `<td style="text-align: center; font-weight: bold; background: #edf2f7;">#${sequencialTabela}</td>`;
-            let statusHtml = `<td style="text-align: center;"><span class="status-dot ${classeBolinha}" title="${item.status || 'pendente'}"></span></td>`;
+            let seqHtml = `<td class="p-3 text-center font-bold text-amber-400 bg-slate-900/40">#${sequencialTabela}</td>`;
+            let statusHtml = `<td class="p-3 text-center"><span class="status-dot ${classeBolinha}" title="${item.status || 'pendente'}"></span></td>`;
             let linhaHtml = seqHtml + statusHtml;
 
             indicesTabelaGlobais.forEach(idx => {
                 let valor = item.linhaOriginal[idx] !== undefined ? item.linhaOriginal[idx] : '';
-                linhaHtml += `<td>${valor}</td>`;
+                linhaHtml += `<td class="p-3">${valor}</td>`;
             });
 
             let desativarBotao = emExecucaoGlobal && item.status !== 'em-execucao';
@@ -751,9 +510,11 @@
             let selectDisabledAttr = selectHabilitado ? '' : 'disabled';
 
             let acaoHtml = `
-                <td style="text-align: center;">
-                    <button class="btn-executar" ${desativarBotao ? 'disabled' : ''} onclick="enviarParaTecnico(${rowIndex})">${item.status === 'em-execucao' ? 'Em Andamento' : 'Executar'}</button>
-                    <select class="select-status" ${selectDisabledAttr} onchange="atualizarStatusItem(${rowIndex}, this.value)">
+                <td class="p-3 text-center space-y-1">
+                    <button ${desativarBotao ? 'disabled' : ''} onclick="enviarParaTecnico(${rowIndex})" class="w-full px-2.5 py-1.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-slate-950 font-bold rounded-lg text-[11px] transition">
+                        ${item.status === 'em-execucao' ? 'Em Andamento' : 'Executar'}
+                    </button>
+                    <select ${selectDisabledAttr} onchange="atualizarStatusItem(${rowIndex}, this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-1 text-[11px] text-slate-300 disabled:opacity-40">
                         <option value="">Status...</option>
                         <option value="concluido" ${item.status === 'concluido' ? 'selected' : ''}>Concluído</option>
                         <option value="nao-concluido" ${item.status === 'nao-concluido' ? 'selected' : ''}>Não Concluído</option>
@@ -775,12 +536,14 @@
             if (item.status === 'nao-concluido') {
                 countNaoConcluidos++;
                 htmlNaoConcluidos += `
-                    <li class="item-historico">
-                        <span class="status-dot status-nao-concluido" style="margin-top: 3px;"></span>
-                        <div class="item-historico-conteudo">
-                            <strong>${resumoItem}</strong>
-                            <div class="item-historico-meta">Registrado em: ${item.timestamp || 'Data não registrada'}</div>
-                            <button class="btn-revistar" onclick="revistarItem(${rowIndex})">🔄 Reencaixar na Rota</button>
+                    <li class="p-2.5 bg-slate-900/60 rounded-lg border border-slate-800 flex items-start gap-2">
+                        <span class="status-dot status-nao-concluido mt-1"></span>
+                        <div class="flex-1">
+                            <strong class="text-slate-200">${resumoItem}</strong>
+                            <div class="text-[10px] text-slate-500 mt-0.5">Registrado em: ${item.timestamp || 'Data não registrada'}</div>
+                            <button onclick="revistarItem(${rowIndex})" class="mt-1.5 px-2 py-1 bg-slate-800 hover:bg-slate-700 text-amber-400 font-semibold rounded text-[10px] transition">
+                                🔄 Reencaixar na Rota
+                            </button>
                         </div>
                     </li>
                 `;
@@ -788,14 +551,14 @@
         });
 
         if (sequencialTabela === 0) {
-            tbody.innerHTML = `<tr><td colspan="${indicesTabelaGlobais.length + 3}" style="text-align: center;">Nenhum item pendente na rota atual.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="${indicesTabelaGlobais.length + 3}" class="p-4 text-center text-slate-500">Nenhum item pendente na rota atual.</td></tr>`;
         }
 
         contadorConcluidos.innerText = countConcluidos;
         contadorNaoConcluidos.innerText = countNaoConcluidos;
 
-        listaConcluidosInferior.innerHTML = htmlConcluidos || '<li>Nenhum item concluído ainda.</li>';
-        listaNaoConcluidosInferior.innerHTML = htmlNaoConcluidos || '<li>Nenhum item pendente de nova vistoria.</li>';
+        listaConcluidosInferior.innerHTML = htmlConcluidos || '<li class="text-slate-500">Nenhum item concluído ainda.</li>';
+        listaNaoConcluidosInferior.innerHTML = htmlNaoConcluidos || '<li class="text-slate-500">Nenhum item pendente de nova vistoria.</li>';
         secaoInferior.style.display = 'grid';
 
         btnZerarRota.style.display = 'block';
@@ -845,7 +608,7 @@
         document.getElementById('nomeArquivo').innerText = 'Nenhum arquivo selecionado';
         document.getElementById('selectColunaLat').innerHTML = '<option value="">Carregue a planilha...</option>';
         document.getElementById('selectColunaLon').innerHTML = '<option value="">Carregue a planilha...</option>';
-        document.getElementById('seletorColunas').innerHTML = '<span style="font-size: 12px; color: #718096; padding: 5px;">Carregue uma planilha primeiro...</span>';
+        document.getElementById('seletorColunas').innerHTML = '<span class="text-xs text-slate-500 col-span-full text-center py-2">Carregue uma planilha primeiro...</span>';
         document.getElementById('btnProcessar').disabled = true;
 
         renderizarTabelaEValores();
