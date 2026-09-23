@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de EPIs - Fiscalização Total</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="jspdf.umd.min.js"></script>
+    <!-- CDN oficial corrigida para carregar o jsPDF corretamente -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -91,7 +92,7 @@
                         <option value="">-- Selecione um EPI --</option>
                     </select>
                     
-                    <!-- Campo de Tamanho da Botina (Diciona Dinamicamente) -->
+                    <!-- Campo de Tamanho da Botina (Aparece Dinamicamente) -->
                     <div id="container-tamanho-botina" class="hidden">
                         <select id="tamanho-botina" class="w-full md:w-36 bg-slate-950/80 border border-amber-500/50 rounded-xl p-3 text-amber-300 font-semibold text-sm focus:outline-none focus:border-amber-400 transition">
                             <option value="">Tamanho</option>
