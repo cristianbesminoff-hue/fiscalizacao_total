@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Instruções e Central de Ajuda - Sistema de Vistorias</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-blue-500 selection:text-white">
+
+    <!-- Cabeçalho Principal do Manual -->
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-40 backdrop-blur-md bg-opacity-90">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2.5 rounded-xl text-amber-400 text-xl shadow-lg shadow-blue-500/20">
+                    <i class="fa-solid fa-book-open-reader"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white">Manual Técnico & Guia Operacional</h1>
+                    <p class="text-xs text-slate-400">Documentação completa dos fluxos, regras de negócio e módulos do sistema</p>
+                </div>
+            </div>
+            <div class="mt-3 md:mt-0 flex items-center gap-2">
+                <a href="index.html" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs px-3.5 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 border border-slate-600">
+                    <i class="fa-solid fa-house"></i> Voltar ao Menu
+                </a>
+                <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs px-3 py-2 rounded-lg font-medium flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check text-[10px]"></i> v2.6 Enterprise
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Layout Principal com Sidebar de Navegação Rápida -->
+    <div class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        <!-- Sidebar / Sumário do Manual -->
+        <aside class="lg:col-span-1 hidden lg:block">
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 sticky top-24 shadow-xl">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-list-ul text-blue-500"></i> Índice do Manual
+                </h3>
+                <nav class="space-y-1.5 text-sm">
+                    <a href="#introducao" class="block px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">1. Visão Geral & Arquitetura</a>
+                    <a href="#modulo-1" class="block px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">2. Agenda & WhatsApp</a>
+                    <a href="#modulo-2" class="block px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">3. Controle de EPIs</a>
+                    <a href="#modulo-3" class="block px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">4. Módulo de Ferramentas</a>
+                    <a href="#modulo-4" class="block px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">5. Fiscalização FTTA</a>
+                    <a href="#modulo-5" class="block px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">6. Roteirizador Inteligente</a>
+                </nav>
+                <div class="mt-6 pt-4 border-t border-slate-700">
+                    <div class="bg-blue-600/10 border border-blue-500/20 p-3 rounded-xl">
+                        <p class="text-xs text-blue-300 leading-relaxed">
+                            <i class="fa-solid fa-circle-info mr-1"></i> Precisa de melhorias ou suporte direto? Clique no assistente flutuante.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Detalhado do Manual -->
+        <main class="lg:col-span-3 space-y-10">
+
+            <!-- Seção 1: Introdução -->
+            <section id="introducao" class="bg-slate-800 border border-slate-700 rounded-2xl p-6 md:p-8 shadow-xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-blue-600/20 text-blue-400 p-3 rounded-xl text-xl">
+                        <i class="fa-solid fa-compass"></i>
+                    </span>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">1. Visão Geral e Arquitetura do Sistema</h2>
+                        <p class="text-xs text-slate-400">Diretrizes de operação em campo e salvamento de dados</p>
+                    </div>
+                </div>
+                <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                    Este ecossistema foi projetado sob medida para otimizar o fluxo de vistorias técnicas, fiscalizações de campo, logística e rotas operacionais. A plataforma divide-se em duas arquiteturas centrais de armazenamento:
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-slate-900/50 border border-slate-700 p-4 rounded-xl">
+                        <h4 class="font-bold text-emerald-400 text-sm mb-1 flex items-center gap-2">
+                            <i class="fa-solid fa-database"></i> Salvamento Local (Offline-First)
+                        </h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Módulos de Agenda, EPIs e Ferramentas salvam as requisições e dados diretamente no armazenamento interno do seu dispositivo, garantindo autonomia em locais sem sinal e relatórios rápidos em PDF.
+                        </p>
+                    </div>
+                    <div class="bg-slate-900/50 border border-slate-700 p-4 rounded-xl">
+                        <h4 class="font-bold text-purple-400 text-sm mb-1 flex items-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Sincronização em Nuvem
+                        </h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Os módulos de Fiscalização FTTA e o Roteirizador Inteligente operam em nuvem, exigindo credenciais validadas para acompanhamento gerencial e auditoria em tempo real.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção 2: Agenda -->
+            <section id="modulo-1" class="bg-slate-800 border border-slate-700 rounded-2xl p-6 md:p-8 shadow-xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-indigo-600/20 text-indigo-400 p-3 rounded-xl text-xl">
+                        <i class="fa-solid fa-calendar-days"></i>
+                    </span>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">2. Módulo de Agenda de Atividades</h2>
+                        <p class="text-xs text-slate-400">Organização de cronograma e disparo rápido de WhatsApp</p>
+                    </div>
+                </div>
+                <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                    A agenda opera de forma totalmente local, permitindo o agendamento prático de compromissos e visitas técnicas através de um calendário interativo integrado.
+                </p>
+                <div class="bg-slate-900/50 border border-slate-700 p-4 rounded-xl space-y-2">
+                    <h4 class="font-bold text-white text-xs uppercase tracking-wider text-indigo-400">Regra de Integração com WhatsApp:</h4>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        O botão de contato do cliente possui automação nativa para formatação de números. Ao acionar o link, o sistema aplica obrigatoriamente o DDI internacional do Brasil (<code class="bg-slate-800 text-indigo-300 px-1.5 py-0.5 rounded">+55</code>), seguido do DDD regional e do número do assinante, abrindo o chat de forma imediata sem necessidade de salvar o contato na agenda do celular.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Seção 3: EPIs -->
+            <section id="modulo-2" class="bg-slate-800 border border-slate-700 rounded-2xl p-6 md:p-8 shadow-xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-emerald-600/20 text-emerald-400 p-3 rounded-xl text-xl">
+                        <i class="fa-solid fa-vest"></i>
+                    </span>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">3. Módulo de Controle de EPIs</h2>
+                        <p class="text-xs text-slate-400">Registro de vistorias de segurança e conformidade</p>
+                    </div>
+                </div>
+                <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                    Desenvolvido para registrar e armazenar localmente todas as requisições, substituições e inconformidades de Equipamentos de Proteção Individual constatadas durante as inspeções de campo.
+                </p>
+                <div class="bg-slate-900/50 border border-slate-700 p-4 rounded-xl">
+                    <h4 class="font-bold text-white text-xs uppercase tracking-wider text-emerald-400 mb-1">Exportação de Relatórios:</h4>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        O sistema consolida todas as ocorrências de segurança inseridas pelo técnico e gera instantaneamente um relatório geral formatado, pronto para exportação e impressão em arquivo PDF para prestação de contas à engenharia de segurança do trabalho.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Seção 4: Ferramentas -->
+            <section id="modulo-3" class="bg-slate-800 border border-slate-700 rounded-2xl p-6 md:p-8 shadow-xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-amber-600/20 text-amber-400 p-3 rounded-xl text-xl">
+                        <i class="fa-solid fa-toolbox"></i>
+                    </span>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">4. Módulo de Gestão de Ferramentas</h2>
+                        <p class="text-xs text-slate-400">Solicitações de ativos e inventário operacional</p>
+                    </div>
+                </div>
+                <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                    Gerencia o ciclo de solicitações de ferramentas e equipamentos obtidos nas vistorias técnicas e manutenções de campo.
+                </p>
+                <div class="bg-slate-900/50 border border-slate-700 p-4 rounded-xl">
+                    <h4 class="font-bold text-white text-xs uppercase tracking-wider text-amber-400 mb-1">Armazenamento e Exportação:</h4>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Os dados são gravados com segurança no dispositivo. Através do painel, o operador consolida o histórico de solicitações e emite o relatório geral em PDF com total precisão gerencial.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Seção 5: Fiscalização FTTA -->
+            <section id="modulo-4" class="bg-slate-800 border border-slate-700 rounded-2xl p-6 md:p-8 shadow-xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-purple-600/20 text-purple-400 p-3 rounded-xl text-xl">
+                        <i class="fa-solid fa-tower-cell"></i>
+                    </span>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">5. Módulo de Fiscalização FTTA</h2>
+                        <p class="text-xs text-slate-400">Vistorias de alta performance em nuvem</p>
+                    </div>
+                </div>
+                <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                    Módulo de inspeção dedicado a projetos FTTA. Diferente dos módulos locais, este ambiente sincroniza cada vistoria diretamente com o banco de dados em nuvem para acompanhamento imediato da gestão técnica.
+                </p>
+                <div class="bg-slate-900/50 border border-slate-700 p-4 rounded-xl border-l-4 border-l-purple-500">
+                    <h4 class="font-bold text-purple-400 text-xs uppercase tracking-wider mb-1">Controle de Acesso Restrito:</h4>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        O uso requer cadastro prévio de login e senha. O sistema bloqueia a entrada até que o gestor responsável aprove o cadastro do operador, garantindo a segurança e a integridade dos dados de engenharia.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Seção 6: Roteirizador -->
+            <section id="modulo-5" class="bg-slate-800 border border-slate-700 rounded-2xl p-6 md:p-8 shadow-xl border-l-4 border-l-blue-600">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-blue-600/20 text-blue-400 p-3 rounded-xl text-xl">
+                        <i class="fa-solid fa-route"></i>
+                    </span>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">6. Roteirizador Inteligente & Vistorias de Campo</h2>
+                        <p class="text-xs text-slate-400">O coração operacional do sistema para rotas e execuções</p>
+                    </div>
+                </div>
+                <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                    Desenvolvido para eliminar complexidades de deslocamento em campo. O técnico credenciado acessa o sistema por meio de credenciais fornecidas pelo gestor e interage com o roteirizador seguindo estas etapas:
+                </p>
+                
+                <div class="space-y-3">
+                    <div class="bg-slate-900/50 border border-slate-700 p-3.5 rounded-xl flex items-start gap-3">
+                        <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</span>
+                        <div>
+                            <strong class="text-white text-xs block mb-0.5">Carga de Planilhas e Mapeamento</strong>
+                            <p class="text-xs text-slate-400">Carregue a planilha de ordens de serviço salva para organizar automaticamente a rota e plotar os pontos no mapa visual de atendimento.</p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/50 border border-slate-700 p-3.5 rounded-xl flex items-start gap-3">
+                        <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</span>
+                        <div>
+                            <strong class="text-white text-xs block mb-0.5">Fluxo de Vistoria Integrado e GPS</strong>
+                            <p class="text-xs text-slate-400">Ao clicar em uma atividade no mapa, a página de vistoria é aberta já preenchida com o nome do técnico executor, fiscalizador, endereço e coordenadas exatas. O botão <strong>"Traçar Rota"</strong> integra-se ao GPS para guiar o técnico até o local.</p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/50 border border-slate-700 p-3.5 rounded-xl flex items-start gap-3">
+                        <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</span>
+                        <div>
+                            <strong class="text-white text-xs block mb-0.5">Controle de Protocolos Concluídos</strong>
+                            <p class="text-xs text-slate-400">Após a inspeção, o técnico informa se a vistoria foi realizada. Caso positivo, o sistema contabiliza o indicador e <strong>remove automaticamente o protocolo</strong> de carregamentos futuros, evitando retrabalho.</p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/50 border border-slate-700 p-3.5 rounded-xl flex items-start gap-3">
+                        <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</span>
+                        <div>
+                            <strong class="text-white text-xs block mb-0.5">Funções de Gestão de Ciclo (Zerar Rotas & Finalizar Mês)</strong>
+                            <p class="text-xs text-slate-400">O sistema disponibiliza a ferramenta de <em>Zerar Rotas</em> para redefinir traçados específicos e a opção crítica de <em>Finalizar Mês</em>, que encerra o ciclo operacional vigente e limpa todos os dados acumulados para reiniciar o período seguinte.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Rodapé -->
+    <footer class="bg-slate-800 border-t border-slate-700 mt-16 py-6 text-center text-xs text-slate-400">
+        <p>Manual Oficial do Sistema Integrado de Vistorias Técnicas &bull; Todos os direitos reservados</p>
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- WIDGET DO BOT DE AJUDA FLUTUANTE (ENVIO DIRETO) -->
+    <!-- ========================================== -->
+
+    <!-- Botão Flutuante -->
+    <button id="btn-chat-toggle" onclick="alternarChat()" class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-500 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-xl transition-all duration-300 hover:scale-110 z-50 focus:outline-none border-2 border-blue-400/30">
+        <i class="fa-solid fa-robot" id="icone-chat"></i>
+    </button>
+
+    <!-- Janela de Chat do Bot -->
+    <div id="janela-chat" class="fixed bottom-24 right-6 w-96 max-w-[92vw] bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 flex flex-col overflow-hidden z-50 hidden transition-all duration-300">
+        
+        <!-- Cabeçalho do Bot -->
+        <div class="bg-slate-900 text-white p-4 flex justify-between items-center border-b border-slate-700">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-amber-400 font-bold text-lg shadow-inner">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full"></span>
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm text-white">Assistente Técnico IA</h3>
+                    <p class="text-[11px] text-slate-400">Suporte, Sugestões & Desenvolvedor</p>
+                </div>
+            </div>
+            <button onclick="alternarChat()" class="text-slate-400 hover:text-white text-lg focus:outline-none p-1">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Mensagens -->
+        <div id="chat-mensagens" class="p-4 h-80 overflow-y-auto flex flex-col gap-3 bg-slate-850 text-sm text-slate-200">
+            <div class="flex items-start gap-2.5 max-w-[88%]">
+                <div class="bg-blue-600 text-white p-2 rounded-xl text-xs mt-1 shrink-0">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="bg-slate-700/80 p-3.5 rounded-2xl rounded-tl-none shadow-sm border border-slate-600 text-xs leading-relaxed">
+                    Olá, operador! Escolha uma das opções abaixo para tirar dúvidas, enviar uma sugestão direto para o meu WhatsApp ou falar comigo:
+                </div>
+            </div>
+
+            <!-- Sugestões Rápidas e Ações -->
+            <div class="flex flex-wrap gap-1.5 mt-2">
+                <button onclick="enviarSugestaoRapida('Agenda e WhatsApp')" class="bg-slate-700 hover:bg-slate-600 text-indigo-300 text-[11px] px-3 py-1.5 rounded-xl border border-slate-600 transition-colors">📅 1. Agenda</button>
+                <button onclick="enviarSugestaoRapida('Controle de EPIs')" class="bg-slate-700 hover:bg-slate-600 text-emerald-300 text-[11px] px-3 py-1.5 rounded-xl border border-slate-600 transition-colors">🦺 2. EPIs</button>
+                <button onclick="enviarSugestaoRapida('Gestão de Ferramentas')" class="bg-slate-700 hover:bg-slate-600 text-amber-300 text-[11px] px-3 py-1.5 rounded-xl border border-slate-600 transition-colors">🔧 3. Ferramentas</button>
+                <button onclick="enviarSugestaoRapida('Fiscalização FTTA')" class="bg-slate-700 hover:bg-slate-600 text-purple-300 text-[11px] px-3 py-1.5 rounded-xl border border-slate-600 transition-colors">🗼 4. FTTA</button>
+                <button onclick="enviarSugestaoRapida('Roteirizador Inteligente')" class="bg-slate-700 hover:bg-slate-600 text-blue-300 text-[11px] px-3 py-1.5 rounded-xl border border-slate-600 transition-colors">🗺️ 5. Roteirizador</button>
+                <button onclick="ativarModoSugestao()" class="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-[11px] px-3 py-1.5 rounded-xl border border-emerald-500/30 transition-colors font-medium">💡 Enviar Sugestão ao Dev</button>
+                <button onclick="falarComDesenvolvedor()" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 text-[11px] px-3 py-1.5 rounded-xl border border-blue-500/30 transition-colors font-medium">👨‍💻 Fale com o Desenvolvedor</button>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div class="p-3 bg-slate-900 border-t border-slate-700 flex gap-2">
+            <input type="text" id="input-mensagem" placeholder="Digite sua dúvida ou sugestão..." class="flex-1 bg-slate-800 border border-slate-700 text-slate-100 placeholder-slate-500 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-blue-500" onkeypress="verificarEnter(event)">
+            <button onclick="enviarMensagemUsuario()" class="bg-blue-600 hover:bg-blue-500 text-white w-9 h-9 rounded-xl flex items-center justify-center transition-colors shrink-0">
+                <i class="fa-solid fa-paper-plane text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Script de Controle do Bot e Envio Direto ao WhatsApp -->
+    <script>
+        let aguardandoSugestao = false;
+
+        function alternarChat() {
+            const janela = document.getElementById('janela-chat');
+            const icone = document.getElementById('icone-chat');
+            janela.classList.toggle('hidden');
+            if (!janela.classList.contains('hidden')) {
+                icone.classList.remove('fa-robot');
+                icone.classList.add('fa-xmark');
+                document.getElementById('input-mensagem').focus();
+            } else {
+                icone.classList.remove('fa-xmark');
+                icone.classList.add('fa-robot');
+            }
+        }
+
+        function adicionarMensagem(texto, remetente) {
+            const container = document.getElementById('chat-mensagens');
+            const div = document.createElement('div');
+            
+            if (remetente === 'usuario') {
+                div.className = "flex items-start justify-end gap-2.5 max-w-[88%] ml-auto";
+                div.innerHTML = `<div class="bg-blue-600 text-white p-3.5 rounded-2xl rounded-tr-none shadow-sm text-xs leading-relaxed">${texto}</div>`;
+            } else {
+                div.className = "flex items-start gap-2.5 max-w-[88%]";
+                div.innerHTML = `
+                    <div class="bg-blue-600 text-white p-2 rounded-xl text-xs mt-1 shrink-0"><i class="fa-solid fa-robot"></i></div>
+                    <div class="bg-slate-700/90 text-slate-200 p-3.5 rounded-2xl rounded-tl-none shadow-sm border border-slate-600 text-xs leading-relaxed">${texto}</div>
+                `;
+            }
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function ativarModoSugestao() {
+            aguardandoSugestao = true;
+            adicionarMensagem("💡 <b>Envio Direto de Sugestão Ativado:</b><br>Digite abaixo qual melhoria, ajuste ou nova função você deseja implementar. Ao enviar, abririrei o WhatsApp com a mensagem pronta para você enviar diretamente para mim!", 'bot');
+        }
+
+        function falarComDesenvolvedor() {
+            const msg = encodeURIComponent("Olá! Estou acessando o Sistema de Vistorias e gostaria de falar sobre suporte.");
+            window.open(`https://wa.me/5551989498171?text=${msg}`, '_blank');
+        }
+
+        function processarTexto(pergunta) {
+            let textoLower = pergunta.toLowerCase();
+
+            // Se o usuário acionou o modo de sugestão, o texto digitado vai direto para o WhatsApp do desenvolvedor
+            if (aguardandoSugestao) {
+                aguardandoSugestao = false;
+                const mensagemFormatada = encodeURIComponent(`💡 *Nova Sugestão / Melhoria no Sistema de Vistorias*:\n\n"${pergunta}"`);
+                const urlWhatsappDireto = `https://wa.me/5551989498171?text=${mensagemFormatada}`;
+                
+                adicionarMensagem("🚀 Sugestão capturada com sucesso! Redirecionando para o seu WhatsApp para envio imediato...", 'bot');
+                setTimeout(() => {
+                    window.open(urlWhatsappDireto, '_blank');
+                }, 700);
+                return;
+            }
+
+            // Respostas padrão de dúvidas sobre os módulos
+            let resposta = "Não compreendi perfeitamente. Utilize os botões rápidos acima, clique em <b>'💡 Enviar Sugestão ao Dev'</b> ou em <b>'👨‍💻 Fale com o Desenvolvedor'</b>.";
+
+            if (textoLower.includes('agenda') || textoLower.includes('whatsapp')) {
+                resposta = "📅 <b>Módulo 1: Agenda & WhatsApp</b><br>• Organiza compromissos em calendário local.<br>• Atalho direto via WhatsApp com inserção automática do DDI <b>+55</b>, DDD e número.";
+            } else if (textoLower.includes('epi')) {
+                resposta = "🦺 <b>Módulo 2: Controle de EPIs</b><br>• Registro local de requisições e inconformidades de segurança.<br>• Exportação de relatórios gerais em PDF.";
+            } else if (textoLower.includes('ferramenta')) {
+                resposta = "🔧 <b>Módulo 3: Gestão de Ferramentas</b><br>• Gerencia solicitações de ferramentas de campo com salvamento local e relatórios em PDF.";
+            } else if (textoLower.includes('ftta')) {
+                resposta = "🗼 <b>Módulo 4: Fiscalização FTTA</b><br>• Vistorias em nuvem para projetos FTTA.<br>• <i>Atenção:</i> Exige cadastro aprovado pelo gestor.";
+            } else if (textoLower.includes('roteirizador') || textoLower.includes('rota')) {
+                resposta = "🗺️ <b>Módulo 5: Roteirizador Inteligente</b><br>• Carga de planilhas para mapeamento de rotas e uso do botão <b>'Traçar Rota'</b>.<br>• Remove protocolos concluídos e gerencia <i>Zerar Rotas</i> e <i>Finalizar Mês</i>.";
+            }
+
+            setTimeout(() => { adicionarMensagem(resposta, 'bot'); }, 400);
+        }
+
+        function enviarMensagemUsuario() {
+            const input = document.getElementById('input-mensagem');
+            const texto = input.value.trim();
+            if (!texto) return;
+            adicionarMensagem(texto, 'usuario');
+            input.value = '';
+            processarTexto(texto);
+        }
+
+        function enviarSugestaoRapida(texto) {
+            adicionarMensagem(texto, 'usuario');
+            processarTexto(texto);
+        }
+
+        function verificarEnter(e) {
+            if (e.key === 'Enter') enviarMensagemUsuario();
+        }
+    </script>
+</body>
+</html>
