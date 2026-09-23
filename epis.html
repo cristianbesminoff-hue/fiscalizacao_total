@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de EPIs - Fiscalização Total</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- CDN oficial corrigida para carregar o jsPDF corretamente -->
+    <!-- Carregamento robusto do jsPDF via CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap');
@@ -92,7 +92,7 @@
                         <option value="">-- Selecione um EPI --</option>
                     </select>
                     
-                    <!-- Campo de Tamanho da Botina (Aparece Dinamicamente) -->
+                    <!-- Campo de Tamanho da Botina -->
                     <div id="container-tamanho-botina" class="hidden">
                         <select id="tamanho-botina" class="w-full md:w-36 bg-slate-950/80 border border-amber-500/50 rounded-xl p-3 text-amber-300 font-semibold text-sm focus:outline-none focus:border-amber-400 transition">
                             <option value="">Tamanho</option>
@@ -158,9 +158,7 @@
                 <h3 class="text-base font-bold text-amber-400 font-futuristic">Consolidado Geral de EPIs</h3>
                 <button onclick="fecharRelatorioGeral()" class="text-slate-400 hover:text-white font-bold text-lg">✕</button>
             </div>
-            <div id="conteudo-relatorio-geral" class="flex-grow overflow-y-auto space-y-4 text-sm text-slate-300">
-                <!-- Conteúdo gerado dinamicamente -->
-            </div>
+            <div id="conteudo-relatorio-geral" class="flex-grow overflow-y-auto space-y-4 text-sm text-slate-300"></div>
             <div class="mt-4 pt-3 border-t border-slate-800 flex justify-end gap-3">
                 <button onclick="exportarRelatorioGeralPDF()" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-xl text-xs uppercase tracking-wider">
                     📄 Exportar Relatório em PDF
@@ -181,27 +179,11 @@
     <!-- Lógica da Aplicação -->
     <script>
         const listaEpisOficial = [
-            "Óculos Escuros",
-            "Óculos Transparente",
-            "Capacete",
-            "Cinto Paraquedista",
-            "Talabarte de Posicionamento",
-            "Luva Isolante",
-            "Luva de Cobertura",
-            "Luva de Vaqueta",
-            "Detector de Tensão",
-            "Eureka",
-            "Corda Linha de Vida",
-            "Fita Catraca",
-            "Fita de Ancoragem 1,20",
-            "Fita de Ancoragem 0,80",
-            "Calça Antichama",
-            "Jaleco Antichama",
-            "Camisa",
-            "Botina",
-            "Escada",
-            "Cones",
-            "Outro EPI"
+            "Óculos Escuros", "Óculos Transparente", "Capacete", "Cinto Paraquedista",
+            "Talabarte de Posicionamento", "Luva Isolante", "Luva de Cobertura",
+            "Luva de Vaqueta", "Detector de Tensão", "Eureka", "Corda Linha de Vida",
+            "Fita Catraca", "Fita de Ancoragem 1,20", "Fita de Ancoragem 0,80",
+            "Calça Antichama", "Jaleco Antichama", "Camisa", "Botina", "Escada", "Cones", "Outro EPI"
         ];
 
         let cestaAtual = [];
@@ -219,7 +201,6 @@
         function verificarSelecaoBotina() {
             const select = document.getElementById('select-epi');
             const containerTamanho = document.getElementById('container-tamanho-botina');
-            
             if (select.value === "Botina") {
                 containerTamanho.classList.remove('hidden');
             } else {
@@ -251,13 +232,10 @@
             }
 
             cestaAtual.push({ nome, qtd });
-            
-            // Resetar campos
             select.value = "";
             qtdInput.value = "1";
             tamanhoSelect.value = "";
             document.getElementById('container-tamanho-botina').classList.add('hidden');
-            
             renderizarCesta();
         }
 
@@ -382,7 +360,13 @@
             const reg = registros.find(r => r.id === id);
             if (!reg) return;
 
-            const { jsPDF } = window.jspdf;
+            // Tratativa segura para instanciar o jsPDF globalmente
+            const { jsPDF } = window.jspdf || {};
+            if (!jsPDF) {
+                alert("A biblioteca jsPDF não foi carregada corretamente. Verifique sua conexão com a internet.");
+                return;
+            }
+
             const doc = new jsPDF();
 
             doc.setFont("helvetica", "bold");
@@ -430,9 +414,6 @@
                     <html>
                         <head><title>PDF - EPIs - ${reg.tecnico}</title></head>
                         <body style="margin:0; background:#030712; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh;">
-                            <div style="margin-bottom:10px; color:white; font-family:sans-serif; text-align:center; font-size:14px;">
-                                <p>Toque e segure no documento abaixo para salvar no celular, ou utilize o menu do navegador:</p>
-                            </div>
                             <iframe src="${pdfDataUri}" style="width:100%; height:90vh; border:none;"></iframe>
                         </body>
                     </html>
@@ -485,9 +466,10 @@
             const registros = JSON.parse(localStorage.getItem('solicitacoes_epis')) || [];
             if (registros.length === 0) return;
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const { jsPDF } = window.jspdf || {};
+            if (!jsPDF) return;
 
+            const doc = new jsPDF();
             doc.setFont("helvetica", "bold");
             doc.setFontSize(16);
             doc.setTextColor(217, 119, 6);
