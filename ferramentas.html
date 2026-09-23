@@ -10,19 +10,27 @@
     <style>
         body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        @media print {
+            body { background-color: white; color: black; }
+            .no-print { display: none !important; }
+            .glass { background: white; border: none; box-shadow: none; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col p-4 md:p-8">
 
     <!-- Cabeçalho -->
-    <header class="w-full max-w-5xl mx-auto mb-6 flex flex-col md:flex-row justify-between items-center glass p-6 rounded-2xl shadow-xl border border-slate-700">
+    <header class="w-full max-w-5xl mx-auto mb-6 flex flex-col md:flex-row justify-between items-center glass p-6 rounded-2xl shadow-xl border border-slate-700 no-print">
         <div>
             <h1 class="text-2xl md:text-3xl font-extrabold text-blue-400 tracking-wider">CONTROLE DE FERRAMENTAS</h1>
             <p class="text-xs text-slate-400 mt-1">Módulo Operacional • Unifique Telecomunicações</p>
         </div>
-        <div class="mt-4 md:mt-0 flex gap-3">
+        <div class="mt-4 md:mt-0 flex flex-wrap gap-3">
             <button onclick="abrirRelatorioGeral()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-blue-400 font-semibold rounded-xl border border-blue-500/30 transition text-xs uppercase tracking-wider">
                 📊 Relatório Geral
+            </button>
+            <button onclick="window.print()" class="px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white font-semibold rounded-xl transition text-xs uppercase tracking-wider">
+                🖨️ Imprimir Tudo
             </button>
             <a href="index.html" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl border border-slate-600 transition text-xs uppercase tracking-wider">
                 ← Voltar ao Início
@@ -34,7 +42,7 @@
     <main class="w-full max-w-5xl mx-auto space-y-6 flex-grow">
         
         <!-- Formulário de Registro -->
-        <div class="glass p-6 rounded-2xl shadow-xl border border-slate-700">
+        <div class="glass p-6 rounded-2xl shadow-xl border border-slate-700 no-print">
             <h2 class="text-lg font-bold text-slate-200 mb-4 uppercase tracking-wide border-b border-slate-700 pb-2">Registrar Solicitação / Empréstimo</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -50,7 +58,7 @@
 
             <!-- Seleção de Ferramentas -->
             <div class="mb-6">
-                <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">Selecionar Ferramenta da Lista (42 Itens):</label>
+                <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">Selecionar Ferramenta da Lista:</label>
                 <div class="flex gap-2">
                     <select id="select-ferramenta" class="flex-grow bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-blue-500">
                         <option value="">-- Selecione uma ferramenta --</option>
@@ -119,65 +127,65 @@
     </div>
 
     <!-- Rodapé -->
-    <footer class="mt-12 text-center text-xs text-slate-500 space-y-1">
+    <footer class="mt-12 text-center text-xs text-slate-500 space-y-1 no-print">
         <p>Criado e Desenvolvido por <span class="text-blue-400 font-semibold">Cristian Azevedo Besminoff</span></p>
         <p class="text-[11px] text-slate-400 font-medium">© 2026 • Todos os direitos reservados</p>
     </footer>
 
     <!-- Lógica da Aplicação -->
     <script>
-        // Lista oficial com os 42 itens exatos de ferramentas
-        const listaFerramentas42 = [
-            "Alicate de Crimpar RJ45/RJ11",
-            "Alicate de Corte Diagonal",
-            "Alicate de Bico Meia-Cana",
-            "Alicate Amperímetro Digital",
-            "Chave de Fenda 1/8 x 3",
-            "Chave de Fenda 3/16 x 4",
-            "Chave Philips 1/8 x 3",
-            "Chave Philips 3/16 x 4",
-            "Chave Teste de Tensão",
-            "Jogo de Chaves Allen (Hexagonais)",
-            "Jogo de Chaves Torx",
+        // Nova lista exata fornecida
+        const listaFerramentasCustom = [
+            "Alicate de Corte",
+            "Alicate Universal",
+            "Alicate de Bico",
+            "Chave BAP",
+            "Chave de Guarita",
+            "Chave Philips P",
+            "Chave Philips M",
+            "Chave Philips G",
+            "Chave de Fenda P",
+            "Chave de Fenda M",
+            "Chave de Fenda G",
+            "Alicate Decapador",
+            "Alicate Striper",
+            "Power Meter",
+            "Clivador",
+            "Clivador de Fusão",
+            "Caneta de Limpeza",
+            "Frasco de Álcool",
+            "Caneta Laser",
+            "Máquina de Fusão",
+            "Bancada Naval",
+            "Morsa",
             "Martelo Unha",
-            "Trena de 5 Metros",
-            "Estilete Profissional",
-            "Lanterna de Cabeça LED",
-            "Clivador de Fibra Óptica",
-            "Power Meter (Medidor de Potência Óptica)",
-            "Caneta Laser Visual Fault Locator (VFL)",
-            "Máquina de Fusão de Fibra Óptica",
-            "Decapador de Cabo Drop FTTH",
-            "Decapador de Tubo Loose",
-            "Alicate Abas / Amarra Drop",
-            "Escada Extensiva de Fibra de Vidro",
-            "Escada Tesoura de Fibra de Vidro",
-            "Cinto de Segurança tipo Paraquedista (NR35)",
-            "Talabarte Duplo com Absorvedor de Energia",
-            "Trava-Quedas para Corda",
-            "Corda de Poliamida 12mm",
-            "Capacete de Segurança com Jugular",
-            "Óculos de Proteção Incolor",
-            "Óculos de Proteção Fumê",
-            "Protetor Auricular tipo Plug",
-            "Luva de Raspa de Couro",
-            "Luva Multiuso Antiderrapante",
-            "Bota de Segurança com Biqueira de Composite",
-            "Detector de Tensão sem Contato",
-            "Multímetro Digital Básica",
-            "Soprador Térmico / Termoencolhível",
-            "Pistola de Cola Quente",
-            "Escova de Limpeza para Conectores Ópticos",
-            "Frasco Dispenser de Álcool Isopropílico",
-            "Bolsa / Mochila para Ferramentas Reforçada"
+            "Furadeira",
+            "Decapador",
+            "Alicate Crimpador",
+            "Notebook",
+            "Fusimec (Máquina de Cintar)",
+            "Guia Passa Fio",
+            "OTDR",
+            "Identificador de Fibra Ativa",
+            "Arco de Serra",
+            "Lanterna LED",
+            "Maçarico",
+            "Rotulador Tubo Loose",
+            "Decapador Longitudinal Tubo Loose",
+            "Estilete",
+            "Cavalete de Fibra",
+            "Balde de Lona",
+            "Etiquetadora",
+            "Gabarito",
+            "Outra Ferramenta"
         ];
 
         let cestaAtual = [];
 
-        // Inicializa o select com os 42 itens
+        // Inicializa o select com a nova lista
         function inicializarSelect() {
             const select = document.getElementById('select-ferramenta');
-            listaFerramentas42.forEach(ferramenta => {
+            listaFerramentasCustom.forEach(ferramenta => {
                 const opt = document.createElement('option');
                 opt.value = ferramenta;
                 opt.textContent = ferramenta;
@@ -298,7 +306,7 @@
                             ${reg.itens.map(i => `• ${i.nome} (Qtd:${i.qtd})`).join('<br>')}
                         </div>
                     </div>
-                    <div class="flex gap-2 w-full md:w-auto">
+                    <div class="flex gap-2 w-full md:w-auto no-print">
                         <button onclick="gerarPDFIndividual(${reg.id})" class="flex-1 md:flex-none px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-xs transition">
                             📄 Baixar / Ver PDF
                         </button>
@@ -365,7 +373,6 @@
             doc.setTextColor(150, 150, 150);
             doc.text("Gerado automaticamente pelo Sistema de Fiscalização Total - Cristian Azevedo Besminoff", 14, 285);
 
-            // Compatibilidade total para celular (visualização direta + salvamento)
             const pdfDataUri = doc.output('datauristring');
             const novaAba = window.open();
             if (novaAba) {
