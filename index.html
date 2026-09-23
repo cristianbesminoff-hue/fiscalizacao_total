@@ -6,63 +6,114 @@
     <title>Fiscalização Total - Unifique</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            background-color: #030712;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .font-futuristic {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .glass-futuristic {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            box-shadow: 0 0 40px rgba(6, 182, 212, 0.1), inset 0 0 20px rgba(6, 182, 212, 0.05);
+        }
+
+        .neon-glow {
+            text-shadow: 0 0 10px rgba(6, 182, 212, 0.5), 0 0 20px rgba(6, 182, 212, 0.3);
+        }
+
+        /* Fundo com efeito de grade futurista */
+        .cyber-grid {
+            background-image: linear-gradient(to right, rgba(30, 41, 59, 0.3) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(30, 41, 59, 0.3) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        /* Botões Flutuantes com animação de pulso */
+        .floating-action {
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0px); }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="min-h-screen cyber-grid flex flex-col items-center justify-between p-4 md:p-6 relative">
+
+    <!-- Elementos de Luz Decorativos de Fundo -->
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-10 right-10 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Espaçador Superior -->
+    <div></div>
 
     <!-- Container Principal de Login -->
-    <div class="w-full max-w-md glass rounded-2xl shadow-2xl p-8 border border-slate-700">
+    <div class="w-full max-w-md glass-futuristic rounded-3xl p-8 relative z-10 my-auto">
         
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-extrabold text-cyan-400 tracking-wider">FISCALIZAÇÃO TOTAL</h1>
-            <p class="text-xs text-slate-400 mt-1">Plataforma Operacional de Qualidade - Unifique</p>
+            <div class="inline-block p-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 mb-3 shadow-inner">
+                <span class="text-2xl">⚡</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-cyan-400 tracking-wider neon-glow">FISCALIZAÇÃO</h1>
+            <h2 class="text-lg font-bold text-blue-400 tracking-widest mt-0.5">TOTAL</h2>
+            <p class="text-[11px] text-slate-400 mt-2 tracking-wide uppercase">Plataforma Operacional de Qualidade • Unifique</p>
         </div>
 
-        <form onsubmit="realizarLogin(event)" class="space-y-5">
+        <form onsubmit="realizarLogin(event)" class="space-y-4">
             <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">E-mail Corporativo:</label>
-                <input type="email" id="email" required placeholder="seu.email@redeunifique.com.br" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-cyan-500">
+                <label class="block text-[11px] font-semibold text-cyan-300/80 mb-2 uppercase tracking-widest">E-mail Corporativo</label>
+                <input type="email" id="email" required placeholder="seu.email@redeunifique.com.br" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition">
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">Senha:</label>
-                <input type="password" id="senha" required placeholder="••••••••" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-cyan-500">
+                <label class="block text-[11px] font-semibold text-cyan-300/80 mb-2 uppercase tracking-widest">Senha de Acesso</label>
+                <input type="password" id="senha" required placeholder="••••••••" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition">
             </div>
 
-            <button type="submit" id="btn-entrar" class="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg transition transform active:scale-95 text-sm uppercase tracking-wider">
+            <button type="submit" id="btn-entrar" class="w-full py-4 mt-2 bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/20 transition-all duration-300 transform active:scale-95 text-xs uppercase tracking-widest font-futuristic">
                 Acessar Sistema
             </button>
         </form>
 
-        <div class="mt-3 space-y-2">
-            <a href="https://cristianbesminoff-hue.github.io/VistoriaFTTA/" target="_blank" class="w-full block text-center py-3 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-bold rounded-xl border border-cyan-500/30 transition text-sm uppercase tracking-wider">
-                Fiscalização FTTA
+        <div class="mt-5 space-y-3">
+            <a href="https://cristianbesminoff-hue.github.io/VistoriaFTTA/" target="_blank" class="w-full block text-center py-3.5 bg-slate-900/90 hover:bg-slate-800 text-cyan-300 font-semibold rounded-xl border border-cyan-500/30 hover:border-cyan-400 transition-all text-xs uppercase tracking-wider shadow-md">
+                🚀 Fiscalização FTTA
             </a>
             
-            <!-- Novos Botões Adicionados -->
+            <!-- Botões Flutuantes / Acesso Rápido -->
             <div class="grid grid-cols-3 gap-2 pt-1">
-                <a href="agenda.html" class="block text-center py-2.5 bg-slate-800/80 hover:bg-slate-700 text-emerald-400 font-semibold rounded-xl border border-emerald-500/30 transition text-xs uppercase tracking-wider">
+                <a href="agenda.html" class="floating-action block text-center py-2.5 bg-slate-900/80 hover:bg-emerald-950/40 text-emerald-400 font-medium rounded-xl border border-emerald-500/30 hover:border-emerald-400 transition text-[11px] uppercase tracking-wider shadow-sm">
                     📅 Agenda
                 </a>
-                <a href="epis.html" class="block text-center py-2.5 bg-slate-800/80 hover:bg-slate-700 text-amber-400 font-semibold rounded-xl border border-amber-500/30 transition text-xs uppercase tracking-wider">
+                <a href="epis.html" style="animation-delay: 0.5s;" class="floating-action block text-center py-2.5 bg-slate-900/80 hover:bg-amber-950/40 text-amber-400 font-medium rounded-xl border border-amber-500/30 hover:border-amber-400 transition text-[11px] uppercase tracking-wider shadow-sm">
                     🦺 EPIs
                 </a>
-                <a href="ferramentas.html" class="block text-center py-2.5 bg-slate-800/80 hover:bg-slate-700 text-blue-400 font-semibold rounded-xl border border-blue-500/30 transition text-xs uppercase tracking-wider">
+                <a href="ferramentas.html" style="animation-delay: 1s;" class="floating-action block text-center py-2.5 bg-slate-900/80 hover:bg-blue-950/40 text-blue-400 font-medium rounded-xl border border-blue-500/30 hover:border-blue-400 transition text-[11px] uppercase tracking-wider shadow-sm">
                     🛠️ Ferramentas
                 </a>
             </div>
         </div>
 
-        <div id="msg-erro" class="mt-4 text-center text-xs text-rose-400 font-semibold hidden"></div>
+        <div id="msg-erro" class="mt-4 text-center text-xs text-rose-400 font-semibold hidden bg-rose-950/30 border border-rose-500/30 p-2.5 rounded-lg"></div>
     </div>
 
     <!-- Rodapé com Direitos Autorais -->
-    <footer class="mt-8 text-center text-xs text-slate-500 space-y-1">
+    <footer class="mt-8 text-center text-xs text-slate-500 space-y-1 relative z-10">
         <p>Criado e Desenvolvido por <span class="text-cyan-400 font-semibold">Cristian Azevedo Besminoff</span></p>
         <p class="text-[11px] text-slate-400 font-medium">© 2026 • Todos os direitos reservados</p>
-        <p class="text-[10px] text-slate-600">Unifique Telecomunicações</p>
+        <p class="text-[10px] text-slate-600 tracking-wider uppercase">Unifique Telecomunicações</p>
     </footer>
 
     <!-- Script de Autenticação Integrado ao Firebase -->
@@ -92,7 +143,7 @@
 
             msgErro.classList.add('hidden');
             btnEntrar.disabled = true;
-            btnEntrar.textContent = "Verificando...";
+            btnEntrar.textContent = "VERIFICANDO...";
 
             try {
                 const q = query(collection(db, "usuarios_sistema"), where("email", "==", email));
@@ -127,7 +178,6 @@
                     return;
                 }
 
-                // Salva o e-mail no navegador para persistir a sessão nas outras telas
                 localStorage.setItem('usuarioEmail', email);
 
                 if (usuarioData.perfil === "gestor") {
